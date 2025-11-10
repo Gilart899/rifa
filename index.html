@@ -1,21 +1,20 @@
 <!doctype html>
-
 <html lang="pt-BR">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Convite Especial — Animação</title>
+<title>Convite Especial — Animação (Envelope Rosa Pérola)</title>
 <style>
-  /* Layout: vertical 9:16 preview */
   :root{--w:720;--h:1280}
-  html,body{height:100%;margin:0;background:#111;color:#fff;font-family:Georgia, 'Times New Roman', serif;display:flex;align-items:center;justify-content:center}
-  .stage-wrap{width:360px; /* responsive preview */}
-  .stage{width:100%;aspect-ratio:9/16;border-radius:20px;overflow:hidden;position:relative;background:linear-gradient(180deg,#fdeef8 0%, #f9e7f3 40%, #f7e9fa 100%);box-shadow:0 20px 50px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.2)}
+  html,body{height:100%;margin:0;background:#0f0f11;color:#fff;font-family:Georgia, 'Times New Roman', serif;display:flex;align-items:center;justify-content:center}
+  .stage-wrap{width:360px;}
+  .stage{width:100%;aspect-ratio:9/16;border-radius:20px;overflow:hidden;position:relative;background:linear-gradient(180deg,#fdeef8 0%, #f9e7f3 40%, #f7e9fa 100%);box-shadow:0 20px 50px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.12)}
   .controls{display:flex;gap:8px;justify-content:center;margin-top:12px}
   button{padding:8px 12px;border-radius:8px;border:0;background:#e9cde6;color:#2b0b2a;font-weight:600;cursor:pointer}
   button:active{transform:translateY(1px)}
   small{display:block;text-align:center;margin-top:8px;color:#ddd}
-  /* hide file inputs styling */
+  /* responsive tweak for mobile */
+  @media (max-width:420px){ .stage-wrap{width:260px} }
 </style>
 </head>
 <body>
@@ -28,47 +27,129 @@
       <button id="recordBtn">Iniciar gravação</button>
       <button id="stopBtn" disabled>Parar & Baixar</button>
     </div>
-    <small>Formato: 9:16 — Duração: 8s — Sem som. Use a gravação integrada ou converta o arquivo se precisar de MP4.</small>
-  </div><script>
-// Animation parameters
-const DURATION = 8_000; // 8 seconds in ms
-const FPS = 60;
-const canvas = document.getElementById('canvas');
-const ctx = canvas.getContext('2d');
-let startTime = null;
-let animRequest = null;
-let playing = false;
+    <small>Formato: 9:16 — Duração: 8s — Sem som. Use a gravação integrada ou converta para MP4 se precisar.</small>
+  </div>
 
+<script>
+// ---------- Parâmetros ----------
+const DURATION = 8_000; // 8s
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d', {alpha: false});
+let startTime = null, animRequest = null, playing = false;
+
+// create reusable textures & gradients
+let paperTexture = null;
+let sealGradientCanvas = null;
+
+// ---------- Utilitários ----------
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+
+// generate subtle paper texture on an offscreen canvas
+function createPaperTexture(w,h,baseColor='#f7dce9'){
+  const off = document.createElement('canvas');
+  off.width = w; off.height = h;
+  const g = off.getContext('2d');
+  // base
+  g.fillStyle = baseColor;
+  g.fillRect(0,0,w,h);
+  // light noise
+  const img = g.getImageData(0,0,w,h);
+  const d = img.data;
+  for(let i=0;i<d.length;i+=4){
+    // tiny luminance variation
+    const v = (Math.random()*18 - 9);
+    d[i] = clamp(d[i] + v, 0, 255);
+    d[i+1] = clamp(d[i+1] + v, 0, 255);
+    d[i+2] = clamp(d[i+2] + v, 0, 255);
+    // alpha remains
+  }
+  g.putImageData(img,0,0);
+  // subtle fibrous strokes: a few translucent thin lines
+  g.globalAlpha = 0.035;
+  for(let i=0;i<120;i++){
+    g.beginPath();
+    const x1 = Math.random()*w, y1 = Math.random()*h;
+    const x2 = x1 + (Math.random()*40 - 20);
+    const y2 = y1 + (Math.random()*120 - 60);
+    g.lineWidth = 1 + Math.random()*2;
+    g.strokeStyle = (Math.random()>0.5) ? '#ffffff' : '#eedfe9';
+    g.moveTo(x1,y1); g.lineTo(x2,y2); g.stroke();
+  }
+  g.globalAlpha = 1;
+  // light vignette
+  const vg = g.createRadialGradient(w/2,h/2,w*0.3,w/2,h/2,w*0.9);
+  vg.addColorStop(0,'rgba(0,0,0,0)');
+  vg.addColorStop(1,'rgba(0,0,0,0.04)');
+  g.fillStyle = vg; g.fillRect(0,0,w,h);
+  return off;
+}
+function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+
+// create an offscreen for metallic seal highlight effect
+function createSealGradient(){
+  const s = 160;
+  const off = document.createElement('canvas'); off.width=s; off.height=s;
+  const g = off.getContext('2d');
+  // radial metallic gradient
+  const rg = g.createRadialGradient(s*0.35,s*0.35,6,s*0.45,s*0.45, s*0.9);
+  rg.addColorStop(0,'#fffbe6');
+  rg.addColorStop(0.2,'#f7ecbf');
+  rg.addColorStop(0.5,'#d8b45a');
+  rg.addColorStop(1,'#9a6b2b');
+  g.fillStyle = rg;
+  g.beginPath(); g.arc(s/2,s/2,s*0.45,0,Math.PI*2); g.fill();
+  // soft inner shine
+  g.globalCompositeOperation = 'lighter';
+  const shine = g.createRadialGradient(s*0.25,s*0.25,2,s*0.5,s*0.45, s*0.6);
+  shine.addColorStop(0,'rgba(255,255,255,0.9)');
+  shine.addColorStop(1,'rgba(255,255,255,0)');
+  g.fillStyle = shine; g.beginPath(); g.arc(s/2,s/2,s*0.45,0,Math.PI*2); g.fill();
+  return off;
+}
+
+// ---------- Desenhos principais ----------
 function drawBackground(t){
-  // soft princess themed background with subtle golden bokeh
   const w = canvas.width, h = canvas.height;
-  // gradient backdrop
-  const g = ctx.createLinearGradient(0,0,0,h);
-  g.addColorStop(0,'#f9e6f1');
-  g.addColorStop(0.4,'#fdeef8');
-  g.addColorStop(1,'#fff8fa');
-  ctx.fillStyle = g;
+  // soft gradient pink-pearl background
+  const bg = ctx.createLinearGradient(0,0,0,h);
+  bg.addColorStop(0,'#fff7fa');
+  bg.addColorStop(0.45,'#fdeef6');
+  bg.addColorStop(1,'#fffafc');
+  ctx.fillStyle = bg;
   ctx.fillRect(0,0,w,h);
 
-  // subtle gold sparkles
-  for(let i=0;i<40;i++){
-    const x = (i * 233 + (t*0.02)) % w;
-    const y = (i * 97 + (t*0.03)) % (h*0.9);
-    const r = 1.2 + (i%3)*0.6;
+  // subtle bokeh/golden particles moving slowly
+  ctx.save();
+  for(let i=0;i<30;i++){
+    const x = (i * 199 + t*0.012) % w;
+    const y = (i * 73 + t*0.017) % (h * 0.8);
+    const r = 0.8 + (i%4)*0.7;
     ctx.beginPath();
-    ctx.globalAlpha = 0.07 + ((i%5)/30);
-    ctx.fillStyle = 'rgba(255,210,120,0.9)';
+    ctx.globalAlpha = 0.04 + (i%5)/60;
+    ctx.fillStyle = 'rgba(255,210,140,0.95)';
     ctx.arc(x,y,r,0,Math.PI*2);
     ctx.fill();
   }
-  ctx.globalAlpha = 1;
+  ctx.restore();
+
+  // soft vignette to frame invite
+  ctx.fillStyle = 'rgba(0,0,0,0.03)';
+  roundRect(ctx,20,20,w-40,h-40,28);
+  ctx.fill();
 }
 
 function drawCrownDecor(w,h){
-  // subtle crown silhouette near top
   ctx.save();
   ctx.translate(w*0.5, h*0.12);
-  ctx.scale(0.9,0.9);
+  ctx.scale(0.95,0.95);
   ctx.globalAlpha = 0.12;
   ctx.fillStyle = '#d4b17a';
   ctx.beginPath();
@@ -84,257 +165,316 @@ function drawCrownDecor(w,h){
   ctx.restore();
 }
 
-function drawEnvelope(progress){
-  // progress: 0 to 1 across animation
+// Realistic envelope opening animation
+function drawEnvelopeRealistic(progress, t){
+  // progress [0..1]
   const w = canvas.width, h = canvas.height;
-  const envW = w*0.72;
-  const envH = h*0.36;
-  const cx = w/2, cy = h*0.5;
+  const envW = w*0.73;
+  const envH = h*0.34;
+  const cx = w/2, cy = h*0.53;
   const left = cx - envW/2, top = cy - envH/2;
 
-  // card movement starts slightly after flap begins opening
-  const flapOpenProgress = Math.min(1, Math.max(0, (progress - 0.05)/0.6));
-  const cardRevealProgress = Math.min(1, Math.max(0, (progress - 0.45)/0.5));
+  // precompute flap progress and card reveal
+  const flapStart = 0.03, flapEnd = 0.55;
+  const flapOpen = easeOutCubic(clamp((progress - flapStart) / (flapEnd - flapStart), 0, 1)); // 0 -> 1
+  const cardStart = 0.45, cardEnd = 0.95;
+  const cardReveal = clamp((progress - cardStart)/(cardEnd - cardStart), 0, 1);
 
-  // draw envelope body (back)
-  // subtle paper texture using linear gradient
-  const bodyGrad = ctx.createLinearGradient(0, top, 0, top+envH);
-  bodyGrad.addColorStop(0,'#f7dce9');
-  bodyGrad.addColorStop(1,'#f4cadf');
-  ctx.fillStyle = bodyGrad;
-  roundRect(ctx, left, top+envH*0.15, envW, envH*0.85, 16);
-  ctx.fill();
-
-  // draw envelope flap (front) as rotated polygon
-  // flap pivot at bottom center of flap
-  const flapHeight = envH*0.6;
-  const flapTopY = top - flapHeight*0.25;
-  const flapPivotX = cx;
-  const flapPivotY = top + envH*0.15;
-  // flap rotation angle
-  const angle = -Math.PI * 0.65 * flapOpenProgress; // from 0 to -117deg
-
+  // paper body (back)
   ctx.save();
-  ctx.translate(flapPivotX, flapPivotY);
-  ctx.rotate(angle);
-  // draw flap shape
-  ctx.beginPath();
-  ctx.moveTo(-envW/2, 0);
-  ctx.lineTo(0, -flapHeight);
-  ctx.lineTo(envW/2, 0);
-  ctx.closePath();
-  // flap gradient
-  const flapGrad = ctx.createLinearGradient(0, -flapHeight, 0, flapHeight);
-  flapGrad.addColorStop(0,'#fbeef6');
-  flapGrad.addColorStop(1,'#f0c9d9');
-  ctx.fillStyle = flapGrad;
+  // draw paper textured rect with slight rotation shadow
+  ctx.translate(0, 0);
+  // base fill using paper texture
+  if(!paperTexture) paperTexture = createPaperTexture(Math.round(envW), Math.round(envH), '#f9e1ea');
+  // draw shadow under envelope body
   ctx.shadowColor = 'rgba(0,0,0,0.25)';
-  ctx.shadowBlur = 18;
+  ctx.shadowBlur = 28;
+  ctx.fillStyle = ctx.createPattern(paperTexture, 'repeat');
+  roundRect(ctx, left, top + envH*0.12, envW, envH*0.88, 18);
   ctx.fill();
   ctx.shadowBlur = 0;
-
-  // wax seal sits near center bottom of flap — animate scale when opening
-  const sealScale = 1 - 0.15*flapOpenProgress + 0.05*Math.sin(progress*20);
-  const sealX = 0, sealY = envH*0.02;
-  ctx.save();
-  ctx.translate(sealX, sealY);
-  ctx.scale(sealScale, sealScale);
-  drawWaxSeal(ctx);
   ctx.restore();
 
-  ctx.restore();
-
-  // draw envelope edges highlight
+  // inner edge highlight
   ctx.beginPath();
-  ctx.moveTo(left, top+envH*0.15);
-  ctx.lineTo(cx, top+envH*0.15 - flapHeight*0.06);
-  ctx.lineTo(left+envW, top+envH*0.15);
-  ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+  ctx.moveTo(left, top + envH*0.12 + 6);
+  ctx.lineTo(cx, top + envH*0.12 - envH*0.06);
+  ctx.lineTo(left + envW, top + envH*0.12 + 6);
+  ctx.strokeStyle = 'rgba(255,255,255,0.28)';
   ctx.lineWidth = 1.2;
   ctx.stroke();
 
-  // draw inner card sliding up
-  const cardW = envW*0.86;
-  const cardH = envH*0.82;
-  const cardLeft = cx - cardW/2;
-  // initial card y is mostly hidden; reveal by moving upward
-  const cardFullyHiddenY = top + envH*0.32;
-  const cardY = cardFullyHiddenY - (envH*0.9 + 40) * cardRevealProgress;
+  // flap (rotating)
+  const flapHeight = envH*0.66;
+  const pivotX = cx, pivotY = top + envH*0.12; // pivot at top of body
+  // angle: 0 closed -> negative rotates up and back
+  const closedAngle = 0;
+  const openAngle = -Math.PI * 0.72; // ~-130deg (fold back)
+  const angle = closedAngle + (openAngle - closedAngle) * flapOpen;
 
-  // card back shadow
+  // compute small 3D offset while opening
+  const zLift = 10 * flapOpen;
+
   ctx.save();
-  ctx.shadowColor = 'rgba(0,0,0,0.2)';
-  ctx.shadowBlur = 16;
-  roundRect(ctx, cardLeft, cardY, cardW, cardH, 12);
-  ctx.fillStyle = '#fffdf7';
+  ctx.translate(pivotX, pivotY - zLift);
+  ctx.rotate(angle);
+
+  // draw flap shape (with slight curvature)
+  ctx.beginPath();
+  ctx.moveTo(-envW/2, 0);
+  // left curve to top point
+  ctx.quadraticCurveTo(-envW*0.25, -flapHeight*0.85, 0, -flapHeight);
+  ctx.quadraticCurveTo(envW*0.25, -flapHeight*0.85, envW/2, 0);
+  ctx.closePath();
+
+  // flap gradient with pearl sheen
+  const fg = ctx.createLinearGradient(0, -flapHeight, 0, 0);
+  fg.addColorStop(0, '#fff8fb');
+  fg.addColorStop(0.5, '#fde9f2');
+  fg.addColorStop(1, '#f0cddf');
+  ctx.fillStyle = fg;
+
+  // subtle inner shadow on flap
+  ctx.shadowColor = 'rgba(0,0,0,0.25)';
+  ctx.shadowBlur = 20;
   ctx.fill();
+  ctx.shadowBlur = 0;
+
+  // flap edge highlight
+  ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  // draw crease line
+  ctx.beginPath();
+  ctx.moveTo(-envW/2 + 18, -flapHeight*0.18);
+  ctx.lineTo(envW/2 - 18, -flapHeight*0.18);
+  ctx.strokeStyle = 'rgba(0,0,0,0.06)';
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // wax seal attached to flap (animated scale when opening)
+  const sealScale = 0.95 + 0.12*(1 - Math.cos(flapOpen * Math.PI * 2)) * (1 - flapOpen*0.6);
+  const sealX = 0, sealY = -flapHeight*0.12;
+  ctx.save();
+    ctx.translate(sealX, sealY);
+    ctx.scale(sealScale, sealScale);
+    drawWaxSealRealistic(ctx, t, 0);
   ctx.restore();
 
-  // card text (appears with a gentle opacity ramp)
+  ctx.restore(); // end flap
+
+  // envelope inner card sliding up (with soft shadow and texture)
+  const cardW = envW*0.86;
+  const cardH = envH*0.78;
+  const cardLeft = cx - cardW/2;
+  const cardHiddenY = top + envH*0.32;
+  const cardVisibleY = top + envH*0.06;
+  const cardY = cardHiddenY - (cardHiddenY - cardVisibleY) * easeOutCubic(cardReveal);
+
+  // card shadow (below card)
   ctx.save();
-  const textAlpha = cardRevealProgress;
-  ctx.globalAlpha = textAlpha;
-  ctx.fillStyle = '#6c3c1f';
-  ctx.font = `${Math.round(cardW*0.12)}px 'Lucida Calligraphy', Georgia, serif`;
+  ctx.shadowColor = 'rgba(0,0,0,0.22)';
+  ctx.shadowBlur = 18;
+  roundRect(ctx, cardLeft, cardY, cardW, cardH, 12);
+  ctx.fillStyle = '#fffdf9';
+  ctx.fill();
+  ctx.shadowBlur = 0;
+  ctx.restore();
+
+  // subtle paper texture on card front (slightly different tone)
+  if(!paperTexture) paperTexture = createPaperTexture(Math.round(cardW), Math.round(cardH), '#fffdf7');
+  ctx.save();
+  ctx.clip(); // we'll draw texture clipped to card area
+  ctx.drawImage(paperTexture, cardLeft - 10, cardY - 10, cardW + 20, cardH + 20);
+  ctx.restore();
+
+  // golden heading text - appears with fade
+  ctx.save();
+  ctx.globalAlpha = clamp(cardReveal*1.1, 0, 1);
+  ctx.fillStyle = '#7e4f26';
+  ctx.font = `${Math.round(cardW*0.11)}px 'Lucida Calligraphy', Georgia, serif`;
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   const textX = cx;
-  const textY = cardY + cardH/2 - 10;
+  const textY = cardY + cardH*0.5 - 6;
 
-  // golden shine effect using linear gradient for fillStyle
-  const txtGrad = ctx.createLinearGradient(textX - cardW*0.4, textY-40, textX + cardW*0.4, textY+40);
-  txtGrad.addColorStop(0,'#b58a44');
-  txtGrad.addColorStop(0.5,'#f7e3b2');
-  txtGrad.addColorStop(1,'#d4a84a');
-  ctx.fillStyle = txtGrad;
+  // golden gradient for lettering
+  const txtG = ctx.createLinearGradient(textX - cardW*0.5, textY - 40, textX + cardW*0.5, textY + 40);
+  txtG.addColorStop(0,'#b6883a');
+  txtG.addColorStop(0.5,'#f7e4b4');
+  txtG.addColorStop(1,'#d19a44');
+  ctx.fillStyle = txtG;
   ctx.fillText('Convite Especial', textX, textY);
 
-  // tiny sparkle over text
-  if(cardRevealProgress>0.7){
-    const sparkleX = textX + cardW*0.28*Math.sin(progress*8);
-    const sparkleY = textY - 30;
+  // small flourish line below text
+  ctx.strokeStyle = 'rgba(150,100,50,0.25)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(textX - cardW*0.22, textY + cardH*0.18);
+  ctx.quadraticCurveTo(textX, textY + cardH*0.25, textX + cardW*0.22, textY + cardH*0.18);
+  ctx.stroke();
+
+  // tiny sparkle that fades in near reveal end
+  if(cardReveal > 0.6){
+    const sparkleAlpha = (cardReveal - 0.6) / 0.4;
+    const sx = textX + cardW*0.28 * Math.sin(t*0.0025);
+    const sy = textY - 28;
     ctx.beginPath();
-    ctx.globalAlpha = (cardRevealProgress-0.7)/0.3;
-    ctx.fillStyle = '#fff7d1';
-    ctx.arc(sparkleX, sparkleY, 4,0,Math.PI*2);
+    ctx.globalAlpha = sparkleAlpha;
+    ctx.fillStyle = '#fff6d9';
+    ctx.arc(sx, sy, 4, 0, Math.PI*2);
     ctx.fill();
   }
 
   ctx.restore();
 }
 
-function drawWaxSeal(ctx){
-  // simple stylized golden seal
-  ctx.save();
-  ctx.beginPath();
-  ctx.fillStyle = '#caa34b';
-  ctx.shadowColor = 'rgba(0,0,0,0.35)';
-  ctx.shadowBlur = 8;
-  ctx.arc(0,0,26,0,Math.PI*2);
-  ctx.fill();
-  ctx.shadowBlur = 0;
-  // inner emboss
-  ctx.beginPath();
-  ctx.fillStyle = '#f6e6b8';
-  ctx.arc(-2,-2,12,0,Math.PI*2);
-  ctx.fill();
-  // tiny floral motif
-  ctx.beginPath();
-  ctx.fillStyle = '#b68b36';
-  for(let i=0;i<5;i++){
-    const ang = i*(Math.PI*2/5);
-    const x = Math.cos(ang)*7, y = Math.sin(ang)*7;
-    ctx.moveTo(x,y);
-    ctx.arc(x,y,2,0,Math.PI*2);
-    ctx.fill();
+// draw a realistic wax/metallic seal (offscreen pattern used)
+function drawWaxSealRealistic(ctxLocal, t, seed = 0){
+  // ctxLocal is already transformed to seal center
+  // create radial metallic look using precomputed offscreen
+  if(!sealGradientCanvas) sealGradientCanvas = createSealGradient();
+
+  const s = 48; // visual radius
+  ctxLocal.save();
+  // base shadow behind seal to anchor to flap
+  ctxLocal.beginPath();
+  ctxLocal.fillStyle = 'rgba(0,0,0,0.22)';
+  ctxLocal.ellipse(6, 10, s*0.9, s*0.5, 0, 0, Math.PI*2);
+  ctxLocal.fill();
+
+  // main disc - draw scaled gradient
+  ctxLocal.save();
+  ctxLocal.translate(0, 0);
+  ctxLocal.drawImage(sealGradientCanvas, -s, -s, s*2, s*2);
+
+  // slightly uneven edges: use small radial bumps
+  ctxLocal.beginPath();
+  for(let i=0;i<10;i++){
+    const ang = (i/10) * Math.PI*2;
+    const rx = Math.cos(ang) * (s*0.9 + Math.sin(t*0.002 + i)*2.5);
+    const ry = Math.sin(ang) * (s*0.9 + Math.cos(t*0.001 + i)*2.2);
+    const px = rx, py = ry;
+    if(i===0) ctxLocal.moveTo(px,py); else ctxLocal.lineTo(px,py);
   }
-  ctx.restore();
+  ctxLocal.closePath();
+  // fill with slight gradient overlay to emulate wax rim
+  const rim = ctxLocal.createLinearGradient(-s, -s, s, s);
+  rim.addColorStop(0,'rgba(255,236,170,0.08)');
+  rim.addColorStop(1,'rgba(0,0,0,0.06)');
+  ctxLocal.fillStyle = rim;
+  ctxLocal.globalCompositeOperation = 'lighter';
+  ctxLocal.fill();
+  ctxLocal.globalCompositeOperation = 'source-over';
+
+  // embossed motif (tiny crown)
+  ctxLocal.beginPath();
+  ctxLocal.fillStyle = 'rgba(255,249,230,0.85)';
+  // small crown motif centered
+  const cr = 8;
+  ctxLocal.moveTo(-10, -2);
+  ctxLocal.lineTo(-4, -8);
+  ctxLocal.lineTo(-0, -2);
+  ctxLocal.lineTo(4, -8);
+  ctxLocal.lineTo(10, -2);
+  ctxLocal.arc(0, 6, 2.5, 0, Math.PI*2);
+  ctxLocal.fill();
+
+  // highlight glint
+  ctxLocal.beginPath();
+  ctxLocal.fillStyle = 'rgba(255,255,255,0.55)';
+  ctxLocal.ellipse(-8, -12, 4, 2, -0.6, 0, Math.PI*2);
+  ctxLocal.fill();
+
+  ctxLocal.restore();
+  ctxLocal.restore();
 }
 
-function roundRect(ctx,x,y,w,h,r){
-  ctx.beginPath();
-  ctx.moveTo(x+r,y);
-  ctx.arcTo(x+w,y,x+w,y+h,r);
-  ctx.arcTo(x+w,y+h,x,y+h,r);
-  ctx.arcTo(x,y+h,x,y,r);
-  ctx.arcTo(x,y,x+w,y,r);
-  ctx.closePath();
-}
+// ---------- Easing ----------
+function easeOutCubic(x){ return 1 - Math.pow(1-x, 3); }
 
+// ---------- Render loop ----------
 function renderFrame(timestamp){
   if(!startTime) startTime = timestamp;
   const elapsed = timestamp - startTime;
-  let progress = Math.min(1, elapsed / DURATION);
-  // clear
+  const t = elapsed;
+  let progress = clamp(elapsed / DURATION, 0, 1);
+
   ctx.clearRect(0,0,canvas.width,canvas.height);
-  drawBackground(elapsed);
+  drawBackground(t);
   drawCrownDecor(canvas.width, canvas.height);
-  drawEnvelope(progress);
+  drawEnvelopeRealistic(progress, t);
 
   if(progress < 1){
     animRequest = requestAnimationFrame(renderFrame);
   } else {
-    playing = false;
-    animRequest = null;
-    startTime = null;
-    // end reached
+    playing = false; animRequest = null; startTime = null;
   }
 }
 
-// Controls
+// ---------- Controls & Recording (preserve original behavior) ----------
 const playBtn = document.getElementById('playBtn');
 const recordBtn = document.getElementById('recordBtn');
 const stopBtn = document.getElementById('stopBtn');
-let mediaRecorder = null; let recordedChunks = [];
+let mediaRecorder = null, recordedChunks = [];
 
 playBtn.addEventListener('click', ()=>{
   if(playing){
-    // restart
-    cancelAnimationFrame(animRequest);
-    startTime = null;
-    playing = false;
-    playBtn.textContent = 'Reproduzir';
+    if(animRequest) cancelAnimationFrame(animRequest);
+    startTime = null; playing = false; playBtn.textContent = 'Reproduzir';
     return;
   }
-  // start animation
-  startTime = null;
-  playing = true;
-  playBtn.textContent = 'Parando...';
+  startTime = null; playing = true; playBtn.textContent = 'Parando...';
   animRequest = requestAnimationFrame(renderFrame);
-  setTimeout(()=>{ playBtn.textContent = 'Reproduzir'; }, 300);
+  setTimeout(()=>{ if(!playing) playBtn.textContent='Reproduzir'; else playBtn.textContent='Reproduzir'; }, 300);
 });
 
 recordBtn.addEventListener('click', async ()=>{
-  // prepare to record canvas
-  const stream = canvas.captureStream(60); // 60fps capture
+  const stream = canvas.captureStream(60);
   recordedChunks = [];
-  recordBtn.disabled = true;
-  stopBtn.disabled = false;
+  recordBtn.disabled = true; stopBtn.disabled = false;
 
   const options = {mimeType: 'video/webm;codecs=vp9'};
-  try{
-    mediaRecorder = new MediaRecorder(stream, options);
-  }catch(e){
-    try{ mediaRecorder = new MediaRecorder(stream); }catch(e2){ alert('Seu navegador não suporta MediaRecorder para este tipo de stream. Use o Chrome/Edge mais recente.'); recordBtn.disabled=false; stopBtn.disabled=true; return; }
+  try{ mediaRecorder = new MediaRecorder(stream, options); }catch(e){
+    try{ mediaRecorder = new MediaRecorder(stream); }catch(e2){
+      alert('Seu navegador não suporta MediaRecorder corretamente. Tente Chrome/Edge mais recente.');
+      recordBtn.disabled=false; stopBtn.disabled=true;
+      return;
+    }
   }
-  mediaRecorder.ondataavailable = function(e){ if(e.data && e.data.size>0) recordedChunks.push(e.data); };
+  mediaRecorder.ondataavailable = e => { if(e.data && e.data.size>0) recordedChunks.push(e.data); };
   mediaRecorder.onstop = ()=>{
     const blob = new Blob(recordedChunks, {type:'video/webm'});
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url;
-    a.download = 'convite_princesa.webm';
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+    a.href = url; a.download = 'convite_princesa_realista.webm';
+    document.body.appendChild(a); a.click(); a.remove();
     URL.revokeObjectURL(url);
-    recordBtn.disabled = false;
-    stopBtn.disabled = true;
+    recordBtn.disabled=false; stopBtn.disabled=true;
   };
   mediaRecorder.start();
-
-  // start animation from beginning while recording
   if(animRequest) cancelAnimationFrame(animRequest);
-  startTime = null;
-  playing = true;
-  animRequest = requestAnimationFrame(renderFrame);
+  startTime = null; playing = true; animRequest = requestAnimationFrame(renderFrame);
 });
 
 stopBtn.addEventListener('click', ()=>{
-  if(mediaRecorder && mediaRecorder.state !== 'inactive'){
-    mediaRecorder.stop();
-  }
+  if(mediaRecorder && mediaRecorder.state !== 'inactive'){ mediaRecorder.stop(); }
   if(animRequest) cancelAnimationFrame(animRequest);
-  playing = false;
-  startTime = null;
+  playing = false; startTime = null;
 });
 
-// draw initial still frame
-(function drawInitial(){
+// ---------- initial frame ----------
+(function init(){
+  // pre-generate texture and seal grad with canvas size multiples to keep quality
+  paperTexture = createPaperTexture(600, 340, '#f7d8e6');
+  sealGradientCanvas = createSealGradient();
+  // draw static initial snapshot (closed envelope)
   ctx.clearRect(0,0,canvas.width,canvas.height);
   drawBackground(0);
   drawCrownDecor(canvas.width, canvas.height);
-  drawEnvelope(0);
+  drawEnvelopeRealistic(0, 0);
 })();
-</script></body>
+</script>
+</body>
 </html>
