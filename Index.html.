@@ -1,0 +1,340 @@
+<!doctype html>
+
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Convite Especial — Animação</title>
+<style>
+  /* Layout: vertical 9:16 preview */
+  :root{--w:720;--h:1280}
+  html,body{height:100%;margin:0;background:#111;color:#fff;font-family:Georgia, 'Times New Roman', serif;display:flex;align-items:center;justify-content:center}
+  .stage-wrap{width:360px; /* responsive preview */}
+  .stage{width:100%;aspect-ratio:9/16;border-radius:20px;overflow:hidden;position:relative;background:linear-gradient(180deg,#fdeef8 0%, #f9e7f3 40%, #f7e9fa 100%);box-shadow:0 20px 50px rgba(0,0,0,0.6), inset 0 1px 0 rgba(255,255,255,0.2)}
+  .controls{display:flex;gap:8px;justify-content:center;margin-top:12px}
+  button{padding:8px 12px;border-radius:8px;border:0;background:#e9cde6;color:#2b0b2a;font-weight:600;cursor:pointer}
+  button:active{transform:translateY(1px)}
+  small{display:block;text-align:center;margin-top:8px;color:#ddd}
+  /* hide file inputs styling */
+</style>
+</head>
+<body>
+  <div class="stage-wrap">
+    <div id="stage" class="stage">
+      <canvas id="canvas" width="720" height="1280" style="width:100%;height:100%;display:block"></canvas>
+    </div>
+    <div class="controls">
+      <button id="playBtn">Reproduzir</button>
+      <button id="recordBtn">Iniciar gravação</button>
+      <button id="stopBtn" disabled>Parar & Baixar</button>
+    </div>
+    <small>Formato: 9:16 — Duração: 8s — Sem som. Use a gravação integrada ou converta o arquivo se precisar de MP4.</small>
+  </div><script>
+// Animation parameters
+const DURATION = 8_000; // 8 seconds in ms
+const FPS = 60;
+const canvas = document.getElementById('canvas');
+const ctx = canvas.getContext('2d');
+let startTime = null;
+let animRequest = null;
+let playing = false;
+
+function drawBackground(t){
+  // soft princess themed background with subtle golden bokeh
+  const w = canvas.width, h = canvas.height;
+  // gradient backdrop
+  const g = ctx.createLinearGradient(0,0,0,h);
+  g.addColorStop(0,'#f9e6f1');
+  g.addColorStop(0.4,'#fdeef8');
+  g.addColorStop(1,'#fff8fa');
+  ctx.fillStyle = g;
+  ctx.fillRect(0,0,w,h);
+
+  // subtle gold sparkles
+  for(let i=0;i<40;i++){
+    const x = (i * 233 + (t*0.02)) % w;
+    const y = (i * 97 + (t*0.03)) % (h*0.9);
+    const r = 1.2 + (i%3)*0.6;
+    ctx.beginPath();
+    ctx.globalAlpha = 0.07 + ((i%5)/30);
+    ctx.fillStyle = 'rgba(255,210,120,0.9)';
+    ctx.arc(x,y,r,0,Math.PI*2);
+    ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+}
+
+function drawCrownDecor(w,h){
+  // subtle crown silhouette near top
+  ctx.save();
+  ctx.translate(w*0.5, h*0.12);
+  ctx.scale(0.9,0.9);
+  ctx.globalAlpha = 0.12;
+  ctx.fillStyle = '#d4b17a';
+  ctx.beginPath();
+  ctx.moveTo(-160,20);
+  ctx.quadraticCurveTo(-120,-40,-60,20);
+  ctx.quadraticCurveTo(-20,-20,0,20);
+  ctx.quadraticCurveTo(20,-20,60,20);
+  ctx.quadraticCurveTo(120,-40,160,20);
+  ctx.lineTo(160,60);
+  ctx.lineTo(-160,60);
+  ctx.closePath();
+  ctx.fill();
+  ctx.restore();
+}
+
+function drawEnvelope(progress){
+  // progress: 0 to 1 across animation
+  const w = canvas.width, h = canvas.height;
+  const envW = w*0.72;
+  const envH = h*0.36;
+  const cx = w/2, cy = h*0.5;
+  const left = cx - envW/2, top = cy - envH/2;
+
+  // card movement starts slightly after flap begins opening
+  const flapOpenProgress = Math.min(1, Math.max(0, (progress - 0.05)/0.6));
+  const cardRevealProgress = Math.min(1, Math.max(0, (progress - 0.45)/0.5));
+
+  // draw envelope body (back)
+  // subtle paper texture using linear gradient
+  const bodyGrad = ctx.createLinearGradient(0, top, 0, top+envH);
+  bodyGrad.addColorStop(0,'#f7dce9');
+  bodyGrad.addColorStop(1,'#f4cadf');
+  ctx.fillStyle = bodyGrad;
+  roundRect(ctx, left, top+envH*0.15, envW, envH*0.85, 16);
+  ctx.fill();
+
+  // draw envelope flap (front) as rotated polygon
+  // flap pivot at bottom center of flap
+  const flapHeight = envH*0.6;
+  const flapTopY = top - flapHeight*0.25;
+  const flapPivotX = cx;
+  const flapPivotY = top + envH*0.15;
+  // flap rotation angle
+  const angle = -Math.PI * 0.65 * flapOpenProgress; // from 0 to -117deg
+
+  ctx.save();
+  ctx.translate(flapPivotX, flapPivotY);
+  ctx.rotate(angle);
+  // draw flap shape
+  ctx.beginPath();
+  ctx.moveTo(-envW/2, 0);
+  ctx.lineTo(0, -flapHeight);
+  ctx.lineTo(envW/2, 0);
+  ctx.closePath();
+  // flap gradient
+  const flapGrad = ctx.createLinearGradient(0, -flapHeight, 0, flapHeight);
+  flapGrad.addColorStop(0,'#fbeef6');
+  flapGrad.addColorStop(1,'#f0c9d9');
+  ctx.fillStyle = flapGrad;
+  ctx.shadowColor = 'rgba(0,0,0,0.25)';
+  ctx.shadowBlur = 18;
+  ctx.fill();
+  ctx.shadowBlur = 0;
+
+  // wax seal sits near center bottom of flap — animate scale when opening
+  const sealScale = 1 - 0.15*flapOpenProgress + 0.05*Math.sin(progress*20);
+  const sealX = 0, sealY = envH*0.02;
+  ctx.save();
+  ctx.translate(sealX, sealY);
+  ctx.scale(sealScale, sealScale);
+  drawWaxSeal(ctx);
+  ctx.restore();
+
+  ctx.restore();
+
+  // draw envelope edges highlight
+  ctx.beginPath();
+  ctx.moveTo(left, top+envH*0.15);
+  ctx.lineTo(cx, top+envH*0.15 - flapHeight*0.06);
+  ctx.lineTo(left+envW, top+envH*0.15);
+  ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+  ctx.lineWidth = 1.2;
+  ctx.stroke();
+
+  // draw inner card sliding up
+  const cardW = envW*0.86;
+  const cardH = envH*0.82;
+  const cardLeft = cx - cardW/2;
+  // initial card y is mostly hidden; reveal by moving upward
+  const cardFullyHiddenY = top + envH*0.32;
+  const cardY = cardFullyHiddenY - (envH*0.9 + 40) * cardRevealProgress;
+
+  // card back shadow
+  ctx.save();
+  ctx.shadowColor = 'rgba(0,0,0,0.2)';
+  ctx.shadowBlur = 16;
+  roundRect(ctx, cardLeft, cardY, cardW, cardH, 12);
+  ctx.fillStyle = '#fffdf7';
+  ctx.fill();
+  ctx.restore();
+
+  // card text (appears with a gentle opacity ramp)
+  ctx.save();
+  const textAlpha = cardRevealProgress;
+  ctx.globalAlpha = textAlpha;
+  ctx.fillStyle = '#6c3c1f';
+  ctx.font = `${Math.round(cardW*0.12)}px 'Lucida Calligraphy', Georgia, serif`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  const textX = cx;
+  const textY = cardY + cardH/2 - 10;
+
+  // golden shine effect using linear gradient for fillStyle
+  const txtGrad = ctx.createLinearGradient(textX - cardW*0.4, textY-40, textX + cardW*0.4, textY+40);
+  txtGrad.addColorStop(0,'#b58a44');
+  txtGrad.addColorStop(0.5,'#f7e3b2');
+  txtGrad.addColorStop(1,'#d4a84a');
+  ctx.fillStyle = txtGrad;
+  ctx.fillText('Convite Especial', textX, textY);
+
+  // tiny sparkle over text
+  if(cardRevealProgress>0.7){
+    const sparkleX = textX + cardW*0.28*Math.sin(progress*8);
+    const sparkleY = textY - 30;
+    ctx.beginPath();
+    ctx.globalAlpha = (cardRevealProgress-0.7)/0.3;
+    ctx.fillStyle = '#fff7d1';
+    ctx.arc(sparkleX, sparkleY, 4,0,Math.PI*2);
+    ctx.fill();
+  }
+
+  ctx.restore();
+}
+
+function drawWaxSeal(ctx){
+  // simple stylized golden seal
+  ctx.save();
+  ctx.beginPath();
+  ctx.fillStyle = '#caa34b';
+  ctx.shadowColor = 'rgba(0,0,0,0.35)';
+  ctx.shadowBlur = 8;
+  ctx.arc(0,0,26,0,Math.PI*2);
+  ctx.fill();
+  ctx.shadowBlur = 0;
+  // inner emboss
+  ctx.beginPath();
+  ctx.fillStyle = '#f6e6b8';
+  ctx.arc(-2,-2,12,0,Math.PI*2);
+  ctx.fill();
+  // tiny floral motif
+  ctx.beginPath();
+  ctx.fillStyle = '#b68b36';
+  for(let i=0;i<5;i++){
+    const ang = i*(Math.PI*2/5);
+    const x = Math.cos(ang)*7, y = Math.sin(ang)*7;
+    ctx.moveTo(x,y);
+    ctx.arc(x,y,2,0,Math.PI*2);
+    ctx.fill();
+  }
+  ctx.restore();
+}
+
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+
+function renderFrame(timestamp){
+  if(!startTime) startTime = timestamp;
+  const elapsed = timestamp - startTime;
+  let progress = Math.min(1, elapsed / DURATION);
+  // clear
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  drawBackground(elapsed);
+  drawCrownDecor(canvas.width, canvas.height);
+  drawEnvelope(progress);
+
+  if(progress < 1){
+    animRequest = requestAnimationFrame(renderFrame);
+  } else {
+    playing = false;
+    animRequest = null;
+    startTime = null;
+    // end reached
+  }
+}
+
+// Controls
+const playBtn = document.getElementById('playBtn');
+const recordBtn = document.getElementById('recordBtn');
+const stopBtn = document.getElementById('stopBtn');
+let mediaRecorder = null; let recordedChunks = [];
+
+playBtn.addEventListener('click', ()=>{
+  if(playing){
+    // restart
+    cancelAnimationFrame(animRequest);
+    startTime = null;
+    playing = false;
+    playBtn.textContent = 'Reproduzir';
+    return;
+  }
+  // start animation
+  startTime = null;
+  playing = true;
+  playBtn.textContent = 'Parando...';
+  animRequest = requestAnimationFrame(renderFrame);
+  setTimeout(()=>{ playBtn.textContent = 'Reproduzir'; }, 300);
+});
+
+recordBtn.addEventListener('click', async ()=>{
+  // prepare to record canvas
+  const stream = canvas.captureStream(60); // 60fps capture
+  recordedChunks = [];
+  recordBtn.disabled = true;
+  stopBtn.disabled = false;
+
+  const options = {mimeType: 'video/webm;codecs=vp9'};
+  try{
+    mediaRecorder = new MediaRecorder(stream, options);
+  }catch(e){
+    try{ mediaRecorder = new MediaRecorder(stream); }catch(e2){ alert('Seu navegador não suporta MediaRecorder para este tipo de stream. Use o Chrome/Edge mais recente.'); recordBtn.disabled=false; stopBtn.disabled=true; return; }
+  }
+  mediaRecorder.ondataavailable = function(e){ if(e.data && e.data.size>0) recordedChunks.push(e.data); };
+  mediaRecorder.onstop = ()=>{
+    const blob = new Blob(recordedChunks, {type:'video/webm'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'convite_princesa.webm';
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+    recordBtn.disabled = false;
+    stopBtn.disabled = true;
+  };
+  mediaRecorder.start();
+
+  // start animation from beginning while recording
+  if(animRequest) cancelAnimationFrame(animRequest);
+  startTime = null;
+  playing = true;
+  animRequest = requestAnimationFrame(renderFrame);
+});
+
+stopBtn.addEventListener('click', ()=>{
+  if(mediaRecorder && mediaRecorder.state !== 'inactive'){
+    mediaRecorder.stop();
+  }
+  if(animRequest) cancelAnimationFrame(animRequest);
+  playing = false;
+  startTime = null;
+});
+
+// draw initial still frame
+(function drawInitial(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  drawBackground(0);
+  drawCrownDecor(canvas.width, canvas.height);
+  drawEnvelope(0);
+})();
+</script></body>
+</html>
