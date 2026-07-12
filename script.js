@@ -9,71 +9,94 @@ const numerosContainer = document.getElementById("numeros");
 
 let numeroSelecionado = null;
 
-function criarNumeros() {
+// Simulação local.
+// Depois será substituída pelo Firebase.
+const numerosReservados = {};
 
-    numerosContainer.innerHTML = "";
+function verificarNumero(){
 
-    for (let i = 1; i <= quantidadeNumeros; i++) {
+    const numero = document
+        .getElementById("numeroEscolhido")
+        .value
+        .padStart(3,"0");
 
-        const numero = document.createElement("div");
-
-        numero.classList.add("numero");
-
-        numero.textContent = i.toString().padStart(3, "0");
-        numero.onclick = () => selecionarNumero(numero, i);
-
-        numerosContainer.appendChild(numero);
-    }
-
-}
-
-function selecionarNumero(elemento, numero) {
-
-    if (elemento.classList.contains("vendido")) return;
-
-    document.querySelectorAll(".numero").forEach(item => {
-        item.classList.remove("selecionado");
-    });
-
-    elemento.classList.add("selecionado");
-
-    numeroSelecionado = numero;
-
-}
-
-function reservarNumero() {
-
-    const nome = document.getElementById("nome").value.trim();
-    const telefone = document.getElementById("telefone").value.trim();
-    const cidade = document.getElementById("cidade").value.trim();
-
-    if (numeroSelecionado == null) {
-        alert("Escolha um número.");
+    if(numero === ""){
+        alert("Digite um número.");
         return;
     }
 
-    if (nome === "" || telefone === "" || cidade === "") {
+    if(numerosReservados[numero]){
+
+        document.getElementById("statusNumero").innerHTML =
+        "🔴 Número " + numero + " indisponível.";
+
+        numeroSelecionado = null;
+
+    }else{
+
+        document.getElementById("statusNumero").innerHTML =
+        "🟢 Número " + numero + " disponível.";
+
+        numeroSelecionado = numero;
+
+    }
+
+}
+
+function numeroDaSorte(){
+
+    let numero;
+
+    do{
+
+        numero =
+        Math.floor(Math.random()*1000)
+        .toString()
+        .padStart(3,"0");
+
+    }while(numerosReservados[numero]);
+
+    document.getElementById("numeroEscolhido").value = numero;
+
+    verificarNumero();
+
+}
+
+function reservarNumero(){
+
+    if(numeroSelecionado==null){
+
+        alert("Primeiro escolha um número.");
+
+        return;
+
+    }
+
+    const nome =
+    document.getElementById("nome").value;
+
+    const telefone =
+    document.getElementById("telefone").value;
+
+    const cidade =
+    document.getElementById("cidade").value;
+
+    if(nome=="" || telefone=="" || cidade==""){
+
         alert("Preencha todos os campos.");
+
         return;
+
     }
 
-    const elemento = document.querySelectorAll(".numero")[numeroSelecionado - 1];
+    numerosReservados[numeroSelecionado]={
 
-    elemento.classList.remove("selecionado");
-    elemento.classList.add("reservado");
+        nome,
+        telefone,
+        cidade
 
-    alert(
-        "Reserva realizada com sucesso!\n\n" +
-        "Número: " + numeroSelecionado.toString().padStart(3, "0") +
-        "\nNome: " + nome
-    );
+    };
 
-    document.getElementById("nome").value = "";
-    document.getElementById("telefone").value = "";
-    document.getElementById("cidade").value = "";
-
-    numeroSelecionado = null;
+    alert("Reserva realizada com sucesso!\nNúmero: "+numeroSelecionado);
 
 }
-
-criarNumeros();
