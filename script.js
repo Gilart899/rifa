@@ -21,7 +21,7 @@ function verificarNumero(){
         .padStart(3,"0");
 
     if(numero === ""){
-        alert("Digite um número.");
+        alert("Digite um número de 1 a 999.");
         return;
     }
 
