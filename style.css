@@ -1,6 +1,7 @@
-/* ==========================
-   GilSigns - Sistema de Rifa
-========================== */
+/* =======================================
+   RIFA ONLINE
+   style.css
+======================================= */
 
 *{
     margin:0;
@@ -9,32 +10,200 @@
 }
 
 body{
+
     font-family:'Poppins',sans-serif;
-    background:linear-gradient(135deg,#1e88e5,#ec4899);
+
+    background:linear-gradient(135deg,#3d5afe,#6a1b9a,#ff4fa3);
+
     min-height:100vh;
-    color:#fff;
+
+    padding:25px;
+
 }
 
-header{
+.container{
+
+    max-width:650px;
+
+    margin:auto;
+
+}
+
+.card{
+
+    background:#fff;
+
+    border-radius:28px;
+
+    padding:35px;
+
+    margin-bottom:28px;
+
+    box-shadow:0 15px 40px rgba(0,0,0,.15);
+
+}
+
+.topo{
+
     text-align:center;
-    padding:30px 20px;
+
 }
 
-.logo img{
-    width:140px;
-    max-width:90%;
+.icone-calendario{
+
+    font-size:60px;
+
     margin-bottom:15px;
+
 }
 
-header h1{
-    font-size:2.2rem;
-    margin-bottom:10px;
+.topo h1{
+
+    font-size:52px;
+
+    color:#2c2f88;
+
+    font-weight:800;
+
 }
 
-header p{
-    opacity:.95;
-    font-size:1rem;
+.topo h2{
+
+    color:#ff4fa3;
+
+    font-size:42px;
+
+    margin-top:10px;
+
+    font-weight:800;
+
 }
+
+.topo p{
+
+    color:#666;
+
+    margin-top:12px;
+
+    font-size:22px;
+
+}
+
+.card h2{
+
+    text-align:center;
+
+    color:#2c2f88;
+
+    font-size:44px;
+
+    font-weight:800;
+
+}
+
+.subtitulo{
+
+    text-align:center;
+
+    color:#666;
+
+    margin-top:8px;
+
+    margin-bottom:30px;
+
+    font-size:20px;
+
+}
+
+#numero{
+
+    width:100%;
+
+    height:130px;
+
+    border:4px solid #ff4fa3;
+
+    border-radius:22px;
+
+    outline:none;
+
+    font-size:72px;
+
+    text-align:center;
+
+    font-weight:800;
+
+    color:#444;
+
+    margin-bottom:25px;
+
+}
+
+.btn{
+
+    width:100%;
+
+    height:74px;
+
+    border:none;
+
+    border-radius:18px;
+
+    font-size:28px;
+
+    color:#fff;
+
+    font-weight:700;
+
+    cursor:pointer;
+
+    margin-bottom:18px;
+
+    transition:.25s;
+
+}
+
+.btn:hover{
+
+    transform:translateY(-2px);
+
+}
+
+.azul{
+
+    background:linear-gradient(90deg,#1565c0,#8e24aa);
+
+}
+
+.verde{
+
+    background:linear-gradient(90deg,#22c55e,#14b84f);
+
+}
+
+#btnSorte{
+
+    width:100%;
+
+    height:74px;
+
+    border:none;
+
+    border-radius:18px;
+
+    background:linear-gradient(90deg,#ff8a00,#ff2d7a);
+
+    color:#fff;
+
+    font-size:28px;
+
+    font-weight:700;
+
+    cursor:pointer;
+
+    margin-bottom:20px;
+
+}}
 
 .informacoes{
     display:flex;
