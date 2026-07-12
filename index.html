@@ -75,22 +75,54 @@ R$ 10,00
 
 <h2>Escolha seu número</h2>
 
-<div id="numeros" class="numeros"></div>
+<section class="consulta">
+
+<h2>Escolha seu número</h2>
+
+<input
+type="number"
+id="numeroEscolhido"
+min="0"
+max="999"
+placeholder="Digite um número de 000 a 999">
+
+<button onclick="verificarNumero()">
+🔍 Verificar disponibilidade
+</button>
+
+<button onclick="numeroDaSorte()">
+🎲 Número da Sorte
+</button>
+
+<p id="statusNumero"></p>
+
+</section>
 
 </section>
 
 <section class="dados">
 
-<h2>Dados do comprador</h2>
+<h2>Seus dados</h2>
 
-<input type="text" id="nome" placeholder="Nome completo">
+<input
+type="text"
+id="nome"
+placeholder="Nome completo">
 
-<input type="tel" id="telefone" placeholder="Telefone">
+<input
+type="tel"
+id="telefone"
+placeholder="Telefone">
 
-<input type="text" id="cidade" placeholder="Cidade">
+<input
+type="text"
+id="cidade"
+placeholder="Cidade">
 
 <button onclick="reservarNumero()">
-Reservar Número
+
+✅ Reservar Número
+
 </button>
 
 </section>
