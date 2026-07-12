@@ -690,3 +690,57 @@ header h1{
     }
 
 }
+.logo{
+    width:100%;
+    max-width:360px;
+    display:block;
+    margin:0 auto 20px;
+}
+
+.faixa{
+    background:linear-gradient(90deg,#ff4f9f,#ff6b6b);
+    color:#fff;
+    padding:12px 24px;
+    border-radius:30px;
+    display:inline-block;
+    font-weight:700;
+    font-size:20px;
+}
+
+.premio{
+    text-align:center;
+}
+
+.foto-premio{
+    width:100%;
+    max-width:320px;
+    margin:20px auto;
+    display:block;
+}
+
+.descricao{
+    text-align:left;
+    max-width:350px;
+    margin:auto;
+    font-size:20px;
+    line-height:1.8;
+}
+
+.homenageada{
+    text-align:center;
+}
+
+.foto-conceicao{
+    width:220px;
+    height:220px;
+    border-radius:50%;
+    object-fit:cover;
+    border:6px solid #d96bff;
+    margin-bottom:20px;
+}
+
+.homenageada p{
+    font-size:20px;
+    color:#666;
+    margin-top:10px;
+}
