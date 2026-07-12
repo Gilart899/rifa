@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Rifa Online - GilSigns</title>
+<title>Rifa Online - gilFest</title>
 
 <link rel="stylesheet" href="style.css">
 
@@ -17,10 +17,180 @@
 
 <body>
 
+  /* ==========================
+   GilSigns - Sistema de Rifa
+========================== */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:'Poppins',sans-serif;
+    background:linear-gradient(135deg,#1e88e5,#ec4899);
+    min-height:100vh;
+    color:#fff;
+}
+
+header{
+    text-align:center;
+    padding:30px 20px;
+}
+
+.logo img{
+    width:140px;
+    max-width:90%;
+    margin-bottom:15px;
+}
+
+header h1{
+    font-size:2.2rem;
+    margin-bottom:10px;
+}
+
+header p{
+    opacity:.95;
+    font-size:1rem;
+}
+
+.informacoes{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:20px;
+    padding:20px;
+}
+
+.card{
+    background:#ffffff;
+    color:#333;
+    width:250px;
+    border-radius:15px;
+    padding:20px;
+    text-align:center;
+    box-shadow:0 8px 20px rgba(0,0,0,.2);
+}
+
+.card h2{
+    color:#1565c0;
+    margin-bottom:10px;
+}
+
+.card p{
+    font-size:20px;
+    font-weight:bold;
+}
+
+section{
+    padding:20px;
+}
+
+section h2{
+    text-align:center;
+    margin-bottom:20px;
+}
+
+.numeros{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(60px,1fr));
+    gap:12px;
+}
+
+.numero{
+    background:#fff;
+    color:#1565c0;
+    border-radius:10px;
+    padding:15px 5px;
+    text-align:center;
+    cursor:pointer;
+    font-weight:bold;
+    transition:.3s;
+    box-shadow:0 5px 12px rgba(0,0,0,.2);
+}
+
+.numero:hover{
+    transform:scale(1.08);
+}
+
+.numero.selecionado{
+    background:#ec4899;
+    color:#fff;
+}
+
+.numero.vendido{
+    background:#e53935;
+    color:#fff;
+}
+
+.numero.reservado{
+    background:#fbc02d;
+    color:#000;
+}
+
+.dados{
+    max-width:600px;
+    margin:40px auto;
+    background:#ffffff;
+    color:#333;
+    padding:30px;
+    border-radius:20px;
+    box-shadow:0 8px 20px rgba(0,0,0,.25);
+}
+
+.dados input{
+    width:100%;
+    padding:14px;
+    margin-bottom:15px;
+    border-radius:10px;
+    border:1px solid #ccc;
+    font-size:16px;
+}
+
+.dados button{
+    width:100%;
+    padding:15px;
+    background:#1565c0;
+    color:#fff;
+    border:none;
+    border-radius:10px;
+    font-size:18px;
+    cursor:pointer;
+    transition:.3s;
+}
+
+.dados button:hover{
+    background:#ec4899;
+}
+
+footer{
+    text-align:center;
+    padding:30px;
+    margin-top:40px;
+    background:rgba(0,0,0,.15);
+}
+
+@media(max-width:768px){
+
+header h1{
+    font-size:1.8rem;
+}
+
+.card{
+    width:100%;
+}
+
+.numeros{
+    grid-template-columns:repeat(5,1fr);
+}
+
+}
+
 <header>
 
 <div class="logo">
-<img src="img/logo.png" alt="GilSigns">
+<img src="img/logo.png" alt="gilFest">
 </div>
 
 <h1>🎟 Rifa Online</h1>
@@ -36,7 +206,7 @@
 <h2>🏆 Prêmio</h2>
 
 <p id="premio">
-Smartphone Samsung Galaxy
+Geladeira Brastemp
 </p>
 
 </div>
@@ -56,7 +226,7 @@ R$ 10,00
 <h2>📅 Sorteio</h2>
 
 <p id="data">
-20/08/2026
+30/12/2026
 </p>
 
 </div>
