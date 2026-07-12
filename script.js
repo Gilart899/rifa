@@ -100,3 +100,46 @@ function reservarNumero(){
     alert("Reserva realizada com sucesso!\nNúmero: "+numeroSelecionado);
 
 }
+
+/* Área da consulta */
+.consulta{
+    max-width:700px;
+    margin:40px auto;
+    background:#ffffff;
+    color:#333;
+    padding:35px;
+    border-radius:20px;
+    box-shadow:0 8px 20px rgba(0,0,0,.25);
+}
+
+/* Campo para digitar o número */
+.consulta input{
+    width:100%;
+    height:70px;
+    font-size:30px;
+    text-align:center;
+    border:2px solid #1e88e5;
+    border-radius:15px;
+    margin:20px 0;
+    font-weight:bold;
+}
+
+/* Botões */
+.consulta button{
+    width:100%;
+    height:65px;
+    font-size:22px;
+    font-weight:bold;
+    border:none;
+    border-radius:15px;
+    margin-top:15px;
+    cursor:pointer;
+}
+
+/* Mensagem de disponibilidade */
+#statusNumero{
+    margin-top:20px;
+    font-size:22px;
+    font-weight:bold;
+    text-align:center;
+}
