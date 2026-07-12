@@ -73,29 +73,166 @@ R$ 10,00
 
 <section>
 
-<h2>Escolha seu número</h2>
+<!DOCTYPE html>
+<html lang="pt-BR">
 
-<section class="consulta">
+<head>
 
-<h2>Escolha seu número</h2>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<input
-type="number"
-id="numeroEscolhido"
-min="0"
-max="999"
-placeholder="Digite um número de 000 a 999">
-<button onclick="verificarNumero()">
-🔍 Verificar disponibilidade
-</button>
+<title>Rifa Online</title>
 
-<button onclick="numeroDaSorte()">
-🎲 Número da Sorte
-</button>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-<p id="statusNumero"></p>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="style.css">
+
+<link rel="stylesheet"
+href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+</head>
+
+<body>
+
+<div class="container">
+
+<!-- ================= TOPO ================= -->
+
+<section class="card topo">
+
+<div class="icone-calendario">
+📅
+</div>
+
+<h1>Sorteio</h1>
+
+<h2 id="dataSorteio">
+30/12/2026
+</h2>
+
+<p>
+Pela 1ª Premiação da Loteria Federal
+</p>
 
 </section>
+
+<!-- ================= ESCOLHA DO NÚMERO ================= -->
+
+<section class="card">
+
+<h2>
+Escolha seu número
+</h2>
+
+<p class="subtitulo">
+Digite um número de 000 a 999
+</p>
+
+<input
+type="text"
+id="numero"
+maxlength="3"
+placeholder="000"
+inputmode="numeric">
+
+<button
+id="btnConsultar"
+class="btn azul">
+
+<i class="fa-solid fa-magnifying-glass"></i>
+
+Verificar Disponibilidade
+
+</button>
+
+<button
+id="btnSorte">
+
+<i class="fa-solid fa-dice"></i>
+
+Número da Sorte
+
+</button>
+
+<div
+id="status"
+class="status">
+
+<div class="icone-status">
+
+<i class="fa-solid fa-circle-info"></i>
+
+</div>
+
+<div>
+
+<h3>
+Aguardando consulta...
+</h3>
+
+<p>
+Digite um número e verifique a disponibilidade.
+</p>
+
+</div>
+
+</div>
+
+</section>
+
+<!-- ================= DADOS ================= -->
+
+<section class="card">
+
+<h2>
+Seus dados
+</h2>
+
+<div class="campo">
+
+<i class="fa-solid fa-user"></i>
+
+<input
+type="text"
+id="nome"
+placeholder="Nome completo">
+
+</div>
+
+<div class="campo">
+
+<i class="fa-solid fa-phone"></i>
+
+<input
+type="tel"
+id="telefone"
+placeholder="Telefone / WhatsApp">
+
+</div>
+
+<div class="campo">
+
+<i class="fa-solid fa-location-dot"></i>
+
+<input
+type="text"
+id="cidade"
+placeholder="Cidade">
+
+</div>
+
+<button
+id="btnReservar"
+class="btn verde">
+
+<i class="fa-solid fa-circle-check"></i>
+
+Reservar Número
+
+</button>
 
 </section>
 
