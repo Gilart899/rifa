@@ -20,7 +20,6 @@ function criarNumeros() {
         numero.classList.add("numero");
 
         numero.textContent = i.toString().padStart(3, "0");
-
         numero.onclick = () => selecionarNumero(numero, i);
 
         numerosContainer.appendChild(numero);
