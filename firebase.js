@@ -124,3 +124,106 @@ export {
     onValue
 
 };
+
+// =====================================
+// Verificar Disponibilidade
+// =====================================
+
+function verificarNumero() {
+
+    let numero = numeroInput.value.trim();
+
+    if (numero === "") {
+
+        atualizarStatus(
+            "Atenção",
+            "Digite um número entre 000 e 999.",
+            "#f59e0b"
+        );
+
+        return;
+
+    }
+
+    numero = parseInt(numero);
+
+    if (isNaN(numero) || numero < 0 || numero > 999) {
+
+        atualizarStatus(
+            "Número inválido",
+            "Escolha um número entre 000 e 999.",
+            "#ef4444"
+        );
+
+        return;
+
+    }
+
+    numero = numero.toString().padStart(3, "0");
+
+    numeroInput.value = numero;
+
+    if (reservas[numero]) {
+
+        atualizarStatus(
+            "Número indisponível",
+            `O número ${numero} já foi reservado.`,
+            "#ef4444"
+        );
+
+    } else {
+
+        atualizarStatus(
+            "Número disponível",
+            `O número ${numero} está livre para reserva.`,
+            "#22c55e"
+        );
+
+    }
+
+}
+
+// =====================================
+// Número da Sorte
+// =====================================
+
+function gerarNumeroDaSorte() {
+
+    let numero;
+    let tentativas = 0;
+
+    do {
+
+        numero = Math.floor(Math.random() * 1000)
+            .toString()
+            .padStart(3, "0");
+
+        tentativas++;
+
+    } while (reservas[numero] && tentativas < 1000);
+
+    if (tentativas >= 1000) {
+
+        atualizarStatus(
+            "Rifa encerrada",
+            "Todos os números já foram reservados.",
+            "#ef4444"
+        );
+
+        return;
+
+    }
+
+    numeroInput.value = numero;
+
+    verificarNumero();
+
+}
+
+// =====================================
+// Eventos
+// =====================================
+
+btnConsultar.addEventListener("click", verificarNumero);
+
+btnSorte.addEventListener("click", gerarNumeroDaSorte);
