@@ -68,7 +68,13 @@ function iniciarCarrossel() {
 
 }
 
-iniciarCarrossel();
+document.addEventListener("DOMContentLoaded", () => {
+
+    carregarConfiguracoes();
+
+    iniciarCarrossel();
+
+});
 }
 
 /* ==========================================
