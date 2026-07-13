@@ -118,3 +118,42 @@ if (btnConsultar) {
 if (btnSorte) {
     btnSorte.addEventListener("click", gerarNumeroDaSorte);
 }
+
+const btnReservar = document.getElementById("btnReservar");
+
+if (btnReservar) {
+    btnReservar.addEventListener("click", reservarNumero);
+}
+
+function reservarNumero() {
+
+    const nome = document.getElementById("nome").value.trim();
+    const telefone = document.getElementById("telefone").value.trim();
+    const cidade = document.getElementById("cidade").value.trim();
+    const numero = numeroInput.value.trim().padStart(3, "0");
+
+    if (nome === "" || telefone === "" || cidade === "" || numero === "") {
+        alert("Preencha todos os campos.");
+        return;
+    }
+
+    if (numerosReservados.includes(numero)) {
+        alert("Este número já foi reservado.");
+        return;
+    }
+
+    const seuWhatsApp = "5579999145044";
+
+    const mensagem =
+`🎟️ *Nova Reserva de Rifa*
+
+👤 Nome: ${nome}
+📱 WhatsApp: ${telefone}
+📍 Cidade: ${cidade}
+
+🎲 Número escolhido: ${numero}`;
+
+    const url = `https://wa.me/${seuWhatsApp}?text=${encodeURIComponent(mensagem)}`;
+
+    window.open(url, "_blank");
+}
