@@ -1,40 +1,102 @@
 // =====================================
-// Firebase - Rifa GilFest
+// RIFA GILFEST v2.0
+// Parte 1
 // =====================================
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.0.0/firebase-app.js";
-
 import {
-    getDatabase,
+    db,
     ref,
     set,
     get,
     child,
-    update,
-    remove,
     onValue
-} from "https://www.gstatic.com/firebasejs/12.0.0/firebase-database.js";
+} from "./firebase.js";
 
-// Configuração do Firebase
+// ==========================
+// Elementos da página
+// ==========================
 
-const firebaseConfig = {
+const numeroInput = document.getElementById("numero");
+const nomeInput = document.getElementById("nome");
+const telefoneInput = document.getElementById("telefone");
+const cidadeInput = document.getElementById("cidade");
 
-    apiKey: "AIzaSyDFFi2nbKHYkBDgThN6MlCy-jw5Se7eYfg",
+const btnConsultar = document.getElementById("btnConsultar");
+const btnSorte = document.getElementById("btnSorte");
+const btnReservar = document.getElementById("btnReservar");
 
-    authDomain: "rifa-1bc12.firebaseapp.com",
+const status = document.getElementById("status");
 
-    databaseURL: "https://rifa-1bc12-default-rtdb.firebaseio.com",
+const barra = document.getElementById("barraProgresso");
+const textoBarra = document.getElementById("textoProgresso");
 
-    projectId: "rifa-1bc12",
+// ==========================
+// Dados carregados do Firebase
+// ==========================
 
-    storageBucket: "rifa-1bc12.firebasestorage.app",
+let reservas = {};
 
-    messagingSenderId: "331108957670",
+// ==========================
+// Atualiza barra de progresso
+// ==========================
 
-    appId: "1:331108957670:web:1875f8481555beddbb6a27"
+function atualizarBarra() {
 
-};
+    const vendidos = Object.keys(reservas).length;
 
+    const porcentagem = (vendidos / 1000) * 100;
+
+    barra.style.width = porcentagem + "%";
+
+    textoBarra.innerHTML =
+        `${vendidos} de 1000 números reservados`;
+
+}
+
+// ==========================
+// Escuta alterações em tempo real
+// ==========================
+
+const reservasRef = ref(db, "reservas");
+
+onValue(reservasRef, (snapshot) => {
+
+    reservas = snapshot.val() || {};
+
+    atualizarBarra();
+
+});
+
+// ==========================
+// Atualiza painel de status
+// ==========================
+
+function atualizarStatus(titulo, texto, cor) {
+
+    status.innerHTML = `
+
+        <div class="icone-status"
+             style="background:${cor};
+                    width:45px;
+                    height:45px;
+                    border-radius:50%;
+                    display:flex;
+                    align-items:center;
+                    justify-content:center;
+                    color:#fff;
+                    margin-bottom:10px;">
+
+            <i class="fa-solid fa-circle-info"></i>
+
+        </div>
+
+        <h3>${titulo}</h3>
+
+        <p>${texto}</p>
+
+    `;
+
+}
 // Inicializa
 
 const app = initializeApp(firebaseConfig);
