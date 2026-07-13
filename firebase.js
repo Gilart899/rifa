@@ -227,3 +227,101 @@ function gerarNumeroDaSorte() {
 btnConsultar.addEventListener("click", verificarNumero);
 
 btnSorte.addEventListener("click", gerarNumeroDaSorte);
+
+// =====================================
+// Reservar Número
+// =====================================
+
+async function reservarNumero() {
+
+    let numero = numeroInput.value.trim();
+
+    const nome = nomeInput.value.trim();
+    const telefone = telefoneInput.value.trim();
+    const cidade = cidadeInput.value.trim();
+
+    if (
+        numero === "" ||
+        nome === "" ||
+        telefone === "" ||
+        cidade === ""
+    ) {
+
+        atualizarStatus(
+            "Campos obrigatórios",
+            "Preencha todos os campos antes de continuar.",
+            "#f59e0b"
+        );
+
+        return;
+    }
+
+    numero = parseInt(numero);
+
+    if (isNaN(numero) || numero < 0 || numero > 999) {
+
+        atualizarStatus(
+            "Número inválido",
+            "Digite um número entre 000 e 999.",
+            "#ef4444"
+        );
+
+        return;
+    }
+
+    numero = numero.toString().padStart(3, "0");
+
+    // Verifica novamente no Firebase
+    if (reservas[numero]) {
+
+        atualizarStatus(
+            "Número indisponível",
+            "Esse número acabou de ser reservado por outra pessoa.",
+            "#ef4444"
+        );
+
+        return;
+    }
+
+    // Salva a reserva
+    await set(ref(db, "reservas/" + numero), {
+
+        numero: numero,
+        nome: nome,
+        telefone: telefone,
+        cidade: cidade,
+
+        status: "Aguardando Pagamento",
+
+        data: new Date().toLocaleString("pt-BR")
+
+    });
+
+    atualizarStatus(
+        "Reserva realizada!",
+        "Agora finalize o pagamento via Pix.",
+        "#22c55e"
+    );
+
+    const mensagem = `🎟️ *NOVA RESERVA DE RIFA*
+
+👤 Nome: ${nome}
+
+📱 WhatsApp: ${telefone}
+
+📍 Cidade: ${cidade}
+
+🎲 Número: ${numero}
+
+💰 Status: Aguardando Pagamento`;
+
+    window.open(
+        `https://wa.me/5579999145044?text=${encodeURIComponent(mensagem)}`,
+        "_blank"
+    );
+
+}
+
+// Evento
+
+btnReservar.addEventListener("click", reservarNumero);
