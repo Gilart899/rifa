@@ -759,3 +759,59 @@ font-weight:bold;
 font-size:20px;
 
 }
+
+/* ==========================================
+   MENSAGENS DO SISTEMA
+========================================== */
+
+.mensagem{
+
+    width:100%;
+
+    max-width:650px;
+
+    margin:20px auto;
+
+    padding:18px;
+
+    border-radius:15px;
+
+    text-align:center;
+
+    font-size:18px;
+
+    font-weight:bold;
+
+    transition:.4s;
+
+}
+
+.oculto{
+
+    display:none;
+
+}
+
+.sucesso{
+
+    background:#22C55E;
+
+    color:white;
+
+}
+
+.erro{
+
+    background:#EF4444;
+
+    color:white;
+
+}
+
+.aviso{
+
+    background:#FACC15;
+
+    color:#333;
+
+}
