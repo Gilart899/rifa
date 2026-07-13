@@ -105,3 +105,5 @@ const CONFIG = {
     "Obrigado por colaborar com esta ação beneficente."
 
 };
+
+organizacao: "GilSigns"
