@@ -72,3 +72,27 @@ function atualizarStatus(texto, cor) {
         </div>
     `;
 }
+document.getElementById("btnSorte").addEventListener("click", () => {
+
+    let numeroSorteado;
+    let tentativas = 0;
+
+    do {
+
+        numeroSorteado = Math.floor(Math.random() * 1000)
+            .toString()
+            .padStart(3, "0");
+
+        tentativas++;
+
+    } while (
+        numerosReservados.includes(numeroSorteado) &&
+        tentativas < 1000
+    );
+
+    numeroInput.value = numeroSorteado;
+
+    verificarNumero();
+
+});
+
