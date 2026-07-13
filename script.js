@@ -1,46 +1,130 @@
-// ==========================
-// GilSigns - Sistema de Rifa
-// ==========================
+// ==========================================
+// RIFA GILFEST v2.0
+// script.js - Parte 1
+// ==========================================
 
-// Lista simulada de números já reservados
-const numerosReservados = [
-    "001",
-    "007",
-    "015",
-    "100",
-    "123",
-    "250",
-    "500",
-    "777",
-    "999"
-];
+import {
+    db,
+    ref,
+    set,
+    get,
+    child,
+    onValue
+} from "./firebase.js";
 
-// Elementos da página
+// =============================
+// ELEMENTOS DA PÁGINA
+// =============================
+
 const numeroInput = document.getElementById("numero");
-const status = document.getElementById("status");
+const nomeInput = document.getElementById("nome");
+const telefoneInput = document.getElementById("telefone");
+const cidadeInput = document.getElementById("cidade");
+
 const btnConsultar = document.getElementById("btnConsultar");
 const btnSorte = document.getElementById("btnSorte");
+const btnReservar = document.getElementById("btnReservar");
 
-// ==========================
-// Atualiza o painel de status
-// ==========================
-function atualizarStatus(titulo, mensagem, cor) {
+const status = document.getElementById("status");
+
+const barra = document.getElementById("barraProgresso");
+const textoBarra = document.getElementById("textoProgresso");
+
+const btnCopiarPix = document.getElementById("btnCopiarPix");
+const chavePix = document.getElementById("chavePix");
+
+// =============================
+// VARIÁVEIS
+// =============================
+
+let reservas = {};
+const TOTAL_NUMEROS = 1000;
+
+// =============================
+// STATUS
+// =============================
+
+function atualizarStatus(titulo, texto, cor) {
 
     status.innerHTML = `
-        <div class="icone-status" style="background:${cor}">
+        <div style="
+            width:50px;
+            height:50px;
+            border-radius:50%;
+            background:${cor};
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            color:#fff;
+            margin:auto auto 15px;
+            font-size:22px;">
             <i class="fa-solid fa-circle-info"></i>
         </div>
 
-        <div>
-            <h3>${titulo}</h3>
-            <p>${mensagem}</p>
-        </div>
+        <h3 style="text-align:center">${titulo}</h3>
+
+        <p style="text-align:center;margin-top:10px;">
+            ${texto}
+        </p>
     `;
+
 }
 
-// ==========================
-// Verifica disponibilidade
-// ==========================
+// =============================
+// BARRA DE PROGRESSO
+// =============================
+
+function atualizarBarra() {
+
+    const vendidos = Object.keys(reservas).length;
+
+    const porcentagem =
+        (vendidos / TOTAL_NUMEROS) * 100;
+
+    barra.style.width = porcentagem + "%";
+
+    textoBarra.innerHTML =
+        `${vendidos} de ${TOTAL_NUMEROS} números reservados`;
+
+}
+
+// =============================
+// LÊ FIREBASE
+// =============================
+
+const reservasRef = ref(db, "reservas");
+
+onValue(reservasRef, (snapshot) => {
+
+    reservas = snapshot.val() || {};
+
+    atualizarBarra();
+
+});
+
+// =============================
+// MENSAGEM INICIAL
+// =============================
+
+atualizarStatus(
+
+    "Bem-vindo!",
+
+    "Escolha um número para participar da rifa.",
+
+    "#3b82f6"
+
+);
+
+// ==========================================
+// RIFA GILFEST v2.0
+// script.js - Parte 2
+// ==========================================
+
+// =============================
+// VERIFICAR DISPONIBILIDADE
+// =============================
+
 function verificarNumero() {
 
     let numero = numeroInput.value.trim();
@@ -48,30 +132,43 @@ function verificarNumero() {
     if (numero === "") {
 
         atualizarStatus(
-            "Digite um número",
-            "Informe um número entre 000 e 999.",
-            "#ff9800"
+            "Atenção",
+            "Digite um número entre 000 e 999.",
+            "#f59e0b"
         );
 
         return;
     }
 
-    numero = numero.padStart(3, "0");
+    numero = parseInt(numero);
+
+    if (isNaN(numero) || numero < 0 || numero > 999) {
+
+        atualizarStatus(
+            "Número inválido",
+            "Informe um número válido.",
+            "#ef4444"
+        );
+
+        return;
+    }
+
+    numero = numero.toString().padStart(3, "0");
 
     numeroInput.value = numero;
 
-    if (numerosReservados.includes(numero)) {
+    if (reservas[numero]) {
 
         atualizarStatus(
-            "Número indisponível",
+            "❌ Número Reservado",
             `O número ${numero} já foi reservado.`,
-            "#e53935"
+            "#ef4444"
         );
 
     } else {
 
         atualizarStatus(
-            "Número disponível",
+            "✅ Número Disponível",
             `O número ${numero} está disponível para reserva.`,
             "#22c55e"
         );
@@ -80,9 +177,10 @@ function verificarNumero() {
 
 }
 
-// ==========================
-// Número da Sorte
-// ==========================
+// =============================
+// NÚMERO DA SORTE
+// =============================
+
 function gerarNumeroDaSorte() {
 
     let numero;
@@ -96,156 +194,94 @@ function gerarNumeroDaSorte() {
 
         tentativas++;
 
-    } while (
-        numerosReservados.includes(numero) &&
-        tentativas < 1000
-    );
+    } while (reservas[numero] && tentativas < 1000);
 
-    numeroInput.value = numero;
+    if (tentativas >= 1000) {
 
-    verificarNumero();
+        atualizarStatus(
+            "Rifa Encerrada",
+            "Todos os números foram reservados.",
+            "#ef4444"
+        );
 
-}
+        return;
 
-// ==========================
-// Eventos
-// ==========================
+    }
 
-if (btnConsultar) {
-    btnConsultar.addEventListener("click", verificarNumero);
-}
+   // ==========================================
+// RIFA GILFEST v2.0
+// script.js - Parte 3
+// Reserva do Número
+// ==========================================
 
-if (btnSorte) {
-    btnSorte.addEventListener("click", gerarNumeroDaSorte);
-}
+async function reservarNumero() {
 
-const btnReservar = document.getElementById("btnReservar");
+    let numero = numeroInput.value.trim();
 
-if (btnReservar) {
-    btnReservar.addEventListener("click", reservarNumero);
-}
+    const nome = nomeInput.value.trim();
+    const telefone = telefoneInput.value.trim();
+    const cidade = cidadeInput.value.trim();
 
-function reservarNumero() {
+    if (!numero || !nome || !telefone || !cidade) {
 
-    const nome = document.getElementById("nome").value.trim();
-    const telefone = document.getElementById("telefone").value.trim();
-    const cidade = document.getElementById("cidade").value.trim();
-    const numero = numeroInput.value.trim().padStart(3, "0");
+        atualizarStatus(
+            "Campos obrigatórios",
+            "Preencha todos os campos para continuar.",
+            "#f59e0b"
+        );
 
-    if (nome === "" || telefone === "" || cidade === "" || numero === "") {
-        alert("Preencha todos os campos.");
         return;
     }
 
-    if (numerosReservados.includes(numero)) {
-        alert("Este número já foi reservado.");
+    numero = parseInt(numero);
+
+    if (isNaN(numero) || numero < 0 || numero > 999) {
+
+        atualizarStatus(
+            "Número inválido",
+            "Digite um número entre 000 e 999.",
+            "#ef4444"
+        );
+
         return;
     }
 
-    const seuWhatsApp = "5579999145044";
+    numero = numero.toString().padStart(3, "0");
 
-    const mensagem =
-`🎟️ *Nova Reserva de Rifa*
+    // Verifica novamente se o número ainda está livre
+    const reservaRef = ref(db, "reservas/" + numero);
 
-👤 Nome: ${nome}
-📱 WhatsApp: ${telefone}
-📍 Cidade: ${cidade}
+    const snapshot = await get(reservaRef);
 
-🎲 Número escolhido: ${numero}`;
+    if (snapshot.exists()) {
 
-    const url = `https://wa.me/${seuWhatsApp}?text=${encodeURIComponent(mensagem)}`;
+        atualizarStatus(
+            "Número já reservado",
+            "Escolha outro número.",
+            "#ef4444"
+        );
 
-    window.open(url, "_blank");
-}
+        return;
+    }
 
-// =====================================
-// Parte 4 - Funções Extras
-// =====================================
+    // Salva a reserva
+    await set(reservaRef, {
 
-// Botão Copiar Pix
-const btnCopiarPix = document.getElementById("btnCopiarPix");
-const chavePix = document.getElementById("chavePix");
-
-if (btnCopiarPix) {
-
-    btnCopiarPix.addEventListener("click", async () => {
-
-        try {
-
-            await navigator.clipboard.writeText(chavePix.value);
-
-            atualizarStatus(
-                "✅ Pix copiado",
-                "Agora faça o pagamento e envie o comprovante.",
-                "#22c55e"
-            );
-
-        } catch (e) {
-
-            alert("Não foi possível copiar a chave Pix.");
-
-        }
+        numero: numero,
+        nome: nome,
+        telefone: telefone,
+        cidade: cidade,
+        status: "Aguardando pagamento",
+        dataReserva: new Date().toLocaleString("pt-BR")
 
     });
 
-}
+    atualizarStatus(
+        "Reserva realizada!",
+        "Seu número foi reservado com sucesso.",
+        "#22c55e"
+    );
 
-// Máscara do WhatsApp
-telefoneInput.addEventListener("input", () => {
-
-    let valor = telefoneInput.value.replace(/\D/g, "");
-
-    valor = valor.substring(0, 11);
-
-    if (valor.length > 10) {
-
-        valor = valor.replace(
-            /(\d{2})(\d{5})(\d{4})/,
-            "($1) $2-$3"
-        );
-
-    } else {
-
-        valor = valor.replace(
-            /(\d{2})(\d{4})(\d{4})/,
-            "($1) $2-$3"
-        );
-
-    }
-
-    telefoneInput.value = valor;
-
-});
-
-// Limpa formulário
-function limparFormulario() {
-
-    numeroInput.value = "";
-    nomeInput.value = "";
-    telefoneInput.value = "";
-    cidadeInput.value = "";
-
-}
-
-// Limpa automaticamente após reservar
-const reservarOriginal = reservarNumero;
-
-reservarNumero = async function () {
-
-    await reservarOriginal();
-
-    limparFormulario();
-
-};
-
-// Mensagem inicial
-
-atualizarStatus(
-
-    "Bem-vindo!",
-
-    "Escolha um número e participe da rifa.",
-
-    "#3b82f6"
-
-);
+    // Mensagem do WhatsApp
+    const mensagem =
+`
