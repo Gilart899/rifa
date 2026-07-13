@@ -1,305 +1,107 @@
 /* ==========================================
+   CONFIGURAÇÃO DA RIFA
    Rifa GilSigns
-   script.js
 ========================================== */
 
-document.addEventListener("DOMContentLoaded", () => {
+const CONFIG = {
 
-    carregarConfiguracoes();
+    // ===========================
+    // Dados da Rifa
+    // ===========================
 
-});
+    titulo: "🎟️ Rifa Beneficente",
 
-/* ==========================================
-   CARREGAR CONFIGURAÇÕES
-========================================== */
+    beneficiada: "Dona Bene",
 
-function carregarConfiguracoes() {
+    premio: "Geladeira Midea Frost Free",
 
-    document.title = CONFIG.titulo;
+    valorNumero: 20.00,
 
-    document.getElementById("beneficiada").textContent = CONFIG.beneficiada;
+    moeda: "R$",
 
-    document.getElementById("premio").textContent = CONFIG.premio;
+    dataSorteio: "30/12/2026",
 
-    document.getElementById("valor").textContent =
-        CONFIG.moeda + " " + CONFIG.valorNumero.toFixed(2);
+    resultado:
 
-    document.getElementById("data").textContent =
-        CONFIG.dataSorteio;
+    "1ª Premiação da Loteria Federal",
 
-    document.getElementById("resultado").textContent =
-        CONFIG.resultado;
 
-    document.getElementById("pix").textContent =
-        CONFIG.pixChave;
+    // ===========================
+    // Contatos
+    // ===========================
 
-}
-/* ==========================================
-   CARROSSEL DE IMAGENS
-========================================== */
+    whatsapp: "5579999145044",
 
-let slideAtual = 0;
+    instagram: "@gilart.signs",
 
-function iniciarCarrossel() {
+    email: "",
 
-    const slides = document.querySelectorAll(".slide");
 
-    const indicadores = document.querySelectorAll(".indicador");
+    // ===========================
+    // PIX
+    // ===========================
 
-    if(slides.length === 0) return;
+    pixTipo: "CPF",
 
-    setInterval(() => {
+    pixChave: "58847235553",
 
-        slides[slideAtual].classList.remove("ativo");
-        indicadores[slideAtual].classList.remove("ativo");
 
-        slideAtual++;
+    // ===========================
+    // Numeração
+    // ===========================
 
-        if(slideAtual >= slides.length){
+    quantidadeNumeros:1000,
 
-            slideAtual = 0;
+    numeroInicial:0,
 
-        }
+    numeroFinal:999,
 
-        slides[slideAtual].classList.add("ativo");
-        indicadores[slideAtual].classList.add("ativo");
 
-    },4000);
+    // ===========================
+    // Cartelas
+    // ===========================
 
-}
+    quantidadeCartelas:10,
 
-iniciarCarrossel();
+    numerosPorCartela:100,
 
-/* ==========================================
-   COPIAR PIX
-========================================== */
 
-const btnPix = document.getElementById("copiarPix");
+    // ===========================
+    // Fotos
+    // ===========================
 
-if(btnPix){
+    fotos:[
 
-    btnPix.addEventListener("click",()=>{
+        "img/premio1.jpg",
 
-        navigator.clipboard.writeText(CONFIG.pixChave);
+        "img/premio2.jpg",
 
-        alert("✅ Chave PIX copiada.");
+        "img/premio3.jpg"
 
-    });
+    ],
 
-}
 
-/* ==========================================
-   NÚMERO DA SORTE
-========================================== */
+    // ===========================
+    // Cores
+    // ===========================
 
-const btnSorte = document.getElementById("btnSorte");
+    corPrincipal:"#1976D2",
 
-if(btnSorte){
+    corSecundaria:"#EC4899",
 
-    btnSorte.addEventListener("click",()=>{
+    corSucesso:"#22C55E",
 
-        const numero = Math.floor(Math.random()*1000);
+    corReservado:"#FACC15",
 
-        document.getElementById("numeroEscolhido").value =
-        numero.toString().padStart(3,"0");
+    corPago:"#EF4444",
 
-    });
 
-   /* ==========================================
-   FORMATAÇÃO DO NÚMERO
-========================================== */
+    // ===========================
+    // Texto do Rodapé
+    // ===========================
 
-const campoNumero = document.getElementById("numeroEscolhido");
+    rodape:
 
-if(campoNumero){
+    "Obrigado por colaborar com esta ação beneficente."
 
-campoNumero.addEventListener("input",()=>{
-
-let valor = campoNumero.value.replace(/\D/g,"");
-
-if(valor>999){
-
-valor="999";
-
-}
-
-campoNumero.value = valor;
-
-});
-
-}
-
-/* ==========================================
-   LISTA DE NÚMEROS SELECIONADOS
-========================================== */
-
-let numerosSelecionados = [];
-
-/* Apenas para testes.
-   Depois será substituído pelo Firebase. */
-
-let numerosReservados = [
-    "005",
-    "027",
-    "125",
-    "301",
-    "728"
-];
-/* ==========================================
-VERIFICAR DISPONIBILIDADE
-========================================== */
-
-const btnVerificar = document.getElementById("btnVerificar");
-
-if(btnVerificar){
-
-btnVerificar.addEventListener("click", verificarNumero);
-
-}
-
-function verificarNumero(){
-
-let numero = document
-.getElementById("numeroEscolhido")
-.value
-.trim();
-
-if(numero===""){
-
-alert("Digite um número.");
-
-return;
-
-}
-
-numero = numero.padStart(3,"0");
-
-if(numerosReservados.includes(numero)){
-
-alert("❌ O número "+numero+" já foi reservado.");
-
-return;
-
-}
-
-alert("✅ Número "+numero+" disponível!");
-
-}/* ==========================================
-ADICIONAR À CARTELA
-========================================== */
-
-const btnAdicionar =
-document.getElementById("btnAdicionar");
-
-if(btnAdicionar){
-
-btnAdicionar.addEventListener("click", adicionarNumero);
-
-}
-
-function adicionarNumero(){
-
-let numero =
-document.getElementById("numeroEscolhido")
-.value
-.trim();
-
-if(numero===""){
-
-alert("Digite um número.");
-
-return;
-
-}
-
-numero = numero.padStart(3,"0");
-
-if(numerosReservados.includes(numero)){
-
-alert("Número indisponível.");
-
-return;
-
-}
-
-if(numerosSelecionados.includes(numero)){
-
-alert("Esse número já está na sua cartela.");
-
-return;
-
-}
-
-numerosSelecionados.push(numero);
-
-mostrarCartela();
-
-document.getElementById("numeroEscolhido").value="";
-
-}/* ==========================================
-MOSTRAR CARTELA
-========================================== */
-
-function mostrarCartela(){
-
-const area =
-document.getElementById("numerosSelecionados");
-
-if(numerosSelecionados.length===0){
-
-area.innerHTML="Nenhum número escolhido.";
-
-return;
-
-}
-
-area.innerHTML="";
-
-numerosSelecionados.forEach(numero=>{
-
-area.innerHTML+=`
-
-<div class="numeroEscolhido">
-
-${numero}
-
-</div>
-
-/* ==========================================
-RESERVAR
-========================================== */
-
-const btnReservar =
-document.getElementById("btnReservar");
-
-if(btnReservar){
-
-btnReservar.addEventListener("click",()=>{
-
-if(numerosSelecionados.length===0){
-
-alert("Escolha pelo menos um número.");
-
-return;
-
-}
-
-alert(
-
-"Reserva criada com sucesso!\n\n"
-
-+"Números: "
-
-+numerosSelecionados.join(", ")
-
-);
-
-});
-
-}
-
-`;
-
-});
-
-}
+};
