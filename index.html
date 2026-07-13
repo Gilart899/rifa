@@ -199,150 +199,133 @@ Número da Sorte
 
 <div
 id="status"
-class="status">
+<!DOCTYPE html>
+<html lang="pt-BR">
 
-<div class="icone-status">
+<head>
 
-<i class="fa-solid fa-circle-info"></i>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-</div>
+<title>Rifa Beneficente | GilFest</title>
 
-<div>
+<meta name="theme-color" content="#5B21B6">
 
-<h3>
-Aguardando consulta...
-</h3>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-<p>
-Digite um número e verifique a disponibilidade.
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+<body>
+
+<div class="container">
+
+<!-- ===== CABEÇALHO ===== -->
+
+<header class="card">
+
+<img src="img/logo.png" class="logo" alt="GilFest">
+
+<h1>Rifa Beneficente</h1>
+
+<p class="subtitulo">
+Ajude esta causa e concorra a um super prêmio.
 </p>
 
-</div>
+</header>
 
-</div>
+<!-- ===== PRÊMIO ===== -->
+
+<section class="card premio">
+
+<img src="img/premio.png" class="fotoPremio" alt="Prêmio">
+
+<h2>Geladeira Midea Frost Free</h2>
+
+<p class="descricao">
+
+347 Litros • Frost Free • 10 anos de garantia no compressor
+
+</p>
 
 </section>
 
-<!-- ================= DADOS ================= -->
+<!-- ===== BENEFICIADA ===== -->
+
+<section class="card beneficiada">
+
+<img src="img/conceicao.png" class="fotoPessoa" alt="Beneficiada">
+
+<h2>Em prol de Dona Conceição</h2>
+
+<p>
+
+Toda participação faz a diferença.
+Muito obrigado por colaborar!
+
+</p>
+
+</section>
+
+<!-- ===== BARRA ===== -->
 
 <section class="card">
 
-<h2>
-Seus dados
-</h2>
+<h2>Andamento da Rifa</h2>
 
-<div class="campo">
+<div class="barra">
 
-<i class="fa-solid fa-user"></i>
-
-<input
-type="text"
-id="nome"
-placeholder="Nome completo">
+<div id="barraProgresso"></div>
 
 </div>
 
-<div class="campo">
+<p id="textoProgresso">
 
-<i class="fa-solid fa-phone"></i>
+0 de 1000 números reservados
 
-<input
-type="tel"
-id="telefone"
-placeholder="Telefone / WhatsApp">
-
-</div>
-
-<div class="campo">
-
-<i class="fa-solid fa-location-dot"></i>
-
-<input
-type="text"
-id="cidade"
-placeholder="Cidade">
-
-</div>
-
-<button
-id="btnReservar"
-class="btn verde">
-
-<i class="fa-solid fa-circle-check"></i>
-
-Reservar Número
-
-</button>
+</p>
 
 </section>
 
-  <!-- ================= RODAPÉ ================= -->
+<!-- ===== ESCOLHER NÚMERO ===== -->
 
-<footer class="rodape">
+<section class="card">
 
-<p>
-© 2026 Rifa Online - Todos os direitos reservados.
-</p>
+<h2>Escolha seu Número</h2>
 
-</footer>
+<input
+type="number"
+id="numero"
+placeholder="000"
+min="0"
+max="999">
 
-</div>
+<button id="btnConsultar" class="azul">
 
-<!-- Modal de carregamento -->
+<i class="fa-solid fa-magnifying-glass"></i>
 
-<div id="loading" class="loading oculto">
-
-<div class="spinner"></div>
-
-<p>Consultando disponibilidade...</p>
-
-</div>
-
-<!-- Modal de confirmação -->
-
-<div id="modalSucesso" class="modal oculto">
-
-<div class="modal-box">
-
-<div class="modal-icon">
-
-<i class="fa-solid fa-circle-check"></i>
-
-</div>
-
-<h2>Reserva realizada!</h2>
-
-<p>
-Seu número foi reservado com sucesso.
-</p>
-
-<button id="fecharModal">
-
-Fechar
+Verificar Disponibilidade
 
 </button>
 
-</div>
+<button id="btnSorte" class="rosa">
+
+<i class="fa-solid fa-dice"></i>
+
+Número da Sorte
+
+</button>
+
+<div id="status">
+
+Pronto para consulta.
 
 </div>
-
-<!-- Scripts -->
-
-<script type="module" src="firebase.js"></script>
-<script type="module" src="script.js"></script>
-
-</body>
-
-</html>
-
 
 </section>
-
-<footer>
-
-<p>© GilSigns - Sistema de Rifas</p>
-
-</footer>
-
-</body>
-</html>
