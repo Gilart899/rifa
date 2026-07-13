@@ -162,3 +162,231 @@ h2{
     color:var(--rosa);
 
 }
+
+/* ======================================
+   ESTATÍSTICAS
+====================================== */
+
+.estatisticas{
+
+    display:grid;
+
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+
+    gap:20px;
+
+}
+
+.estatistica{
+
+    background:linear-gradient(135deg,#1976D2,#EC4899);
+
+    color:white;
+
+    padding:25px;
+
+    border-radius:20px;
+
+    text-align:center;
+
+    box-shadow:0 8px 20px rgba(0,0,0,.20);
+
+}
+
+.estatistica h3{
+
+    font-size:38px;
+
+    margin-bottom:10px;
+
+}
+
+.estatistica p{
+
+    font-size:18px;
+
+}
+
+/* ======================================
+CARROSSEL
+====================================== */
+
+.carrossel{
+
+    overflow:hidden;
+
+}
+
+.slides{
+
+    width:100%;
+
+}
+
+.slide{
+
+    width:100%;
+
+    display:none;
+
+    border-radius:20px;
+
+}
+
+.slide.ativo{
+
+    display:block;
+
+   /* ======================================
+ESCOLHER NÚMERO
+====================================== */
+
+.escolha{
+
+    text-align:center;
+
+}
+
+.escolha p{
+
+    font-size:18px;
+
+    margin-bottom:20px;
+
+}
+
+#numeroEscolhido{
+
+    width:100%;
+
+    max-width:420px;
+
+    height:75px;
+
+    margin:20px auto;
+
+    display:block;
+
+    border-radius:18px;
+
+    border:3px solid #1976D2;
+
+    text-align:center;
+
+    font-size:34px;
+
+    font-weight:bold;
+
+    outline:none;
+
+}
+
+#numeroEscolhido:focus{
+
+    border-color:#EC4899;
+
+   /* ======================================
+BOTÕES
+====================================== */
+
+button{
+
+    width:100%;
+
+    max-width:420px;
+
+    margin:12px auto;
+
+    display:block;
+
+    padding:18px;
+
+    border:none;
+
+    border-radius:18px;
+
+    background:linear-gradient(135deg,#1976D2,#EC4899);
+
+    color:white;
+
+    font-size:20px;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+    transition:.3s;
+
+}
+
+button:hover{
+
+    transform:translateY(-3px);
+
+    box-shadow:0 12px 25px rgba(0,0,0,.25);
+
+   /* ======================================
+NÚMEROS ESCOLHIDOS
+====================================== */
+
+#numerosSelecionados{
+
+    min-height:70px;
+
+    border:2px dashed #1976D2;
+
+    border-radius:15px;
+
+    padding:20px;
+
+    text-align:center;
+
+    font-size:20px;
+
+}
+
+   /
+
+   /* ======================================
+BARRA DE PROGRESSO
+====================================== */
+
+.barra{
+
+    width:100%;
+
+    height:28px;
+
+    background:#DDD;
+
+    border-radius:30px;
+
+    overflow:hidden;
+
+}
+
+#barraProgresso{
+
+    width:0%;
+
+    height:100%;
+
+    background:linear-gradient(90deg,#1976D2,#EC4899);
+
+    transition:1s;
+
+}
+
+#textoProgresso{
+
+    text-align:center;
+
+    margin-top:12px;
+
+    font-size:18px;
+
+    font-weight:bold;
+
+}
+
+   
