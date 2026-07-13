@@ -311,3 +311,79 @@ alert(
 
 }
 }
+
+/* ==========================================
+   ENVIAR PARA WHATSAPP
+========================================== */
+
+const btnWhatsapp =
+document.getElementById("btnWhatsapp");
+
+if(btnWhatsapp){
+
+    btnWhatsapp.addEventListener("click", enviarWhatsApp);
+
+}
+
+function enviarWhatsApp(){
+
+    const nome =
+    document.getElementById("nome").value.trim();
+
+    const telefone =
+    document.getElementById("telefone").value.trim();
+
+    const cidade =
+    document.getElementById("cidade").value.trim();
+
+    if(nome===""){
+
+        alert("Informe seu nome.");
+
+        return;
+
+    }
+
+    if(telefone===""){
+
+        alert("Informe seu WhatsApp.");
+
+        return;
+
+    }
+
+    if(numerosSelecionados.length===0){
+
+        alert("Escolha pelo menos um número.");
+
+        return;
+
+    }
+
+    let mensagem =
+
+`🎟️ *Rifa Beneficente*
+
+👤 Nome: ${nome}
+
+📱 WhatsApp: ${telefone}
+
+🏙️ Cidade: ${cidade}
+
+🎁 Prêmio:
+${CONFIG.premio}
+
+🎟️ Números escolhidos:
+
+${numerosSelecionados.join(", ")}
+
+💳 Aguardo confirmação da reserva.
+
+Obrigado!`;
+
+    const url =
+`https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(mensagem)}`;
+
+    window.open(url,"_blank");
+
+}
