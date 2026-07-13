@@ -329,3 +329,134 @@ Pronto para consulta.
 </div>
 
 </section>
+
+
+    <!-- ===== DADOS DO PARTICIPANTE ===== -->
+
+<section class="card">
+
+    <h2>Seus Dados</h2>
+
+    <div class="campo">
+        <i class="fa-solid fa-user"></i>
+        <input
+            type="text"
+            id="nome"
+            placeholder="Nome completo">
+    </div>
+
+    <div class="campo">
+        <i class="fa-solid fa-phone"></i>
+        <input
+            type="tel"
+            id="telefone"
+            placeholder="WhatsApp">
+    </div>
+
+    <div class="campo">
+        <i class="fa-solid fa-location-dot"></i>
+        <input
+            type="text"
+            id="cidade"
+            placeholder="Cidade">
+    </div>
+
+    <button id="btnReservar" class="verde">
+
+        <i class="fa-solid fa-circle-check"></i>
+
+        Reservar Número
+
+    </button>
+
+</section>
+
+<!-- ===== PAGAMENTO PIX ===== -->
+
+<section class="card">
+
+    <h2>Pagamento via Pix</h2>
+
+    <p class="pixTexto">
+        Após reservar seu número, faça o pagamento via Pix.
+    </p>
+
+    <div class="pixBox">
+
+        <input
+            type="text"
+            id="chavePix"
+            value="79999145044"
+            readonly>
+
+        <button id="btnCopiarPix">
+
+            <i class="fa-solid fa-copy"></i>
+
+            Copiar Pix
+
+        </button>
+
+    </div>
+
+</section>
+
+<!-- ===== COMPROVANTE ===== -->
+
+<section class="card">
+
+    <h2>Comprovante</h2>
+
+    <p class="pixTexto">
+
+        Envie uma foto do comprovante.
+
+    </p>
+
+    <input
+        type="file"
+        id="comprovante"
+        accept="image/*,.pdf">
+
+</section>
+
+<!-- ===== REGULAMENTO ===== -->
+
+<section class="card">
+
+    <h2>Regulamento</h2>
+
+    <ul class="regras">
+
+        <li>✔ Cada número participa apenas uma vez.</li>
+
+        <li>✔ A reserva será confirmada após o pagamento.</li>
+
+        <li>✔ O sorteio será realizado pela Loteria Federal.</li>
+
+        <li>✔ O prêmio será entregue ao ganhador mediante identificação.</li>
+
+    </ul>
+
+</section>
+
+<!-- ===== RODAPÉ ===== -->
+
+<footer>
+
+    <p>
+
+        © 2026 GilFest • Sistema de Rifa Online
+
+    </p>
+
+</footer>
+
+<script type="module" src="firebase.js"></script>
+<script type="module" src="script.js"></script>
+
+</div>
+
+</body>
+
+</html>
