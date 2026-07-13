@@ -52,3 +52,113 @@ body{
     color:white;
 
 }
+
+/* ==========================
+HEADER
+========================== */
+
+header{
+
+    padding:40px 20px;
+
+    text-align:center;
+
+}
+
+.logo img{
+
+    width:150px;
+
+    margin-bottom:20px;
+
+}
+
+header h1{
+
+    font-size:40px;
+
+    font-weight:700;
+
+}
+
+header p{
+
+    margin-top:10px;
+
+    font-size:20px;
+
+    opacity:.9;
+
+}
+
+
+main{
+
+    width:95%;
+
+    max-width:1200px;
+
+    margin:auto;
+
+}
+
+.card-rifa,
+.estatisticas,
+.carrossel,
+.escolha,
+.cartelaUsuario,
+.participante,
+.pagamento,
+.comprovante,
+.acoes,
+.aviso,
+.regulamento,
+.faq{
+
+    background:white;
+
+    color:#333;
+
+    border-radius:25px;
+
+    margin:30px auto;
+
+    padding:30px;
+
+    box-shadow:
+
+    0 15px 40px
+
+    rgba(0,0,0,.20);
+
+}
+
+h2{
+
+    color:var(--azul);
+
+    margin-bottom:20px;
+
+    text-align:center;
+
+}
+
+.linha-info{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:20px;
+
+    margin:20px 0;
+
+}
+
+.linha-info i{
+
+    font-size:32px;
+
+    color:var(--rosa);
+
+}
