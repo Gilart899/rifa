@@ -129,4 +129,177 @@ campoNumero.value = valor;
 
 }
 
+/* ==========================================
+   LISTA DE NÚMEROS SELECIONADOS
+========================================== */
 
+let numerosSelecionados = [];
+
+/* Apenas para testes.
+   Depois será substituído pelo Firebase. */
+
+let numerosReservados = [
+    "005",
+    "027",
+    "125",
+    "301",
+    "728"
+];
+/* ==========================================
+VERIFICAR DISPONIBILIDADE
+========================================== */
+
+const btnVerificar = document.getElementById("btnVerificar");
+
+if(btnVerificar){
+
+btnVerificar.addEventListener("click", verificarNumero);
+
+}
+
+function verificarNumero(){
+
+let numero = document
+.getElementById("numeroEscolhido")
+.value
+.trim();
+
+if(numero===""){
+
+alert("Digite um número.");
+
+return;
+
+}
+
+numero = numero.padStart(3,"0");
+
+if(numerosReservados.includes(numero)){
+
+alert("❌ O número "+numero+" já foi reservado.");
+
+return;
+
+}
+
+alert("✅ Número "+numero+" disponível!");
+
+}/* ==========================================
+ADICIONAR À CARTELA
+========================================== */
+
+const btnAdicionar =
+document.getElementById("btnAdicionar");
+
+if(btnAdicionar){
+
+btnAdicionar.addEventListener("click", adicionarNumero);
+
+}
+
+function adicionarNumero(){
+
+let numero =
+document.getElementById("numeroEscolhido")
+.value
+.trim();
+
+if(numero===""){
+
+alert("Digite um número.");
+
+return;
+
+}
+
+numero = numero.padStart(3,"0");
+
+if(numerosReservados.includes(numero)){
+
+alert("Número indisponível.");
+
+return;
+
+}
+
+if(numerosSelecionados.includes(numero)){
+
+alert("Esse número já está na sua cartela.");
+
+return;
+
+}
+
+numerosSelecionados.push(numero);
+
+mostrarCartela();
+
+document.getElementById("numeroEscolhido").value="";
+
+}/* ==========================================
+MOSTRAR CARTELA
+========================================== */
+
+function mostrarCartela(){
+
+const area =
+document.getElementById("numerosSelecionados");
+
+if(numerosSelecionados.length===0){
+
+area.innerHTML="Nenhum número escolhido.";
+
+return;
+
+}
+
+area.innerHTML="";
+
+numerosSelecionados.forEach(numero=>{
+
+area.innerHTML+=`
+
+<div class="numeroEscolhido">
+
+${numero}
+
+</div>
+
+/* ==========================================
+RESERVAR
+========================================== */
+
+const btnReservar =
+document.getElementById("btnReservar");
+
+if(btnReservar){
+
+btnReservar.addEventListener("click",()=>{
+
+if(numerosSelecionados.length===0){
+
+alert("Escolha pelo menos um número.");
+
+return;
+
+}
+
+alert(
+
+"Reserva criada com sucesso!\n\n"
+
++"Números: "
+
++numerosSelecionados.join(", ")
+
+);
+
+});
+
+}
+
+`;
+
+});
+
+}
