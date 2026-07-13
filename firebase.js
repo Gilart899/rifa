@@ -1,327 +1,107 @@
-// =====================================
-// RIFA GILFEST v2.0
-// Parte 1
-// =====================================
+/* ==========================================
+   CONFIGURAÇÃO DA RIFA
+   Rifa GilSigns
+========================================== */
 
-import {
-    db,
-    ref,
-    set,
-    get,
-    child,
-    onValue
-} from "./firebase.js";
+const CONFIG = {
 
-// ==========================
-// Elementos da página
-// ==========================
+    // ===========================
+    // Dados da Rifa
+    // ===========================
 
-const numeroInput = document.getElementById("numero");
-const nomeInput = document.getElementById("nome");
-const telefoneInput = document.getElementById("telefone");
-const cidadeInput = document.getElementById("cidade");
+    titulo: "🎟️ Rifa Beneficente",
 
-const btnConsultar = document.getElementById("btnConsultar");
-const btnSorte = document.getElementById("btnSorte");
-const btnReservar = document.getElementById("btnReservar");
+    beneficiada: "Dona Bene",
 
-const status = document.getElementById("status");
+    premio: "Geladeira Midea Frost Free",
 
-const barra = document.getElementById("barraProgresso");
-const textoBarra = document.getElementById("textoProgresso");
+    valorNumero: 20.00,
 
-// ==========================
-// Dados carregados do Firebase
-// ==========================
+    moeda: "R$",
 
-let reservas = {};
+    dataSorteio: "30/12/2026",
 
-// ==========================
-// Atualiza barra de progresso
-// ==========================
+    resultado:
 
-function atualizarBarra() {
+    "1ª Premiação da Loteria Federal",
 
-    const vendidos = Object.keys(reservas).length;
 
-    const porcentagem = (vendidos / 1000) * 100;
+    // ===========================
+    // Contatos
+    // ===========================
 
-    barra.style.width = porcentagem + "%";
+    whatsapp: "5579999145044",
 
-    textoBarra.innerHTML =
-        `${vendidos} de 1000 números reservados`;
+    instagram: "@gilart.signs",
 
-}
+    email: "",
 
-// ==========================
-// Escuta alterações em tempo real
-// ==========================
 
-const reservasRef = ref(db, "reservas");
+    // ===========================
+    // PIX
+    // ===========================
 
-onValue(reservasRef, (snapshot) => {
+    pixTipo: "CPF",
 
-    reservas = snapshot.val() || {};
+    pixChave: "58847235553",
 
-    atualizarBarra();
 
-});
+    // ===========================
+    // Numeração
+    // ===========================
 
-// ==========================
-// Atualiza painel de status
-// ==========================
+    quantidadeNumeros:1000,
 
-function atualizarStatus(titulo, texto, cor) {
+    numeroInicial:0,
 
-    status.innerHTML = `
+    numeroFinal:999,
 
-        <div class="icone-status"
-             style="background:${cor};
-                    width:45px;
-                    height:45px;
-                    border-radius:50%;
-                    display:flex;
-                    align-items:center;
-                    justify-content:center;
-                    color:#fff;
-                    margin-bottom:10px;">
 
-            <i class="fa-solid fa-circle-info"></i>
+    // ===========================
+    // Cartelas
+    // ===========================
 
-        </div>
+    quantidadeCartelas:10,
 
-        <h3>${titulo}</h3>
+    numerosPorCartela:100,
 
-        <p>${texto}</p>
 
-    `;
+    // ===========================
+    // Fotos
+    // ===========================
 
-}
-// Inicializa
+    fotos:[
 
-const app = initializeApp(firebaseConfig);
+        "img/premio1.jpg",
 
-const db = getDatabase(app);
+        "img/premio2.jpg",
 
-// Exporta para o script.js
+        "img/premio3.jpg"
 
-export {
+    ],
 
-    db,
 
-    ref,
+    // ===========================
+    // Cores
+    // ===========================
 
-    set,
+    corPrincipal:"#1976D2",
 
-    get,
+    corSecundaria:"#EC4899",
 
-    child,
+    corSucesso:"#22C55E",
 
-    update,
+    corReservado:"#FACC15",
 
-    remove,
+    corPago:"#EF4444",
 
-    onValue
+
+    // ===========================
+    // Texto do Rodapé
+    // ===========================
+
+    rodape:
+
+    "Obrigado por colaborar com esta ação beneficente."
 
 };
-
-// =====================================
-// Verificar Disponibilidade
-// =====================================
-
-function verificarNumero() {
-
-    let numero = numeroInput.value.trim();
-
-    if (numero === "") {
-
-        atualizarStatus(
-            "Atenção",
-            "Digite um número entre 000 e 999.",
-            "#f59e0b"
-        );
-
-        return;
-
-    }
-
-    numero = parseInt(numero);
-
-    if (isNaN(numero) || numero < 0 || numero > 999) {
-
-        atualizarStatus(
-            "Número inválido",
-            "Escolha um número entre 000 e 999.",
-            "#ef4444"
-        );
-
-        return;
-
-    }
-
-    numero = numero.toString().padStart(3, "0");
-
-    numeroInput.value = numero;
-
-    if (reservas[numero]) {
-
-        atualizarStatus(
-            "Número indisponível",
-            `O número ${numero} já foi reservado.`,
-            "#ef4444"
-        );
-
-    } else {
-
-        atualizarStatus(
-            "Número disponível",
-            `O número ${numero} está livre para reserva.`,
-            "#22c55e"
-        );
-
-    }
-
-}
-
-// =====================================
-// Número da Sorte
-// =====================================
-
-function gerarNumeroDaSorte() {
-
-    let numero;
-    let tentativas = 0;
-
-    do {
-
-        numero = Math.floor(Math.random() * 1000)
-            .toString()
-            .padStart(3, "0");
-
-        tentativas++;
-
-    } while (reservas[numero] && tentativas < 1000);
-
-    if (tentativas >= 1000) {
-
-        atualizarStatus(
-            "Rifa encerrada",
-            "Todos os números já foram reservados.",
-            "#ef4444"
-        );
-
-        return;
-
-    }
-
-    numeroInput.value = numero;
-
-    verificarNumero();
-
-}
-
-// =====================================
-// Eventos
-// =====================================
-
-btnConsultar.addEventListener("click", verificarNumero);
-
-btnSorte.addEventListener("click", gerarNumeroDaSorte);
-
-// =====================================
-// Reservar Número
-// =====================================
-
-async function reservarNumero() {
-
-    let numero = numeroInput.value.trim();
-
-    const nome = nomeInput.value.trim();
-    const telefone = telefoneInput.value.trim();
-    const cidade = cidadeInput.value.trim();
-
-    if (
-        numero === "" ||
-        nome === "" ||
-        telefone === "" ||
-        cidade === ""
-    ) {
-
-        atualizarStatus(
-            "Campos obrigatórios",
-            "Preencha todos os campos antes de continuar.",
-            "#f59e0b"
-        );
-
-        return;
-    }
-
-    numero = parseInt(numero);
-
-    if (isNaN(numero) || numero < 0 || numero > 999) {
-
-        atualizarStatus(
-            "Número inválido",
-            "Digite um número entre 000 e 999.",
-            "#ef4444"
-        );
-
-        return;
-    }
-
-    numero = numero.toString().padStart(3, "0");
-
-    // Verifica novamente no Firebase
-    if (reservas[numero]) {
-
-        atualizarStatus(
-            "Número indisponível",
-            "Esse número acabou de ser reservado por outra pessoa.",
-            "#ef4444"
-        );
-
-        return;
-    }
-
-    // Salva a reserva
-    await set(ref(db, "reservas/" + numero), {
-
-        numero: numero,
-        nome: nome,
-        telefone: telefone,
-        cidade: cidade,
-
-        status: "Aguardando Pagamento",
-
-        data: new Date().toLocaleString("pt-BR")
-
-    });
-
-    atualizarStatus(
-        "Reserva realizada!",
-        "Agora finalize o pagamento via Pix.",
-        "#22c55e"
-    );
-
-    const mensagem = `🎟️ *NOVA RESERVA DE RIFA*
-
-👤 Nome: ${nome}
-
-📱 WhatsApp: ${telefone}
-
-📍 Cidade: ${cidade}
-
-🎲 Número: ${numero}
-
-💰 Status: Aguardando Pagamento`;
-
-    window.open(
-        `https://wa.me/5579999145044?text=${encodeURIComponent(mensagem)}`,
-        "_blank"
-    );
-
-}
-
-// Evento
-
-btnReservar.addEventListener("click", reservarNumero);
