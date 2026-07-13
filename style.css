@@ -714,4 +714,24 @@ button{
 
 }
 
+   .numeroEscolhido{
+
+display:inline-block;
+
+padding:12px 18px;
+
+margin:6px;
+
+background:linear-gradient(135deg,#1976D2,#EC4899);
+
+color:white;
+
+border-radius:12px;
+
+font-weight:bold;
+
+font-size:20px;
+
+   }
+
    
