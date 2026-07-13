@@ -1,109 +1,27 @@
 /* ==========================================
-   CONFIGURAÇÃO DA RIFA
-   Rifa GilSigns
+   FIREBASE
 ========================================== */
 
-const CONFIG = {
+const firebaseConfig = {
 
-    // ===========================
-    // Dados da Rifa
-    // ===========================
+    apiKey: "AIzaSyDFFi2nbKHYkBDgThN6MlCy-jw5Se7eYfg",
 
-    titulo: "🎟️ Rifa Beneficente",
+    authDomain: "rifa-1bc12.firebaseapp.com",
 
-    beneficiada: "Dona Bene",
+    databaseURL: "https://rifa-1bc12-default-rtdb.firebaseio.com",
 
-    premio: "Geladeira Midea Frost Free",
+    projectId: "rifa-1bc12",
 
-    valorNumero: 20.00,
+    storageBucket: "rifa-1bc12.firebasestorage.app",
 
-    moeda: "R$",
+    messagingSenderId: "331108957670",
 
-    dataSorteio: "30/12/2026",
-
-    resultado:
-
-    "1ª Premiação da Loteria Federal",
-
-
-    // ===========================
-    // Contatos
-    // ===========================
-
-    whatsapp: "5579999145044",
-
-    instagram: "@gilart.signs",
-
-    email: "",
-
-
-    // ===========================
-    // PIX
-    // ===========================
-
-    pixTipo: "CPF",
-
-    pixChave: "58847235553",
-
-
-    // ===========================
-    // Numeração
-    // ===========================
-
-    quantidadeNumeros:1000,
-
-    numeroInicial:0,
-
-    numeroFinal:999,
-
-
-    // ===========================
-    // Cartelas
-    // ===========================
-
-    quantidadeCartelas:10,
-
-    numerosPorCartela:100,
-
-
-    // ===========================
-    // Fotos
-    // ===========================
-
-    fotos:[
-
-        "img/premio1.jpg",
-
-        "img/premio2.jpg",
-
-        "img/premio3.jpg"
-
-    ],
-
-
-    // ===========================
-    // Cores
-    // ===========================
-
-    corPrincipal:"#1976D2",
-
-    corSecundaria:"#EC4899",
-
-    corSucesso:"#22C55E",
-
-    corReservado:"#FACC15",
-
-    corPago:"#EF4444",
-
-
-    // ===========================
-    // Texto do Rodapé
-    // ===========================
-
-    rodape:
-
-    "Obrigado por colaborar com esta ação beneficente."
+    appId: "1:331108957670:web:1875f8481555beddbb6a27"
 
 };
 
-organizacao: "GilSigns"
+firebase.initializeApp(firebaseConfig);
+
+const db = firebase.database();
+
+const reservasRef = db.ref("reservas");
