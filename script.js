@@ -1,17 +1,8 @@
 // ==========================
 // GilSigns - Sistema de Rifa
-// Etapa 3
 // ==========================
 
-const quantidadeNumeros = 1000;
-
-const numerosContainer = document.getElementById("numeros");
-
-let numeroSelecionado = null;
-
-// Simulação local.
-// Depois será substituída pelo Firebase.
-// Simulação de números já reservados
+// Lista simulada de números já reservados
 const numerosReservados = [
     "001",
     "007",
@@ -24,17 +15,44 @@ const numerosReservados = [
     "999"
 ];
 
+// Elementos da página
 const numeroInput = document.getElementById("numero");
 const status = document.getElementById("status");
+const btnConsultar = document.getElementById("btnConsultar");
+const btnSorte = document.getElementById("btnSorte");
 
-document.getElementById("btnConsultar").addEventListener("click", verificarNumero);
+// ==========================
+// Atualiza o painel de status
+// ==========================
+function atualizarStatus(titulo, mensagem, cor) {
 
+    status.innerHTML = `
+        <div class="icone-status" style="background:${cor}">
+            <i class="fa-solid fa-circle-info"></i>
+        </div>
+
+        <div>
+            <h3>${titulo}</h3>
+            <p>${mensagem}</p>
+        </div>
+    `;
+}
+
+// ==========================
+// Verifica disponibilidade
+// ==========================
 function verificarNumero() {
 
     let numero = numeroInput.value.trim();
 
     if (numero === "") {
-        atualizarStatus("⚠️ Digite um número.", "#ff9800");
+
+        atualizarStatus(
+            "Digite um número",
+            "Informe um número entre 000 e 999.",
+            "#ff9800"
+        );
+
         return;
     }
 
@@ -45,14 +63,16 @@ function verificarNumero() {
     if (numerosReservados.includes(numero)) {
 
         atualizarStatus(
-            `❌ O número ${numero} já foi reservado.`,
+            "Número indisponível",
+            `O número ${numero} já foi reservado.`,
             "#e53935"
         );
 
     } else {
 
         atualizarStatus(
-            `✅ O número ${numero} está disponível!`,
+            "Número disponível",
+            `O número ${numero} está disponível para reserva.`,
             "#22c55e"
         );
 
@@ -60,39 +80,41 @@ function verificarNumero() {
 
 }
 
-function atualizarStatus(texto, cor) {
+// ==========================
+// Número da Sorte
+// ==========================
+function gerarNumeroDaSorte() {
 
-    status.innerHTML = `
-        <div class="icone-status" style="background:${cor}">
-            <i class="fa-solid fa-circle-info"></i>
-        </div>
-
-        <div>
-            <h3>${texto}</h3>
-        </div>
-    `;
-}
-document.getElementById("btnSorte").addEventListener("click", () => {
-
-    let numeroSorteado;
+    let numero;
     let tentativas = 0;
 
     do {
 
-        numeroSorteado = Math.floor(Math.random() * 1000)
+        numero = Math.floor(Math.random() * 1000)
             .toString()
             .padStart(3, "0");
 
         tentativas++;
 
     } while (
-        numerosReservados.includes(numeroSorteado) &&
+        numerosReservados.includes(numero) &&
         tentativas < 1000
     );
 
-    numeroInput.value = numeroSorteado;
+    numeroInput.value = numero;
 
     verificarNumero();
 
-});
+}
 
+// ==========================
+// Eventos
+// ==========================
+
+if (btnConsultar) {
+    btnConsultar.addEventListener("click", verificarNumero);
+}
+
+if (btnSorte) {
+    btnSorte.addEventListener("click", gerarNumeroDaSorte);
+}
