@@ -157,3 +157,95 @@ function reservarNumero() {
 
     window.open(url, "_blank");
 }
+
+// =====================================
+// Parte 4 - Funções Extras
+// =====================================
+
+// Botão Copiar Pix
+const btnCopiarPix = document.getElementById("btnCopiarPix");
+const chavePix = document.getElementById("chavePix");
+
+if (btnCopiarPix) {
+
+    btnCopiarPix.addEventListener("click", async () => {
+
+        try {
+
+            await navigator.clipboard.writeText(chavePix.value);
+
+            atualizarStatus(
+                "✅ Pix copiado",
+                "Agora faça o pagamento e envie o comprovante.",
+                "#22c55e"
+            );
+
+        } catch (e) {
+
+            alert("Não foi possível copiar a chave Pix.");
+
+        }
+
+    });
+
+}
+
+// Máscara do WhatsApp
+telefoneInput.addEventListener("input", () => {
+
+    let valor = telefoneInput.value.replace(/\D/g, "");
+
+    valor = valor.substring(0, 11);
+
+    if (valor.length > 10) {
+
+        valor = valor.replace(
+            /(\d{2})(\d{5})(\d{4})/,
+            "($1) $2-$3"
+        );
+
+    } else {
+
+        valor = valor.replace(
+            /(\d{2})(\d{4})(\d{4})/,
+            "($1) $2-$3"
+        );
+
+    }
+
+    telefoneInput.value = valor;
+
+});
+
+// Limpa formulário
+function limparFormulario() {
+
+    numeroInput.value = "";
+    nomeInput.value = "";
+    telefoneInput.value = "";
+    cidadeInput.value = "";
+
+}
+
+// Limpa automaticamente após reservar
+const reservarOriginal = reservarNumero;
+
+reservarNumero = async function () {
+
+    await reservarOriginal();
+
+    limparFormulario();
+
+};
+
+// Mensagem inicial
+
+atualizarStatus(
+
+    "Bem-vindo!",
+
+    "Escolha um número e participe da rifa.",
+
+    "#3b82f6"
+
+);
