@@ -4,3 +4,4 @@ img/
 ├── premio3.jpg
 ├── logo.png
 └── conceicao.png
+logo: "img/logo.png"
