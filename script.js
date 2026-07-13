@@ -162,7 +162,10 @@ let numero = document
 
 if(numero===""){
 
-alert("Digite um número.");
+mostrarMensagem(
+"Digite um número.",
+"aviso"
+);
 
 return;
 
@@ -178,7 +181,10 @@ return;
 
 }
 
-alert("✅ Número "+numero+" disponível!");
+mostrarMensagem(
+"✅ Número disponível!",
+"sucesso"
+);
 
 
   /* ==========================================
@@ -213,7 +219,10 @@ numero = numero.padStart(3,"0");
 
 if(numerosReservados.includes(numero)){
 
-alert("Número indisponível.");
+mostrarMensagem(
+"❌ Este número já foi reservado.",
+"erro"
+);
 
 return;
 
@@ -281,9 +290,10 @@ return;
 
 }
 
-alert(
-
-"Reserva criada com sucesso!\n\n"
+mostrarMensagem(
+"🎉 Reserva realizada com sucesso!",
+"sucesso"
+);
 
 +"Números: "
 
@@ -387,3 +397,27 @@ Obrigado!`;
     window.open(url,"_blank");
 
 }
+
+/* ==========================================
+   MENSAGENS
+========================================== */
+
+function mostrarMensagem(texto,tipo){
+
+    const msg =
+    document.getElementById("mensagemSistema");
+
+    msg.innerHTML = texto;
+
+    msg.className = "mensagem";
+
+    msg.classList.add(tipo);
+
+    setTimeout(()=>{
+
+        msg.className="mensagem oculto";
+
+    },4000);
+
+}
+
