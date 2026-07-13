@@ -1169,3 +1169,38 @@ footer{
     }
 
 }
+   .btn-cartelas{
+    position:fixed;
+    bottom:25px;
+    right:20px;
+
+    width:80px;
+    height:80px;
+
+    border-radius:50%;
+
+    background:linear-gradient(135deg,#1565C0,#EC4899);
+
+    color:#fff;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    text-decoration:none;
+
+    font-size:18px;
+    font-weight:bold;
+
+    box-shadow:0 10px 25px rgba(0,0,0,.35);
+
+    z-index:999;
+
+    transition:.3s;
+}
+
+.btn-cartelas:hover{
+
+    transform:scale(1.1);
+
+}
