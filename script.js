@@ -69,3 +69,64 @@ function iniciarCarrossel() {
 }
 
 iniciarCarrossel();
+
+/* ==========================================
+   COPIAR PIX
+========================================== */
+
+const btnPix = document.getElementById("copiarPix");
+
+if(btnPix){
+
+    btnPix.addEventListener("click",()=>{
+
+        navigator.clipboard.writeText(CONFIG.pixChave);
+
+        alert("✅ Chave PIX copiada.");
+
+    });
+
+}
+
+/* ==========================================
+   NÚMERO DA SORTE
+========================================== */
+
+const btnSorte = document.getElementById("btnSorte");
+
+if(btnSorte){
+
+    btnSorte.addEventListener("click",()=>{
+
+        const numero = Math.floor(Math.random()*1000);
+
+        document.getElementById("numeroEscolhido").value =
+        numero.toString().padStart(3,"0");
+
+    });
+
+   /* ==========================================
+   FORMATAÇÃO DO NÚMERO
+========================================== */
+
+const campoNumero = document.getElementById("numeroEscolhido");
+
+if(campoNumero){
+
+campoNumero.addEventListener("input",()=>{
+
+let valor = campoNumero.value.replace(/\D/g,"");
+
+if(valor>999){
+
+valor="999";
+
+}
+
+campoNumero.value = valor;
+
+});
+
+}
+
+
