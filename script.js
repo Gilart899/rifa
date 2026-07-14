@@ -7,13 +7,17 @@ let numerosSelecionados = [];
 
 /* Apenas para testes.
    Depois será substituído pelo Firebase. */
-let numerosReservados = [
-    "005",
-    "027",
-    "125",
-    "301",
-    "728"
-];
+/* ==========================================
+   SALVAR RESERVA
+========================================== */
+
+function salvarReserva(dados){
+
+    const novaReserva = reservasRef.push();
+
+    novaReserva.set(dados);
+
+}
 
 let slideAtual = 0;
 
@@ -87,3 +91,66 @@ function configurarEventos(){
     .addEventListener("click", enviarWhatsApp);
 
 }
+
+function reservar(){
+
+    const nome =
+    document.getElementById("nome").value.trim();
+
+    const telefone =
+    document.getElementById("telefone").value.trim();
+
+    const cidade =
+    document.getElementById("cidade").value.trim();
+
+    if(nome===""){
+
+        mostrarMensagem(
+        "Informe seu nome.",
+        "aviso"
+        );
+
+        return;
+
+    }
+
+    if(numerosSelecionados.length===0){
+
+        mostrarMensagem(
+        "Escolha pelo menos um número.",
+        "aviso"
+        );
+
+        return;
+
+    }
+
+    numerosSelecionados.forEach(numero=>{
+
+        salvarReserva({
+
+            numero:numero,
+
+            nome:nome,
+
+            telefone:telefone,
+
+            cidade:cidade,
+
+            status:"reservado",
+
+            data:new Date().toISOString()
+
+        });
+
+    });
+
+    mostrarMensagem(
+
+    "Reserva enviada com sucesso!",
+
+    "sucesso"
+
+    );
+
+       }
