@@ -25,3 +25,29 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
 const reservasRef = db.ref("reservas");
+
+/* ==========================================
+   LISTA DE NÚMEROS RESERVADOS
+========================================== */
+
+let numerosReservados = [];
+
+reservasRef.on("value", (snapshot) => {
+
+    numerosReservados = [];
+
+    snapshot.forEach((item) => {
+
+        const reserva = item.val();
+
+        if (reserva.numero) {
+            numerosReservados.push(
+                reserva.numero.toString().padStart(3, "0")
+            );
+        }
+
+    });
+
+    console.log("Números reservados:", numerosReservados);
+
+});
