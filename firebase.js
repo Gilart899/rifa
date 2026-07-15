@@ -29,70 +29,60 @@ const reservasRef = db.ref("reservas");
 let numerosReservados = [];
 
 /* ==========================================
-CARREGAR RESERVAS
+   CARREGAR RESERVAS
 ========================================== */
 
-reservasRef.on("value", (snapshot)=>{
+reservasRef.on("value", (snapshot) => {
 
-    numerosReservados=[];
+    numerosReservados = [];
 
-    snapshot.forEach((item)=>{
+    snapshot.forEach((item) => {
 
-        const dados=item.val();
+        const dados = item.val();
 
         numerosReservados.push(
-
-            dados.numero.toString().padStart(3,"0")
-
+            dados.numero.toString().padStart(3, "0")
         );
 
     });
 
-    function atualizarEstatisticas(){
+    atualizarEstatisticas();
+
+});
+
+/* ==========================================
+   ESTATÍSTICAS
+========================================== */
+
+function atualizarEstatisticas() {
 
     const reservados = numerosReservados.length;
 
     const disponiveis = 1000 - reservados;
 
-    const percentual = ((reservados/1000)*100).toFixed(1);
+    const percentual = ((reservados / 1000) * 100).toFixed(1);
 
-    document.getElementById("totalReservados").innerHTML = reservados;
+    const totalReservados = document.getElementById("totalReservados");
+    if (totalReservados) totalReservados.innerHTML = reservados;
 
-    document.getElementById("totalDisponiveis").innerHTML = disponiveis;
+    const totalDisponiveis = document.getElementById("totalDisponiveis");
+    if (totalDisponiveis) totalDisponiveis.innerHTML = disponiveis;
 
-    document.getElementById("percentual").innerHTML = percentual + "%";
+    const percentualHTML = document.getElementById("percentual");
+    if (percentualHTML) percentualHTML.innerHTML = percentual + "%";
 
-    document.getElementById("textoProgresso").innerHTML =
-    reservados + " de 1000 números reservados";
+    const texto = document.getElementById("textoProgresso");
+    if (texto)
+        texto.innerHTML = reservados + " de 1000 números reservados";
 
-    document.getElementById("barraProgresso").style.width =
-    percentual + "%";
+    const barra = document.getElementById("barraProgresso");
+    if (barra)
+        barra.style.width = percentual + "%";
 
 }
+
 /* ==========================================
-ESTATÍSTICAS
-========================================== */
-
-function atualizarEstatisticas(){
-
-    const vendidos=numerosReservados.length;
-
-    const disponiveis=
-
-    CONFIG.quantidadeNumeros-vendidos;
-
-    document.getElementById("totalVendidos").innerHTML=
-
-    vendidos;
-
-    document.getElementById("totalDisponiveis").innerHTML=
-
-    disponiveis;
-
-}
-
-               /* ==========================================
-CONFIRMAR PAGAMENTO
+   CONFIRMAR PAGAMENTO
 ========================================== */
 
 function confirmarPagamento(id){
@@ -105,8 +95,8 @@ function confirmarPagamento(id){
 
 }
 
-               /* ==========================================
-EXCLUIR RESERVA
+/* ==========================================
+   EXCLUIR RESERVA
 ========================================== */
 
 function excluirReserva(id){
