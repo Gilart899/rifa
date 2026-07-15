@@ -1288,25 +1288,46 @@ font-size:22px;
 }
 
 .logo img{
-    width:220px;
-    max-width:80%;
+/* ==========================
+LOGO
+========================== */
+
+.logo{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    margin-bottom:25px;
+}
+
+.logo img{
+
+    width:340px;
+    max-width:90%;
     height:auto;
+
     display:block;
-    filter:drop-shadow(0 10px 25px rgba(0,0,0,.35));
+
+    object-fit:contain;
+
     animation:flutuarLogo 4s ease-in-out infinite;
+
+    filter:
+        drop-shadow(0 10px 20px rgba(0,0,0,.35));
+
 }
 
 @keyframes flutuarLogo{
 
-    0%,100%{
-        transform:translateY(0);
+    0%{
+        transform:translateY(0px);
     }
 
     50%{
-        transform:translateY(-8px);
+        transform:translateY(-10px);
     }
 
-}
-}
+    100%{
+        transform:translateY(0px);
+    }
 
 }
