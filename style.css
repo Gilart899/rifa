@@ -1281,12 +1281,32 @@ font-size:22px;
 
 }
 
+.logo{
+    display:flex;
+    justify-content:center;
+    margin-bottom:20px;
+}
+
 .logo img{
+    width:220px;
+    max-width:80%;
+    height:auto;
+    display:block;
+    filter:drop-shadow(0 10px 25px rgba(0,0,0,.35));
+    animation:flutuarLogo 4s ease-in-out infinite;
+}
 
-width:110px;
+@keyframes flutuarLogo{
 
-height:110px;
+    0%,100%{
+        transform:translateY(0);
+    }
 
+    50%{
+        transform:translateY(-8px);
+    }
+
+}
 }
 
 }
