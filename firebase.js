@@ -48,30 +48,27 @@ reservasRef.on("value", (snapshot)=>{
 
     });
 
-    atualizarEstatisticas();
+    function atualizarEstatisticas(){
 
-});/* ==========================================
-SALVAR RESERVA
-========================================== */
+    const reservados = numerosReservados.length;
 
-function salvarReserva(dados){
+    const disponiveis = 1000 - reservados;
 
-    reservasRef.push().set(dados);
+    const percentual = ((reservados/1000)*100).toFixed(1);
 
-}
+    document.getElementById("totalReservados").innerHTML = reservados;
 
-/* ==========================================
-VERIFICAR NÚMERO
-========================================== */
+    document.getElementById("totalDisponiveis").innerHTML = disponiveis;
 
-function numeroDisponivel(numero){
+    document.getElementById("percentual").innerHTML = percentual + "%";
 
-    numero=numero.padStart(3,"0");
+    document.getElementById("textoProgresso").innerHTML =
+    reservados + " de 1000 números reservados";
 
-    return !numerosReservados.includes(numero);
+    document.getElementById("barraProgresso").style.width =
+    percentual + "%";
 
 }
-
 /* ==========================================
 ESTATÍSTICAS
 ========================================== */
