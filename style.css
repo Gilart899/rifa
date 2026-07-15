@@ -1134,3 +1134,159 @@ opacity:0;
 }
 
 }
+
+/* ==========================================
+   CABEÇALHO PREMIUM
+========================================== */
+
+.hero{
+
+    position:relative;
+
+    overflow:hidden;
+
+    text-align:center;
+
+    padding:70px 20px;
+
+    background:linear-gradient(135deg,#1D4ED8,#3B82F6,#60A5FA);
+
+    color:#fff;
+
+}
+
+.brilho{
+
+    position:absolute;
+
+    width:320px;
+
+    height:320px;
+
+    background:rgba(255,255,255,.18);
+
+    border-radius:50%;
+
+    top:40px;
+
+    left:50%;
+
+    transform:translateX(-50%);
+
+    filter:blur(60px);
+
+    animation:pulsar 4s infinite;
+
+}
+
+.logo{
+
+    position:relative;
+
+    z-index:2;
+
+}
+
+.logo img{
+
+    width:140px;
+
+    height:140px;
+
+    object-fit:contain;
+
+    display:block;
+
+    margin:auto;
+
+    animation:flutuarLogo 4s ease-in-out infinite;
+
+    filter:drop-shadow(0 8px 20px rgba(0,0,0,.30));
+
+}
+
+.hero h1{
+
+    position:relative;
+
+    z-index:2;
+
+    font-size:58px;
+
+    margin-top:20px;
+
+    font-weight:700;
+
+}
+
+.hero p{
+
+    position:relative;
+
+    z-index:2;
+
+    font-size:32px;
+
+    margin-top:15px;
+
+    color:#F3F4F6;
+
+}
+
+@keyframes flutuarLogo{
+
+0%,100%{
+
+transform:translateY(0);
+
+}
+
+50%{
+
+transform:translateY(-8px);
+
+}
+
+}
+
+@keyframes pulsar{
+
+0%,100%{
+
+transform:translateX(-50%) scale(1);
+
+}
+
+50%{
+
+transform:translateX(-50%) scale(1.15);
+
+}
+
+}
+
+/* CELULAR */
+
+@media(max-width:768px){
+
+.hero h1{
+
+font-size:42px;
+
+}
+
+.hero p{
+
+font-size:22px;
+
+}
+
+.logo img{
+
+width:110px;
+
+height:110px;
+
+}
+
+}
