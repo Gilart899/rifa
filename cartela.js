@@ -42,3 +42,72 @@ function abrirCartela(numeroCartela){
     gerarNumeros();
 
 }
+/* ==========================================
+   GERAR NÚMEROS DA CARTELA
+========================================== */
+
+function gerarNumeros(){
+
+    const grade = document.getElementById("gradeNumeros");
+
+    grade.innerHTML = "";
+
+    const inicio = cartelaAtual * 100;
+
+    const fim = inicio + 99;
+
+    for(let i=inicio; i<=fim; i++){
+
+        const numero = i.toString().padStart(3,"0");
+
+        const botao = document.createElement("button");
+
+        botao.innerHTML = numero;
+
+        /* Verifica se o número está reservado */
+
+        if(numerosReservados.includes(numero)){
+
+            botao.classList.add("numeroReservado");
+
+            botao.disabled = true;
+
+        }else{
+
+            botao.classList.add("numeroLivre");
+
+            botao.onclick = ()=>{
+
+                selecionarNumero(numero);
+
+            };
+
+        }
+
+        grade.appendChild(botao);
+
+    }
+
+}
+
+/* ==========================================
+   SELECIONAR NÚMERO
+========================================== */
+
+function selecionarNumero(numero){
+
+    localStorage.setItem("numeroSelecionado", numero);
+
+    window.location.href = "index.html";
+
+}/* ==========================================
+   INICIAR
+========================================== */
+
+document.addEventListener("DOMContentLoaded", ()=>{
+
+    criarMenuCartelas();
+
+    abrirCartela(0);
+
+});
