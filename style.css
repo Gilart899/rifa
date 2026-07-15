@@ -869,3 +869,71 @@ color:#555;
 }
 
 }
+
+/* ======================================
+GRADE DOS NÚMEROS
+====================================== */
+
+.gradeNumeros{
+
+display:grid;
+
+grid-template-columns:repeat(5,1fr);
+
+gap:12px;
+
+padding:20px;
+
+max-width:650px;
+
+margin:auto;
+
+}
+
+.gradeNumeros button{
+
+height:65px;
+
+font-size:22px;
+
+font-weight:bold;
+
+border:none;
+
+border-radius:15px;
+
+cursor:pointer;
+
+background:#22C55E;
+
+color:white;
+
+transition:.3s;
+
+}
+
+.gradeNumeros button:hover{
+
+transform:scale(1.05);
+
+}
+
+.numeroLivre{
+
+background:#22C55E;
+
+}
+
+.numeroReservado{
+
+background:#FACC15;
+
+color:#333;
+
+}
+
+.numeroPago{
+
+background:#EF4444;
+
+}
