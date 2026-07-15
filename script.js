@@ -3,8 +3,13 @@
    script.js
 ========================================== */
 
+// Lista de números
 let numerosSelecionados = [];
 let numerosReservados = [];
+
+/* ==========================================
+   INICIAR
+========================================== */
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -14,7 +19,27 @@ document.addEventListener("DOMContentLoaded", () => {
 
     iniciarEventos();
 
+    receberNumeroDaCartela();
+
 });
+
+/* ==========================================
+   RECEBER NÚMERO DAS CARTELAS
+========================================== */
+
+function receberNumeroDaCartela(){
+
+    const numero = localStorage.getItem("numeroSelecionado");
+
+    if(numero){
+
+        document.getElementById("numeroEscolhido").value = numero;
+
+        localStorage.removeItem("numeroSelecionado");
+
+    }
+
+}
 
 /* ==========================================
    CONFIGURAÇÕES
@@ -25,7 +50,9 @@ function carregarConfiguracoes(){
     document.title = CONFIG.titulo;
 
     document.getElementById("beneficiada").textContent = CONFIG.beneficiada;
+
     document.getElementById("premio").textContent = CONFIG.premio;
+
     document.getElementById("valor").textContent =
         CONFIG.moeda + " " + CONFIG.valorNumero.toFixed(2);
 
@@ -41,7 +68,7 @@ function carregarConfiguracoes(){
 }
 
 /* ==========================================
-   EVENTOS DOS BOTÕES
+   EVENTOS
 ========================================== */
 
 function iniciarEventos(){
@@ -67,37 +94,66 @@ function iniciarEventos(){
     document.getElementById("btnFecharModal")
         .addEventListener("click", fecharModal);
 
-}/* ==========================================
+}
+
+/* ==========================================
+   CARROSSEL
+========================================== */
+
+let slideAtual = 0;
+
+function iniciarCarrossel(){
+
+    const slides = document.querySelectorAll(".slide");
+
+    const indicadores = document.querySelectorAll(".indicador");
+
+    if(slides.length === 0) return;
+
+    setInterval(()=>{
+
+        slides[slideAtual].classList.remove("ativo");
+
+        indicadores[slideAtual].classList.remove("ativo");
+
+        slideAtual++;
+
+        if(slideAtual >= slides.length){
+
+            slideAtual = 0;
+
+        }
+
+        slides[slideAtual].classList.add("ativo");
+
+        indicadores[slideAtual].classList.add("ativo");
+
+    },4000);
+
+}
+
+/* ==========================================
    NÚMERO DA SORTE
 ========================================== */
 
 function numeroDaSorte(){
 
-    const numero = Math.floor(Math.random() * 1000);
+    const numero = Math.floor(Math.random()*1000);
 
     document.getElementById("numeroEscolhido").value =
         numero.toString().padStart(3,"0");
 
-}
-
-/* ==========================================
+}/* ==========================================
    VERIFICAR DISPONIBILIDADE
 ========================================== */
 
 function verificarNumero(){
 
-    let numero =
-        document.getElementById("numeroEscolhido")
-        .value.trim();
+    let numero = document.getElementById("numeroEscolhido").value.trim();
 
-    if(numero===""){
+    if(numero === ""){
 
-        abrirModal(
-            "Atenção",
-            "Digite um número primeiro.",
-            "⚠️"
-        );
-
+        abrirModal("Atenção","Digite um número primeiro.","⚠️");
         return;
 
     }
@@ -107,7 +163,7 @@ function verificarNumero(){
     if(numerosReservados.includes(numero)){
 
         abrirModal(
-            "Número Indisponível",
+            "Número indisponível",
             "O número "+numero+" já foi reservado.",
             "❌"
         );
@@ -117,7 +173,7 @@ function verificarNumero(){
     }
 
     abrirModal(
-        "Número Disponível",
+        "Número disponível",
         "O número "+numero+" está livre.",
         "✅"
     );
@@ -130,18 +186,11 @@ function verificarNumero(){
 
 function adicionarNumero(){
 
-    let numero =
-        document.getElementById("numeroEscolhido")
-        .value.trim();
+    let numero = document.getElementById("numeroEscolhido").value.trim();
 
     if(numero===""){
 
-        abrirModal(
-            "Atenção",
-            "Digite um número.",
-            "⚠️"
-        );
-
+        abrirModal("Atenção","Digite um número.","⚠️");
         return;
 
     }
@@ -151,7 +200,7 @@ function adicionarNumero(){
     if(numerosReservados.includes(numero)){
 
         abrirModal(
-            "Número Reservado",
+            "Número reservado",
             "Escolha outro número.",
             "❌"
         );
@@ -181,18 +230,16 @@ function adicionarNumero(){
 }
 
 /* ==========================================
-   CARTELA
+   ATUALIZAR CARTELA
 ========================================== */
 
 function atualizarCartela(){
 
-    const area =
-        document.getElementById("numerosSelecionados");
+    const area = document.getElementById("numerosSelecionados");
 
     if(numerosSelecionados.length===0){
 
-        area.innerHTML="<p>Nenhum número escolhido.</p>";
-
+        area.innerHTML="<p>Você ainda não escolheu nenhum número.</p>";
         return;
 
     }
@@ -206,7 +253,8 @@ function atualizarCartela(){
 
     });
 
-       }
+}
+
 /* ==========================================
    RESERVAR NÚMEROS
 ========================================== */
@@ -227,27 +275,59 @@ function reservarNumeros(){
 
     numerosSelecionados.forEach(numero=>{
 
-        if(!numerosReservados.includes(numero)){
+        reservasRef.push({
 
-            numerosReservados.push(numero);
+            numero: numero,
 
-        }
+            nome: document.getElementById("nome").value,
+
+            telefone: document.getElementById("telefone").value,
+
+            cidade: document.getElementById("cidade").value,
+
+            status:"reservado",
+
+            data: new Date().toISOString()
+
+        });
 
     });
 
+    numerosSelecionados=[];
+
     atualizarCartela();
 
-    atualizarProgresso();
-
     abrirModal(
-        "Reserva realizada!",
-        "Seus números foram reservados com sucesso.",
+        "Sucesso",
+        "Reserva realizada com sucesso!",
         "🎉"
     );
 
 }
 
 /* ==========================================
+   FIREBASE
+========================================== */
+
+reservasRef.on("value",(snapshot)=>{
+
+    numerosReservados=[];
+
+    snapshot.forEach(item=>{
+
+        const dados=item.val();
+
+        numerosReservados.push(
+
+            dados.numero.toString().padStart(3,"0")
+
+        );
+
+    });
+
+    atualizarProgresso();
+
+});/* ==========================================
    COPIAR PIX
 ========================================== */
 
@@ -256,8 +336,8 @@ function copiarPix(){
     navigator.clipboard.writeText(CONFIG.pixChave);
 
     abrirModal(
-        "PIX copiado",
-        "A chave PIX foi copiada para a área de transferência.",
+        "PIX Copiado",
+        "A chave PIX foi copiada com sucesso.",
         "💳"
     );
 
@@ -269,54 +349,26 @@ function copiarPix(){
 
 function enviarWhatsapp(){
 
-    const nome =
-        document.getElementById("nome").value.trim();
-
-    const telefone =
-        document.getElementById("telefone").value.trim();
-
-    const cidade =
-        document.getElementById("cidade").value.trim();
+    const nome = document.getElementById("nome").value.trim();
+    const telefone = document.getElementById("telefone").value.trim();
+    const cidade = document.getElementById("cidade").value.trim();
 
     if(nome===""){
 
-        abrirModal(
-            "Atenção",
-            "Informe seu nome.",
-            "⚠️"
-        );
-
+        abrirModal("Atenção","Informe seu nome.","⚠️");
         return;
 
     }
 
     if(telefone===""){
 
-        abrirModal(
-            "Atenção",
-            "Informe seu WhatsApp.",
-            "📱"
-        );
-
-        return;
-
-    }
-
-    if(numerosSelecionados.length===0){
-
-        abrirModal(
-            "Atenção",
-            "Escolha pelo menos um número.",
-            "🎟️"
-        );
-
+        abrirModal("Atenção","Informe seu WhatsApp.","📱");
         return;
 
     }
 
     let mensagem =
-
-`🎟️ Rifa Beneficente
+`🎟️ *${CONFIG.titulo}*
 
 👤 Nome: ${nome}
 
@@ -324,22 +376,18 @@ function enviarWhatsapp(){
 
 🏙️ Cidade: ${cidade}
 
-🎁 Prêmio:
-${CONFIG.premio}
-
 🎟️ Números:
 ${numerosSelecionados.join(", ")}
 
 💳 PIX:
 ${CONFIG.pixChave}
 
-Obrigado!`;
+Obrigado pela participação!`;
 
-    const link =
-
+    const url =
 `https://wa.me/55${CONFIG.whatsapp}?text=${encodeURIComponent(mensagem)}`;
 
-    window.open(link,"_blank");
+    window.open(url,"_blank");
 
 }
 
@@ -351,13 +399,33 @@ function atualizarProgresso(){
 
     const vendidos = numerosReservados.length;
 
-    const porcentagem = (vendidos / 1000) * 100;
+    const percentual =
+    (vendidos / CONFIG.quantidadeNumeros) * 100;
 
     document.getElementById("barraProgresso").style.width =
-        porcentagem + "%";
+    percentual + "%";
 
     document.getElementById("textoProgresso").innerHTML =
+    `${vendidos} de ${CONFIG.quantidadeNumeros} números reservados`;
 
-`${vendidos} números reservados (${porcentagem.toFixed(1)}%)`;
+}
+
+/* ==========================================
+   MODAL
+========================================== */
+
+function abrirModal(titulo,mensagem,icone){
+
+    document.getElementById("modalIcone").innerHTML = icone;
+    document.getElementById("modalTitulo").innerHTML = titulo;
+    document.getElementById("modalMensagem").innerHTML = mensagem;
+
+    document.getElementById("modal").classList.add("mostrar");
+
+}
+
+function fecharModal(){
+
+    document.getElementById("modal").classList.remove("mostrar");
 
 }
