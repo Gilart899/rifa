@@ -104,3 +104,13 @@ function confirmarPagamento(id){
     });
 
 }
+
+               /* ==========================================
+EXCLUIR RESERVA
+========================================== */
+
+function excluirReserva(id){
+
+    reservasRef.child(id).remove();
+
+}
