@@ -771,6 +771,14 @@ footer h3{
 }
 
 footer p{
+
+    margin:10px 0;
+
+    font-size:18px;
+
+    line-height:1.8;
+
+}
    /* ======================================
    GRADE DAS CARTELAS
 ====================================== */
@@ -1148,6 +1156,14 @@ footer{
     }
 
     #numeroEscolhido{
+
+    height:60px;
+
+    font-size:28px;
+
+}
+
+}
 
        
 /* ===========================
