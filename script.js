@@ -33,6 +33,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     configurarEventos();
 
+   const numeroSalvo = localStorage.getItem("numeroEscolhido");
+
+if(numeroSalvo){
+
+    document.getElementById("numeroEscolhido").value = numeroSalvo;
+
+    localStorage.removeItem("numeroEscolhido");
+
+}
 });/* ==========================================
    CARREGAR CONFIGURAÇÕES
 ========================================== */
