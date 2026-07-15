@@ -90,3 +90,17 @@ function atualizarEstatisticas(){
     disponiveis;
 
 }
+
+               /* ==========================================
+CONFIRMAR PAGAMENTO
+========================================== */
+
+function confirmarPagamento(id){
+
+    reservasRef.child(id).update({
+
+        status:"pago"
+
+    });
+
+}
