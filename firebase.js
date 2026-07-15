@@ -1,5 +1,5 @@
 /* ==========================================
-   FIREBASE
+   FIREBASE - RIFA GILSIGNS
 ========================================== */
 
 const firebaseConfig = {
@@ -26,28 +26,70 @@ const db = firebase.database();
 
 const reservasRef = db.ref("reservas");
 
-/* ==========================================
-   LISTA DE NÚMEROS RESERVADOS
-========================================== */
-
 let numerosReservados = [];
 
-reservasRef.on("value", (snapshot) => {
+/* ==========================================
+CARREGAR RESERVAS
+========================================== */
 
-    numerosReservados = [];
+reservasRef.on("value", (snapshot)=>{
 
-    snapshot.forEach((item) => {
+    numerosReservados=[];
 
-        const reserva = item.val();
+    snapshot.forEach((item)=>{
 
-        if (reserva.numero) {
-            numerosReservados.push(
-                reserva.numero.toString().padStart(3, "0")
-            );
-        }
+        const dados=item.val();
+
+        numerosReservados.push(
+
+            dados.numero.toString().padStart(3,"0")
+
+        );
 
     });
 
-    console.log("Números reservados:", numerosReservados);
+    atualizarEstatisticas();
 
-});
+});/* ==========================================
+SALVAR RESERVA
+========================================== */
+
+function salvarReserva(dados){
+
+    reservasRef.push().set(dados);
+
+}
+
+/* ==========================================
+VERIFICAR NÚMERO
+========================================== */
+
+function numeroDisponivel(numero){
+
+    numero=numero.padStart(3,"0");
+
+    return !numerosReservados.includes(numero);
+
+}
+
+/* ==========================================
+ESTATÍSTICAS
+========================================== */
+
+function atualizarEstatisticas(){
+
+    const vendidos=numerosReservados.length;
+
+    const disponiveis=
+
+    CONFIG.quantidadeNumeros-vendidos;
+
+    document.getElementById("totalVendidos").innerHTML=
+
+    vendidos;
+
+    document.getElementById("totalDisponiveis").innerHTML=
+
+    disponiveis;
+
+}
