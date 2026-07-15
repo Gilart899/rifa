@@ -163,3 +163,28 @@ function reservar(){
     );
 
        }
+/* ===========================
+MODAL
+=========================== */
+
+function abrirModal(titulo, texto, icone){
+
+    document.getElementById("tituloModal").innerHTML = titulo;
+
+    document.getElementById("textoModal").innerHTML = texto;
+
+    document.getElementById("iconeModal").innerHTML = icone;
+
+    document.getElementById("modal").classList.remove("oculto");
+
+}
+
+function fecharModal(){
+
+    document.getElementById("modal").classList.add("oculto");
+
+}
+
+document
+.getElementById("btnFecharModal")
+.addEventListener("click", fecharModal);
