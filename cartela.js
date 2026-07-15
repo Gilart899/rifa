@@ -1,98 +1,44 @@
 /* ==========================================
-   CARTELA GILSIGNS
+   CARTELAS DA RIFA GILSIGNS
 ========================================== */
 
-const parametros = new URLSearchParams(window.location.search);
+let cartelaAtual = 0;
 
-const inicio = parseInt(parametros.get("inicio")) || 0;
-const fim = inicio + 99;
+/* ==========================================
+CRIAR MENU DAS CARTELAS
+========================================== */
 
-document.getElementById("tituloCartela").innerHTML =
-`Cartela ${inicio.toString().padStart(3,"0")} • ${fim.toString().padStart(3,"0")}`;
+function criarMenuCartelas(){
 
-const grade = document.getElementById("gradeNumeros");
+    const menu = document.getElementById("menuCartelas");
 
-/* Cria os 100 botões */
+    for(let i=0;i<10;i++){
 
-for(let i=inicio;i<=fim;i++){
+        const botao = document.createElement("button");
 
-    const numero=i.toString().padStart(3,"0");
+        botao.innerHTML =
+        `${i*100} - ${(i*100)+99}`;
 
-    const botao=document.createElement("button");
+        botao.onclick = ()=>{
 
-    botao.id="num"+numero;
+            abrirCartela(i);
 
-    botao.innerHTML=numero;
+        };
 
-    botao.className="numeroLivre";
+        menu.appendChild(botao);
 
-    botao.onclick=()=>selecionarNumero(numero);
-
-    grade.appendChild(botao);
+    }
 
 }
 
-/* Atualiza em tempo real */
+/* ==========================================
+ABRIR CARTELA
+========================================== */
 
-reservasRef.on("value",(snapshot)=>{
+function abrirCartela(numeroCartela){
 
-    document.querySelectorAll(".gradeNumeros button")
-    .forEach(botao=>{
+    cartelaAtual = numeroCartela;
 
-        botao.className="numeroLivre";
-
-    });
-
-    snapshot.forEach(item=>{
-
-        const dados=item.val();
-
-        const numero=dados.numero.toString().padStart(3,"0");
-
-        const botao=document.getElementById("num"+numero);
-
-        if(!botao) return;
-
-        if(dados.status==="reservado"){
-
-            botao.className="numeroReservado";
-
-        }
-
-        if(dados.status==="pago"){
-
-            botao.className="numeroPago";
-
-        }
-
-    });
-
-});
-
-/* Escolher número */
-
-function selecionarNumero(numero){
-
-    const botao=document.getElementById("num"+numero);
-
-    if(botao.classList.contains("numeroPago")){
-
-        alert("Número já vendido.");
-
-        return;
-
-    }
-
-    if(botao.classList.contains("numeroReservado")){
-
-        alert("Número reservado.");
-
-        return;
-
-    }
-
-    localStorage.setItem("numeroEscolhido",numero);
-
-    window.location="index.html";
+    gerarNumeros();
 
 }
