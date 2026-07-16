@@ -393,7 +393,6 @@ Obrigado pela participação!`;
    BARRA DE PROGRESSO
 ========================================== */
 
-function atualizarProgresso(){
 
     const vendidos = numerosReservados.length;
 
