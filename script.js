@@ -414,15 +414,18 @@ function atualizarProgresso(){
    MODAL
 ========================================== */
 
-function abrirModal(titulo,mensagem,icone){
+function abrirModal(titulo, mensagem, icone){
 
-    document.getElementById("iconeModal")
-document.getElementById("tituloModal")
-document.getElementById("textoModal")
-document.getElementById("modal").classList.remove("oculto");
+    document.getElementById("iconeModal").innerHTML = icone;
+    document.getElementById("tituloModal").textContent = titulo;
+    document.getElementById("textoModal").textContent = mensagem;
+
+    document.getElementById("modal").classList.remove("oculto");
+
 }
 
 function fecharModal(){
 
-document.getElementById("modal").classList.add("oculto");
+    document.getElementById("modal").classList.add("oculto");
+
 }
