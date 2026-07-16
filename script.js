@@ -5,7 +5,6 @@
 
 // Lista de números
 let numerosSelecionados = [];
-let numerosReservados = [];
 
 /* ==========================================
    INICIAR
@@ -325,7 +324,6 @@ reservasRef.on("value",(snapshot)=>{
 
     });
 
-    atualizarProgresso();
 
 });/* ==========================================
    COPIAR PIX
