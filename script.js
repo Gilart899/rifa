@@ -53,14 +53,14 @@ function carregarConfiguracoes(){
 
     document.getElementById("premio").textContent = CONFIG.premio;
 
-    document.getElementById("valor").textContent =
-        CONFIG.moeda + " " + CONFIG.valorNumero.toFixed(2);
+    document.getElementById("valorNumero").textContent =
+CONFIG.moeda + " " + CONFIG.valorNumero.toFixed(2);
 
-    document.getElementById("data").textContent =
-        CONFIG.dataSorteio;
+document.getElementById("dataSorteio").textContent =
+CONFIG.dataSorteio;
 
-    document.getElementById("resultado").textContent =
-        CONFIG.resultado;
+document.getElementById("resultadoSorteio").textContent =
+CONFIG.resultado;
 
     document.getElementById("pix").textContent =
         CONFIG.pixChave;
