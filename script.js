@@ -258,6 +258,18 @@ function atualizarCartela(){
    RESERVAR NÚMEROS
 ========================================== */
 
+const nome = document.getElementById("nome").value.trim();
+const telefone = document.getElementById("telefone").value.trim();
+
+if (nome === "") {
+    abrirModal("Atenção", "Informe seu nome.", "⚠️");
+    return;
+}
+
+if (telefone === "") {
+    abrirModal("Atenção", "Informe seu WhatsApp.", "⚠️");
+    return;
+}
 function reservarNumeros(){
 
     if(numerosSelecionados.length===0){
@@ -304,25 +316,6 @@ function reservarNumeros(){
 
 }
 
-/* ==========================================
-   FIREBASE
-========================================== */
-
-reservasRef.on("value",(snapshot)=>{
-
-    numerosReservados=[];
-
-    snapshot.forEach(item=>{
-
-        const dados=item.val();
-
-        numerosReservados.push(
-
-            dados.numero.toString().padStart(3,"0")
-
-        );
-
-    });
 
 
 });/* ==========================================
@@ -389,24 +382,7 @@ Obrigado pela participação!`;
 
 }
 
-/* ==========================================
-   BARRA DE PROGRESSO
-========================================== */
 
-atualizarEstatisticas();
-
-    const vendidos = numerosReservados.length;
-
-    const percentual =
-    (vendidos / CONFIG.quantidadeNumeros) * 100;
-
-    document.getElementById("barraProgresso").style.width =
-    percentual + "%";
-
-    document.getElementById("textoProgresso").innerHTML =
-    `${vendidos} de ${CONFIG.quantidadeNumeros} números reservados`;
-
-}
 
 /* ==========================================
    MODAL
