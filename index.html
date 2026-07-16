@@ -25,69 +25,66 @@
 
 <body>
 
-    <!-- ÂNCORA TOPO -->
-    <div id="topo"></div>
+<div id="topo"></div>
 
-    <!-- CABEÇALHO -->
-    <header class="hero">
+<header class="hero">
 
-        <div class="brilho"></div>
+    <div class="brilho"></div>
 
-        <div class="logo">
-            <img src="img/logo.png" alt="Logo GilFest">
+    <div class="logo">
+        <img src="img/logo.png" alt="GilFest">
+    </div>
+
+    <h1>🎟️ Rifa Beneficente</h1>
+
+    <p>Em prol de Dona Bene</p>
+
+</header>
+
+<div class="efeitos">
+
+    <span>🍀</span>
+    <span>✨</span>
+    <span>💖</span>
+    <span>🎟️</span>
+    <span>🍀</span>
+    <span>⭐</span>
+    <span>🎁</span>
+    <span>💰</span>
+    <span>🍀</span>
+    <span>🎉</span>
+    <span>✨</span>
+    <span>🍀</span>
+
+</div>
+
+<!-- MODAL -->
+
+<div id="modal" class="modal oculto">
+
+    <div class="modal-box">
+
+        <div id="iconeModal" class="iconeModal">
+            ✅
         </div>
 
-        <h1>🎟️ Rifa Beneficente</h1>
+        <h2 id="tituloModal">
+            Mensagem
+        </h2>
 
-        <p>Em prol de Dona Bene</p>
+        <p id="textoModal">
+            Texto
+        </p>
 
-    </header>
-
-    <!-- EFEITOS -->
-    <div class="efeitos">
-
-        <span>🍀</span>
-        <span>✨</span>
-        <span>💖</span>
-        <span>🎟️</span>
-        <span>🍀</span>
-        <span>⭐</span>
-        <span>🎁</span>
-        <span>💰</span>
-        <span>🍀</span>
-        <span>🎉</span>
-        <span>✨</span>
-        <span>🍀</span>
+        <button id="btnFecharModal" type="button">
+            Fechar
+        </button>
 
     </div>
 
-    <!-- MODAL -->
+</div>
 
-    <div id="modal" class="modal oculto">
-
-        <div class="modal-box">
-
-            <div id="iconeModal" class="iconeModal">
-                ✅
-            </div>
-
-            <h2 id="tituloModal">
-                Mensagem
-            </h2>
-
-            <p id="textoModal">
-                Texto
-            </p>
-
-            <button id="btnFecharModal" type="button">
-                Fechar
-            </button>
-
-        </div>
-
-    </div>
-
-    <main>
+<main>
 
         <!-- CARD PRINCIPAL -->
 
@@ -185,145 +182,341 @@
         <section class="carrossel">
 
             <div class="slides">
+<!-- ===========================================
+CARD PRINCIPAL DA RIFA
+=========================================== -->
 
-                <img src="img/premio1.jpg" class="slide ativo" alt="Geladeira Midea Frost Free">
+<section class="card-rifa">
 
-                <img src="img/premio2.jpg" class="slide" alt="Geladeira Midea Frost Free">
+    <div class="card-info">
 
-                <img src="img/premio3.jpg" class="slide" alt="Geladeira Midea Frost Free">
+        <div class="linha-info">
+
+            <i class="fa-solid fa-user"></i>
+
+            <div>
+
+                <h3>Beneficiada</h3>
+
+                <p id="beneficiada">
+                    Benedita Laranjeiras dos Santos
+                </p>
 
             </div>
 
-            <div class="indicadores">
+        </div>
 
-                <span class="indicador ativo"></span>
-                <span class="indicador"></span>
-                <span class="indicador"></span>
+        <div class="linha-info">
+
+            <i class="fa-solid fa-gift"></i>
+
+            <div>
+
+                <h3>Prêmio</h3>
+
+                <p id="premio">
+                    Geladeira Midea Frost Free
+                </p>
 
             </div>
 
-        </section>
+        </div>
+
+        <div class="linha-info">
+
+            <i class="fa-solid fa-money-bill-wave"></i>
+
+            <div>
+
+                <h3>Valor por número</h3>
+
+                <p id="valorNumero">
+                    R$ 10,00
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="linha-info">
+
+            <i class="fa-solid fa-calendar-days"></i>
+
+            <div>
+
+                <h3>Data do Sorteio</h3>
+
+                <p id="dataSorteio">
+                    30/12/2026
+                </p>
+
+            </div>
+
+        </div>
+
+        <div class="linha-info">
+
+            <i class="fa-solid fa-trophy"></i>
+
+            <div>
+
+                <h3>Resultado</h3>
+
+                <p id="resultadoSorteio">
+                    1ª Premiação da Loteria Federal
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- ===========================================
+CARROSSEL DO PRÊMIO
+=========================================== -->
+
+<section class="carrossel">
+
+    <div class="slides">
+
+        <img src="img/premio1.jpg"
+             class="slide ativo"
+             alt="Prêmio 1">
+
+        <img src="img/premio2.jpg"
+             class="slide"
+             alt="Prêmio 2">
+
+        <img src="img/premio3.jpg"
+             class="slide"
+             alt="Prêmio 3">
+
+    </div>
+
+    <div class="indicadores">
+
+        <span class="indicador ativo"></span>
+        <span class="indicador"></span>
+        <span class="indicador"></span>
+
+    </div>
+
+</section>
 
         <!-- ===========================================
-        ESCOLHA DOS NÚMEROS
-        =========================================== -->
+ESCOLHA DOS NÚMEROS
+=========================================== -->
 
-        <section class="escolha">
+<section class="escolha">
 
-            <h2>Escolha seus números</h2>
+    <h2>Escolha seus números</h2>
 
-            <p>
-                Digite um número entre <strong>000</strong> e <strong>999</strong>.
-            </p>
+    <p>
+        Digite um número entre <strong>000</strong> e <strong>999</strong>
+    </p>
 
-            <input
-                type="text"
-                id="numeroEscolhido"
-                maxlength="3"
-                inputmode="numeric"
-                autocomplete="off"
-                placeholder="Ex.: 728">
+    <input
+        type="text"
+        id="numeroEscolhido"
+        maxlength="3"
+        inputmode="numeric"
+        autocomplete="off"
+        placeholder="Ex.: 728">
 
-            <button id="btnVerificar" type="button">
-                🔍 Verificar disponibilidade
-            </button>
+    <button id="btnVerificar" type="button">
+        🔍 Verificar disponibilidade
+    </button>
 
-            <button id="btnSorte" type="button">
-                🎲 Número da Sorte
-            </button>
+    <button id="btnSorte" type="button">
+        🎲 Número da Sorte
+    </button>
 
-            <button id="btnAdicionar" type="button">
-                ➕ Adicionar à Cartela
-            </button>
+    <button id="btnAdicionar" type="button">
+        ➕ Adicionar à Cartela
+    </button>
 
-            <div id="mensagemSistema" class="mensagem oculto"></div>
+    <div id="mensagemSistema" class="mensagem oculto"></div>
 
-        </section>
+</section>
 
-        <!-- ===========================================
-        NÚMEROS ESCOLHIDOS
-        =========================================== -->
+<!-- ===========================================
+NÚMEROS ESCOLHIDOS
+=========================================== -->
 
-        <section class="cartelaUsuario">
+<section class="cartelaUsuario">
 
-            <h2>Seus números</h2>
+    <h2>Seus números</h2>
 
-            <div id="numerosSelecionados">
+    <div id="numerosSelecionados">
 
-                <p>Você ainda não escolheu nenhum número.</p>
+        <p>Você ainda não escolheu nenhum número.</p>
 
-            </div>
+    </div>
 
-        </section>
+</section>
 
-        <!-- ===========================================
-        ANDAMENTO DA RIFA
-        =========================================== -->
+<!-- ===========================================
+ANDAMENTO DA RIFA
+=========================================== -->
 
-        <section class="progresso">
+<section class="progresso">
 
-            <h2>📊 Andamento da Rifa</h2>
+    <h2>📊 Andamento da Rifa</h2>
 
-            <div class="barra">
+    <div class="barra">
 
-                <div id="barraProgresso"></div>
+        <div id="barraProgresso"></div>
 
-            </div>
+    </div>
 
-            <p id="textoProgresso">
-                0 de
+    <p id="textoProgresso">
+
+        0 de 1000 números reservados
+
+    </p>
+
+    <div class="estatisticas">
+
+        <div class="cardEstatistica">
+
+            <h3 id="totalReservados">0</h3>
+
+            <span>Reservados</span>
+
+        </div>
+
+        <div class="cardEstatistica">
+
+            <h3 id="totalDisponiveis">1000</h3>
+
+            <span>Disponíveis</span>
+
+        </div>
+
+        <div class="cardEstatistica">
+
+            <h3 id="percentual">0%</h3>
+
+            <span>Vendido</span>
+
+        </div>
+
+    </div>
+
+</section>
                      <!-- ===========================================
-        BOTÕES
-        =========================================== -->
+DADOS DO PARTICIPANTE
+=========================================== -->
 
-        <section class="acoes">
+<section class="participante">
 
-            <button id="btnReservar" type="button">
-                ✅ Reservar Números
-            </button>
+    <h2>📝 Dados do Participante</h2>
 
-            <button id="btnWhatsapp" type="button">
-                💬 Enviar pelo WhatsApp
-            </button>
+    <input
+        type="text"
+        id="nome"
+        placeholder="Nome completo"
+        autocomplete="name"
+        required>
 
-        </section>
+    <input
+        type="tel"
+        id="telefone"
+        placeholder="WhatsApp"
+        autocomplete="tel"
+        inputmode="tel"
+        required>
 
-        <!-- ===========================================
-        AVISO
-        =========================================== -->
+    <input
+        type="text"
+        id="cidade"
+        placeholder="Cidade"
+        autocomplete="address-level2">
 
-        <section class="aviso">
+    <textarea
+        id="observacao"
+        rows="3"
+        placeholder="Observações (opcional)"></textarea>
 
-            <h2>ℹ️ Importante</h2>
+</section>
 
-            <p>
-                A reserva será válida somente após a confirmação do pagamento via PIX.
-            </p>
+<!-- ===========================================
+PAGAMENTO PIX
+=========================================== -->
 
-            <p>
-                Após realizar o pagamento, envie o comprovante para agilizar a confirmação.
-            </p>
+<section class="pagamento">
 
-        </section>
+    <h2>💳 Pagamento via PIX</h2>
 
-        <!-- ===========================================
-        REGULAMENTO
-        =========================================== -->
+    <div class="pixCard">
 
-        <section class="regulamento">
+        <p><strong>Chave PIX (CPF)</strong></p>
 
-            <h2>📜 Regulamento</h2>
+        <h3 id="pix">
+            588.472.355-53
+        </h3>
 
-            <details>
+        <button id="copiarPix" type="button">
+            📋 Copiar Chave PIX
+        </button>
 
-                <summary>Leia o regulamento completo</summary>
+    </div>
 
-                <p>• Esta é uma rifa beneficente em prol de <strong>Dona Bene</strong>.</p>
+</section>
 
-                <p>• Cada participante poderá adquirir quantos números desejar.</p>
+<!-- ===========================================
+COMPROVANTE
+=========================================== -->
 
-                <p>• O número somente será confirmado após o pagamento via PIX.</p>
+<section class="comprovante">
 
-                <p>• O sorteio será realizado pela 1ª Premiação da Loteria Federal.</p>
+    <h2>📎 Enviar Comprovante</h2>
 
+    <input
+        type="file"
+        id="arquivo"
+        accept="image/*,.pdf">
+
+    <p>
+        Aceitamos arquivos JPG, PNG e PDF.
+    </p>
+
+</section>
+
+<!-- ===========================================
+AÇÕES
+=========================================== -->
+
+<section class="acoes">
+
+    <button id="btnReservar" type="button">
+        ✅ Reservar Números
+    </button>
+
+    <button id="btnWhatsapp" type="button">
+        💬 Enviar pelo WhatsApp
+    </button>
+
+</section>
+
+<!-- ===========================================
+AVISO
+=========================================== -->
+
+<section class="aviso">
+
+    <h2>ℹ️ Importante</h2>
+
+    <p>
+        A reserva somente será confirmada após a identificação do pagamento via PIX.
+    </p>
+
+    <p>
+        Após realizar o pagamento, envie o comprovante para agilizar a confirmação da sua reserva.
+    </p>
+
+</section>
                
