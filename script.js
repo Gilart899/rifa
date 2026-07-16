@@ -258,53 +258,55 @@ function atualizarCartela(){
    RESERVAR NÚMEROS
 ========================================== */
 
-const nome = document.getElementById("nome").value.trim();
-const telefone = document.getElementById("telefone").value.trim();
-
-if (nome === "") {
-    abrirModal("Atenção", "Informe seu nome.", "⚠️");
-    return;
-}
-
-if (telefone === "") {
-    abrirModal("Atenção", "Informe seu WhatsApp.", "⚠️");
-    return;
-}
 function reservarNumeros(){
 
-    if(numerosSelecionados.length===0){
+    const nome = document.getElementById("nome").value.trim();
+    const telefone = document.getElementById("telefone").value.trim();
+    const cidade = document.getElementById("cidade").value.trim();
 
+    if(nome === ""){
+        abrirModal(
+            "Atenção",
+            "Informe seu nome.",
+            "⚠️"
+        );
+        return;
+    }
+
+    if(telefone === ""){
+        abrirModal(
+            "Atenção",
+            "Informe seu WhatsApp.",
+            "⚠️"
+        );
+        return;
+    }
+
+    if(numerosSelecionados.length === 0){
         abrirModal(
             "Atenção",
             "Escolha pelo menos um número.",
             "⚠️"
         );
-
         return;
-
     }
 
-    numerosSelecionados.forEach(numero=>{
+    numerosSelecionados.forEach(numero => {
 
         reservasRef.push({
 
             numero: numero,
-
-            nome: document.getElementById("nome").value,
-
-            telefone: document.getElementById("telefone").value,
-
-            cidade: document.getElementById("cidade").value,
-
-            status:"reservado",
-
+            nome: nome,
+            telefone: telefone,
+            cidade: cidade,
+            status: "reservado",
             data: new Date().toISOString()
 
         });
 
     });
 
-    numerosSelecionados=[];
+    numerosSelecionados = [];
 
     atualizarCartela();
 
@@ -315,7 +317,6 @@ function reservarNumeros(){
     );
 
 }
-
 
 
 });/* ==========================================
