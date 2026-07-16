@@ -416,16 +416,13 @@ function atualizarProgresso(){
 
 function abrirModal(titulo,mensagem,icone){
 
-    document.getElementById("modalIcone").innerHTML = icone;
-    document.getElementById("modalTitulo").innerHTML = titulo;
-    document.getElementById("modalMensagem").innerHTML = mensagem;
-
-    document.getElementById("modal").classList.add("mostrar");
-
+    document.getElementById("iconeModal")
+document.getElementById("tituloModal")
+document.getElementById("textoModal")
+document.getElementById("modal").classList.remove("oculto");
 }
 
 function fecharModal(){
 
-    document.getElementById("modal").classList.remove("mostrar");
-
+document.getElementById("modal").classList.add("oculto");
 }
