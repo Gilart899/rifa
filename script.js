@@ -311,15 +311,13 @@ function reservarNumeros(){
     atualizarCartela();
 
     abrirModal(
-        "Sucesso",
-        "Reserva realizada com sucesso!",
-        "🎉"
-    );
+    "Sucesso",
+    "Reserva realizada com sucesso!",
+    "🎉"
+);
 
 }
-
-
-});/* ==========================================
+/* ==========================================
    COPIAR PIX
 ========================================== */
 
