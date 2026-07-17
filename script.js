@@ -96,29 +96,27 @@ CONFIG.resultado;
 
 function iniciarEventos(){
 
-    document.getElementById("btnSorte")
-        .addEventListener("click", numeroDaSorte);
+    const ligar = (id, funcao) => {
 
-    document.getElementById("btnVerificar")
-        .addEventListener("click", verificarNumero);
+        const botao = document.getElementById(id);
 
-    document.getElementById("btnAdicionar")
-        .addEventListener("click", adicionarNumero);
+        if(botao){
+            botao.addEventListener("click", funcao);
+        }else{
+            console.log("Botão não encontrado:", id);
+        }
 
-    document.getElementById("btnReservar")
-        .addEventListener("click", reservarNumeros);
+    };
 
-    document.getElementById("btnWhatsapp")
-        .addEventListener("click", enviarWhatsapp);
-
-    document.getElementById("copiarPix")
-        .addEventListener("click", copiarPix);
-
-    document.getElementById("btnFecharModal")
-        .addEventListener("click", fecharModal);
+    ligar("btnSorte", numeroDaSorte);
+    ligar("btnVerificar", verificarNumero);
+    ligar("btnAdicionar", adicionarNumero);
+    ligar("btnReservar", reservarNumeros);
+    ligar("btnWhatsapp", enviarWhatsapp);
+    ligar("copiarPix", copiarPix);
+    ligar("btnFecharModal", fecharModal);
 
 }
-
 /* ==========================================
    CARROSSEL
 ========================================== */
