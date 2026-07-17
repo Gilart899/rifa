@@ -13,13 +13,36 @@ let numerosReservados = [];
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    carregarConfiguracoes();
+    try{
+        carregarConfiguracoes();
+        console.log("OK - carregarConfiguracoes");
+    }catch(e){
+        alert("Erro em carregarConfiguracoes:\n" + e.message);
+        return;
+    }
 
-    iniciarCarrossel();
+    try{
+        iniciarCarrossel();
+        console.log("OK - iniciarCarrossel");
+    }catch(e){
+        alert("Erro em iniciarCarrossel:\n" + e.message);
+        return;
+    }
 
-    iniciarEventos();
+    try{
+        iniciarEventos();
+        console.log("OK - iniciarEventos");
+    }catch(e){
+        alert("Erro em iniciarEventos:\n" + e.message);
+        return;
+    }
 
-    receberNumeroDaCartela();
+    try{
+        receberNumeroDaCartela();
+        console.log("OK - receberNumeroDaCartela");
+    }catch(e){
+        alert("Erro em receberNumeroDaCartela:\n" + e.message);
+    }
 
 });
 
