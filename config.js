@@ -30,7 +30,7 @@ const CONFIG = {
     // Contatos
     // ===========================
 
-    whatsapp: "5579999145044",
+    whatsapp: "79999145044",
 
     instagram: "@gilart.signs",
 
