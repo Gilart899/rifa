@@ -400,6 +400,12 @@ function abrirModal(titulo, mensagem, icone){
 
 function fecharModal(){
 
-    document.getElementById("modal").classList.add("oculto");
+    const modal = document.getElementById("modal");
+
+    if(modal){
+
+        modal.style.display = "none";
+
+    }
 
 }
