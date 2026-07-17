@@ -390,11 +390,13 @@ Obrigado pela participação!`;
 
 function abrirModal(titulo, mensagem, icone){
 
+    const modal = document.getElementById("modal");
+
     document.getElementById("iconeModal").innerHTML = icone;
     document.getElementById("tituloModal").textContent = titulo;
     document.getElementById("textoModal").textContent = mensagem;
 
-    document.getElementById("modal").classList.remove("oculto");
+    modal.style.display = "flex";
 
 }
 
