@@ -5,6 +5,7 @@
 
 // Lista de números
 let numerosSelecionados = [];
+let numerosReservados = [];
 
 /* ==========================================
    INICIAR
