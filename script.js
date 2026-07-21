@@ -3,9 +3,8 @@
    script.js
 ========================================== */
 
-// Lista de números
 let numerosSelecionados = [];
-let numerosReservados = [];
+let slideAtual = 0;
 
 /* ==========================================
    INICIAR
@@ -13,36 +12,10 @@ let numerosReservados = [];
 
 document.addEventListener("DOMContentLoaded", () => {
 
-    try{
-        carregarConfiguracoes();
-        console.log("OK - carregarConfiguracoes");
-    }catch(e){
-        alert("Erro em carregarConfiguracoes:\n" + e.message);
-        return;
-    }
-
-    try{
-        iniciarCarrossel();
-        console.log("OK - iniciarCarrossel");
-    }catch(e){
-        alert("Erro em iniciarCarrossel:\n" + e.message);
-        return;
-    }
-
-    try{
-        iniciarEventos();
-        console.log("OK - iniciarEventos");
-    }catch(e){
-        alert("Erro em iniciarEventos:\n" + e.message);
-        return;
-    }
-
-    try{
-        receberNumeroDaCartela();
-        console.log("OK - receberNumeroDaCartela");
-    }catch(e){
-        alert("Erro em receberNumeroDaCartela:\n" + e.message);
-    }
+    carregarConfiguracoes();
+    iniciarCarrossel();
+    iniciarEventos();
+    receberNumeroDaCartela();
 
 });
 
@@ -56,7 +29,13 @@ function receberNumeroDaCartela(){
 
     if(numero){
 
-        document.getElementById("numeroEscolhido").value = numero;
+        const campo = document.getElementById("numeroEscolhido");
+
+        if(campo){
+
+            campo.value = numero;
+
+        }
 
         localStorage.removeItem("numeroSelecionado");
 
@@ -72,20 +51,28 @@ function carregarConfiguracoes(){
 
     document.title = CONFIG.titulo;
 
-    document.getElementById("beneficiada").textContent = CONFIG.beneficiada;
+    if(document.getElementById("beneficiada"))
+        document.getElementById("beneficiada").textContent =
+        CONFIG.beneficiada;
 
-    document.getElementById("premio").textContent = CONFIG.premio;
+    if(document.getElementById("premio"))
+        document.getElementById("premio").textContent =
+        CONFIG.premio;
 
-    document.getElementById("valorNumero").textContent =
-CONFIG.moeda + " " + CONFIG.valorNumero.toFixed(2);
+    if(document.getElementById("valorNumero"))
+        document.getElementById("valorNumero").textContent =
+        CONFIG.moeda + " " + CONFIG.valorNumero.toFixed(2);
 
-document.getElementById("dataSorteio").textContent =
-CONFIG.dataSorteio;
+    if(document.getElementById("dataSorteio"))
+        document.getElementById("dataSorteio").textContent =
+        CONFIG.dataSorteio;
 
-document.getElementById("resultadoSorteio").textContent =
-CONFIG.resultado;
+    if(document.getElementById("resultadoSorteio"))
+        document.getElementById("resultadoSorteio").textContent =
+        CONFIG.resultado;
 
-    document.getElementById("pix").textContent =
+    if(document.getElementById("pix"))
+        document.getElementById("pix").textContent =
         CONFIG.pixChave;
 
 }
@@ -96,38 +83,48 @@ CONFIG.resultado;
 
 function iniciarEventos(){
 
-    const ligar = (id, funcao) => {
+    adicionarEvento("btnSorte", numeroDaSorte);
 
-        const botao = document.getElementById(id);
+    adicionarEvento("btnVerificar", verificarNumero);
 
-        if(botao){
-            botao.addEventListener("click", funcao);
-        }else{
-            console.log("Botão não encontrado:", id);
-        }
+    adicionarEvento("btnAdicionar", adicionarNumero);
 
-    };
+    adicionarEvento("btnReservar", reservarNumeros);
 
-    ligar("btnSorte", numeroDaSorte);
-    ligar("btnVerificar", verificarNumero);
-    ligar("btnAdicionar", adicionarNumero);
-    ligar("btnReservar", reservarNumeros);
-    ligar("btnWhatsapp", enviarWhatsapp);
-    ligar("copiarPix", copiarPix);
-    ligar("btnFecharModal", fecharModal);
+    adicionarEvento("btnWhatsapp", enviarWhatsapp);
+
+    adicionarEvento("copiarPix", copiarPix);
+
+    adicionarEvento("btnFecharModal", fecharModal);
 
 }
+
+/* ==========================================
+   ADICIONAR EVENTO
+========================================== */
+
+function adicionarEvento(id, funcao){
+
+    const elemento = document.getElementById(id);
+
+    if(elemento){
+
+        elemento.addEventListener("click", funcao);
+
+    }
+
+}
+
 /* ==========================================
    CARROSSEL
 ========================================== */
-
-let slideAtual = 0;
 
 function iniciarCarrossel(){
 
     const slides = document.querySelectorAll(".slide");
 
-    const indicadores = document.querySelectorAll(".indicador");
+    const indicadores =
+    document.querySelectorAll(".indicador");
 
     if(slides.length === 0) return;
 
@@ -135,7 +132,11 @@ function iniciarCarrossel(){
 
         slides[slideAtual].classList.remove("ativo");
 
-        indicadores[slideAtual].classList.remove("ativo");
+        if(indicadores.length){
+
+            indicadores[slideAtual].classList.remove("ativo");
+
+        }
 
         slideAtual++;
 
@@ -147,7 +148,11 @@ function iniciarCarrossel(){
 
         slides[slideAtual].classList.add("ativo");
 
-        indicadores[slideAtual].classList.add("ativo");
+        if(indicadores.length){
+
+            indicadores[slideAtual].classList.add("ativo");
+
+        }
 
     },4000);
 
@@ -159,276 +164,10 @@ function iniciarCarrossel(){
 
 function numeroDaSorte(){
 
-    const numero = Math.floor(Math.random()*1000);
+    const numero =
+    Math.floor(Math.random()*1000);
 
     document.getElementById("numeroEscolhido").value =
-        numero.toString().padStart(3,"0");
-
-}/* ==========================================
-   VERIFICAR DISPONIBILIDADE
-========================================== */
-
-function verificarNumero(){
-
-    let numero = document.getElementById("numeroEscolhido").value.trim();
-
-    if(numero === ""){
-
-        abrirModal("Atenção","Digite um número primeiro.","⚠️");
-        return;
-
-    }
-
-    numero = numero.padStart(3,"0");
-
-    if(numerosReservados.includes(numero)){
-
-        abrirModal(
-            "Número indisponível",
-            "O número "+numero+" já foi reservado.",
-            "❌"
-        );
-
-        return;
-
-    }
-
-    abrirModal(
-        "Número disponível",
-        "O número "+numero+" está livre.",
-        "✅"
-    );
-
-}
-
-/* ==========================================
-   ADICIONAR À CARTELA
-========================================== */
-
-function adicionarNumero(){
-
-    let numero = document.getElementById("numeroEscolhido").value.trim();
-
-    if(numero===""){
-
-        abrirModal("Atenção","Digite um número.","⚠️");
-        return;
-
-    }
-
-    numero = numero.padStart(3,"0");
-
-    if(numerosReservados.includes(numero)){
-
-        abrirModal(
-            "Número reservado",
-            "Escolha outro número.",
-            "❌"
-        );
-
-        return;
-
-    }
-
-    if(numerosSelecionados.includes(numero)){
-
-        abrirModal(
-            "Aviso",
-            "Esse número já está na sua cartela.",
-            "ℹ️"
-        );
-
-        return;
-
-    }
-
-    numerosSelecionados.push(numero);
-
-    atualizarCartela();
-
-    document.getElementById("numeroEscolhido").value="";
-
-}
-
-/* ==========================================
-   ATUALIZAR CARTELA
-========================================== */
-
-function atualizarCartela(){
-
-    const area = document.getElementById("numerosSelecionados");
-
-    if(numerosSelecionados.length===0){
-
-        area.innerHTML="<p>Você ainda não escolheu nenhum número.</p>";
-        return;
-
-    }
-
-    area.innerHTML="";
-
-    numerosSelecionados.forEach(numero=>{
-
-        area.innerHTML +=
-        `<div class="numeroEscolhido">${numero}</div>`;
-
-    });
-
-}
-
-/* ==========================================
-   RESERVAR NÚMEROS
-========================================== */
-
-function reservarNumeros(){
-
-    const nome = document.getElementById("nome").value.trim();
-    const telefone = document.getElementById("telefone").value.trim();
-    const cidade = document.getElementById("cidade").value.trim();
-
-    if(nome === ""){
-        abrirModal(
-            "Atenção",
-            "Informe seu nome.",
-            "⚠️"
-        );
-        return;
-    }
-
-    if(telefone === ""){
-        abrirModal(
-            "Atenção",
-            "Informe seu WhatsApp.",
-            "⚠️"
-        );
-        return;
-    }
-
-    if(numerosSelecionados.length === 0){
-        abrirModal(
-            "Atenção",
-            "Escolha pelo menos um número.",
-            "⚠️"
-        );
-        return;
-    }
-
-    numerosSelecionados.forEach(numero => {
-
-        reservasRef.push({
-
-            numero: numero,
-            nome: nome,
-            telefone: telefone,
-            cidade: cidade,
-            status: "reservado",
-            data: new Date().toISOString()
-
-        });
-
-    });
-
-    numerosSelecionados = [];
-
-    atualizarCartela();
-
-    abrirModal(
-    "Sucesso",
-    "Reserva realizada com sucesso!",
-    "🎉"
-);
-
-}
-/* ==========================================
-   COPIAR PIX
-========================================== */
-
-function copiarPix(){
-
-    navigator.clipboard.writeText(CONFIG.pixChave);
-
-    abrirModal(
-        "PIX Copiado",
-        "A chave PIX foi copiada com sucesso.",
-        "💳"
-    );
-
-}
-
-/* ==========================================
-   ENVIAR WHATSAPP
-========================================== */
-
-function enviarWhatsapp(){
-
-    const nome = document.getElementById("nome").value.trim();
-    const telefone = document.getElementById("telefone").value.trim();
-    const cidade = document.getElementById("cidade").value.trim();
-
-    if(nome===""){
-
-        abrirModal("Atenção","Informe seu nome.","⚠️");
-        return;
-
-    }
-
-    if(telefone===""){
-
-        abrirModal("Atenção","Informe seu WhatsApp.","📱");
-        return;
-
-    }
-
-    let mensagem =
-`🎟️ *${CONFIG.titulo}*
-
-👤 Nome: ${nome}
-
-📱 WhatsApp: ${telefone}
-
-🏙️ Cidade: ${cidade}
-
-🎟️ Números:
-${numerosSelecionados.join(", ")}
-
-💳 PIX:
-${CONFIG.pixChave}
-
-Obrigado pela participação!`;
-
-    const url =
-`https://wa.me/55${CONFIG.whatsapp}?text=${encodeURIComponent(mensagem)}`;
-
-    window.open(url,"_blank");
-
-}
-
-
-
-/* ==========================================
-   MODAL
-========================================== */
-
-function abrirModal(titulo, mensagem, icone){
-
-    const modal = document.getElementById("modal");
-
-    document.getElementById("iconeModal").innerHTML = icone;
-    document.getElementById("tituloModal").textContent = titulo;
-    document.getElementById("textoModal").textContent = mensagem;
-
-    modal.style.display = "flex";
-
-}
-
-function fecharModal(){
-
-    const modal = document.getElementById("modal");
-
-    if(modal){
-
-        modal.style.display = "none";
-
-    }
+    numero.toString().padStart(3,"0");
 
 }
