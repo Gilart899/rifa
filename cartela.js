@@ -12,7 +12,7 @@ function criarMenuCartelas(){
 
     const menu = document.getElementById("menuCartelas");
 
-    for(let i=0;i<10;i++){
+   for (let i = 0; i < CONFIG.quantidadeCartelas; i++)
 
         const botao = document.createElement("button");
 
@@ -52,9 +52,8 @@ function gerarNumeros(){
 
     grade.innerHTML = "";
 
-    const inicio = cartelaAtual * 100;
-
-    const fim = inicio + 99;
+   const inicio = cartelaAtual * CONFIG.numerosPorCartela;
+const fim = inicio + CONFIG.numerosPorCartela - 1;
 
     for(let i=inicio; i<=fim; i++){
 
