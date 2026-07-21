@@ -4,11 +4,6 @@
 ========================================== */
 
 let numerosSelecionados = [];
-let slideAtual = 0;
-
-/* ==========================================
-   INICIAR
-========================================== */
 
 document.addEventListener("DOMContentLoaded", () => {
 
@@ -32,9 +27,7 @@ function receberNumeroDaCartela(){
         const campo = document.getElementById("numeroEscolhido");
 
         if(campo){
-
             campo.value = numero;
-
         }
 
         localStorage.removeItem("numeroSelecionado");
@@ -51,29 +44,24 @@ function carregarConfiguracoes(){
 
     document.title = CONFIG.titulo;
 
-    if(document.getElementById("beneficiada"))
-        document.getElementById("beneficiada").textContent =
-        CONFIG.beneficiada;
+    const beneficiada = document.getElementById("beneficiada");
+    if(beneficiada) beneficiada.textContent = CONFIG.beneficiada;
 
-    if(document.getElementById("premio"))
-        document.getElementById("premio").textContent =
-        CONFIG.premio;
+    const premio = document.getElementById("premio");
+    if(premio) premio.textContent = CONFIG.premio;
 
-    if(document.getElementById("valorNumero"))
-        document.getElementById("valorNumero").textContent =
+    const valor = document.getElementById("valor");
+    if(valor) valor.textContent =
         CONFIG.moeda + " " + CONFIG.valorNumero.toFixed(2);
 
-    if(document.getElementById("dataSorteio"))
-        document.getElementById("dataSorteio").textContent =
-        CONFIG.dataSorteio;
+    const data = document.getElementById("data");
+    if(data) data.textContent = CONFIG.dataSorteio;
 
-    if(document.getElementById("resultadoSorteio"))
-        document.getElementById("resultadoSorteio").textContent =
-        CONFIG.resultado;
+    const resultado = document.getElementById("resultado");
+    if(resultado) resultado.textContent = CONFIG.resultado;
 
-    if(document.getElementById("pix"))
-        document.getElementById("pix").textContent =
-        CONFIG.pixChave;
+    const pix = document.getElementById("pix");
+    if(pix) pix.textContent = CONFIG.pixChave;
 
 }
 
@@ -83,27 +71,17 @@ function carregarConfiguracoes(){
 
 function iniciarEventos(){
 
-    adicionarEvento("btnSorte", numeroDaSorte);
-
-    adicionarEvento("btnVerificar", verificarNumero);
-
-    adicionarEvento("btnAdicionar", adicionarNumero);
-
-    adicionarEvento("btnReservar", reservarNumeros);
-
-    adicionarEvento("btnWhatsapp", enviarWhatsapp);
-
-    adicionarEvento("copiarPix", copiarPix);
-
-    adicionarEvento("btnFecharModal", fecharModal);
+    ligar("btnSorte", numeroDaSorte);
+    ligar("btnVerificar", verificarNumero);
+    ligar("btnAdicionar", adicionarNumero);
+    ligar("btnReservar", reservarNumeros);
+    ligar("btnWhatsapp", enviarWhatsapp);
+    ligar("copiarPix", copiarPix);
+    ligar("btnFecharModal", fecharModal);
 
 }
 
-/* ==========================================
-   ADICIONAR EVENTO
-========================================== */
-
-function adicionarEvento(id, funcao){
+function ligar(id, funcao){
 
     const elemento = document.getElementById(id);
 
@@ -119,12 +97,12 @@ function adicionarEvento(id, funcao){
    CARROSSEL
 ========================================== */
 
+let slideAtual = 0;
+
 function iniciarCarrossel(){
 
     const slides = document.querySelectorAll(".slide");
-
-    const indicadores =
-    document.querySelectorAll(".indicador");
+    const indicadores = document.querySelectorAll(".indicador");
 
     if(slides.length === 0) return;
 
@@ -133,9 +111,7 @@ function iniciarCarrossel(){
         slides[slideAtual].classList.remove("ativo");
 
         if(indicadores.length){
-
             indicadores[slideAtual].classList.remove("ativo");
-
         }
 
         slideAtual++;
@@ -149,9 +125,7 @@ function iniciarCarrossel(){
         slides[slideAtual].classList.add("ativo");
 
         if(indicadores.length){
-
             indicadores[slideAtual].classList.add("ativo");
-
         }
 
     },4000);
@@ -164,30 +138,32 @@ function iniciarCarrossel(){
 
 function numeroDaSorte(){
 
-    const numero =
-    Math.floor(Math.random()*1000);
+    const numero = Math.floor(Math.random()*1000);
 
     document.getElementById("numeroEscolhido").value =
-    numero.toString().padStart(3,"0");
+        numero.toString().padStart(3,"0");
 
 }
+
 /* ==========================================
    VERIFICAR DISPONIBILIDADE
 ========================================== */
 
 function verificarNumero(){
 
-    let numero = document.getElementById("numeroEscolhido").value.trim();
+    let numero =
+        document.getElementById("numeroEscolhido").value.trim();
 
-    if(numero === ""){
+    if(numero===""){
 
         abrirModal(
             "Atenção",
-            "Digite um número primeiro.",
+            "Digite um número.",
             "⚠️"
         );
 
         return;
+
     }
 
     numero = numero.padStart(3,"0");
@@ -196,21 +172,21 @@ function verificarNumero(){
 
         abrirModal(
             "Número indisponível",
-            "O número " + numero + " já foi reservado.",
+            "Esse número já foi reservado.",
             "❌"
         );
 
         return;
+
     }
 
     abrirModal(
         "Número disponível",
-        "O número " + numero + " está livre.",
+        "Esse número está livre.",
         "✅"
     );
 
 }
-
 /* ==========================================
    ADICIONAR À CARTELA
 ========================================== */
@@ -228,6 +204,7 @@ function adicionarNumero(){
         );
 
         return;
+
     }
 
     numero = numero.padStart(3,"0");
@@ -241,17 +218,19 @@ function adicionarNumero(){
         );
 
         return;
+
     }
 
     if(numerosSelecionados.includes(numero)){
 
         abrirModal(
             "Aviso",
-            "Esse número já está na sua cartela.",
+            "Esse número já foi adicionado.",
             "ℹ️"
         );
 
         return;
+
     }
 
     numerosSelecionados.push(numero);
@@ -298,14 +277,9 @@ function atualizarCartela(){
 
 function reservarNumeros(){
 
-    const nome =
-    document.getElementById("nome").value.trim();
-
-    const telefone =
-    document.getElementById("telefone").value.trim();
-
-    const cidade =
-    document.getElementById("cidade").value.trim();
+    const nome = document.getElementById("nome").value.trim();
+    const telefone = document.getElementById("telefone").value.trim();
+    const cidade = document.getElementById("cidade").value.trim();
 
     if(nome === ""){
 
@@ -369,6 +343,40 @@ function reservarNumeros(){
     );
 
 }
+
+/* ==========================================
+   PROGRESSO
+========================================== */
+
+function atualizarProgresso(){
+
+    const reservados = numerosReservados.length;
+
+    const percentual =
+    ((reservados / CONFIG.quantidadeNumeros) * 100).toFixed(1);
+
+    const barra = document.getElementById("barraProgresso");
+
+    if(barra){
+
+        barra.style.width = percentual + "%";
+
+    }
+
+    const texto = document.getElementById("textoProgresso");
+
+    if(texto){
+
+        texto.innerHTML =
+        reservados +
+        " de " +
+        CONFIG.quantidadeNumeros +
+        " números reservados";
+
+    }
+
+}
+
 /* ==========================================
    COPIAR PIX
 ========================================== */
@@ -378,50 +386,34 @@ function copiarPix(){
     navigator.clipboard.writeText(CONFIG.pixChave);
 
     abrirModal(
+
         "PIX copiado",
-        "A chave PIX foi copiada com sucesso.",
+
+        "A chave PIX foi copiada para a área de transferência.",
+
         "💳"
+
     );
 
-}
-
+    }
 /* ==========================================
    ENVIAR WHATSAPP
 ========================================== */
 
 function enviarWhatsapp(){
 
-    const nome =
-    document.getElementById("nome").value.trim();
-
-    const telefone =
-    document.getElementById("telefone").value.trim();
-
-    const cidade =
-    document.getElementById("cidade").value.trim();
+    const nome = document.getElementById("nome").value.trim();
+    const telefone = document.getElementById("telefone").value.trim();
+    const cidade = document.getElementById("cidade").value.trim();
 
     if(nome === ""){
-
-        abrirModal(
-            "Atenção",
-            "Informe seu nome.",
-            "⚠️"
-        );
-
+        abrirModal("Atenção","Informe seu nome.","⚠️");
         return;
-
     }
 
     if(telefone === ""){
-
-        abrirModal(
-            "Atenção",
-            "Informe seu WhatsApp.",
-            "📱"
-        );
-
+        abrirModal("Atenção","Informe seu WhatsApp.","📱");
         return;
-
     }
 
     let mensagem =
@@ -436,56 +428,18 @@ function enviarWhatsapp(){
 🎟️ Números:
 ${numerosSelecionados.join(", ")}
 
-💰 Valor:
-${CONFIG.moeda} ${(numerosSelecionados.length * CONFIG.valorNumero).toFixed(2)}
+💰 Valor por número:
+${CONFIG.moeda} ${CONFIG.valorNumero.toFixed(2)}
 
 💳 PIX:
 ${CONFIG.pixChave}
 
 Obrigado pela participação!`;
 
-    const link =
+    const url =
 `https://wa.me/55${CONFIG.whatsapp}?text=${encodeURIComponent(mensagem)}`;
 
-    window.open(link,"_blank");
-
-}
-
-/* ==========================================
-   PROGRESSO DA RIFA
-========================================== */
-
-function atualizarProgresso(){
-
-    const vendidos = numerosReservados.length;
-
-    const percentual =
-    (vendidos / CONFIG.quantidadeNumeros) * 100;
-
-    const barra =
-    document.getElementById("barraProgresso");
-
-    if(barra){
-
-        barra.style.width =
-        percentual + "%";
-
-    }
-
-    const texto =
-    document.getElementById("textoProgresso");
-
-    if(texto){
-
-        texto.innerHTML =
-        vendidos +
-        " de " +
-        CONFIG.quantidadeNumeros +
-        " números reservados (" +
-        percentual.toFixed(1) +
-        "%)";
-
-    }
+    window.open(url,"_blank");
 
 }
 
@@ -493,27 +447,18 @@ function atualizarProgresso(){
    MODAL
 ========================================== */
 
-function abrirModal(titulo,mensagem,icone){
+function abrirModal(titulo, mensagem, icone){
 
-    const modal =
-    document.getElementById("modal");
+    const modal = document.getElementById("modal");
 
     if(!modal){
-
         alert(titulo + "\n\n" + mensagem);
-
         return;
-
     }
 
-    document.getElementById("iconeModal").textContent =
-    icone;
-
-    document.getElementById("tituloModal").textContent =
-    titulo;
-
-    document.getElementById("textoModal").textContent =
-    mensagem;
+    document.getElementById("iconeModal").textContent = icone;
+    document.getElementById("tituloModal").textContent = titulo;
+    document.getElementById("textoModal").textContent = mensagem;
 
     modal.style.display = "flex";
 
@@ -521,16 +466,14 @@ function abrirModal(titulo,mensagem,icone){
 
 function fecharModal(){
 
-    const modal =
-    document.getElementById("modal");
+    const modal = document.getElementById("modal");
 
     if(modal){
-
         modal.style.display = "none";
-
     }
 
-       }
+}
+
 /* ==========================================
    ATUALIZAR ESTATÍSTICAS
 ========================================== */
@@ -540,114 +483,33 @@ function atualizarEstatisticas(){
     const reservados = numerosReservados.length;
 
     const disponiveis =
-    CONFIG.quantidadeNumeros - reservados;
+        CONFIG.quantidadeNumeros - reservados;
 
     const percentual =
-    ((reservados / CONFIG.quantidadeNumeros) * 100).toFixed(1);
+        ((reservados / CONFIG.quantidadeNumeros) * 100).toFixed(1);
 
     const totalReservados =
-    document.getElementById("totalReservados");
+        document.getElementById("totalReservados");
 
-    if(totalReservados){
+    if(totalReservados)
         totalReservados.textContent = reservados;
-    }
 
     const totalDisponiveis =
-    document.getElementById("totalDisponiveis");
+        document.getElementById("totalDisponiveis");
 
-    if(totalDisponiveis){
+    if(totalDisponiveis)
         totalDisponiveis.textContent = disponiveis;
-    }
 
     const percentualHTML =
-    document.getElementById("percentual");
+        document.getElementById("percentual");
 
-    if(percentualHTML){
+    if(percentualHTML)
         percentualHTML.textContent = percentual + "%";
-    }
 
     atualizarProgresso();
 
 }
 
 /* ==========================================
-   UTILITÁRIOS
+   FIM DO SCRIPT
 ========================================== */
-
-function formatarNumero(numero){
-
-    return Number(numero)
-        .toString()
-        .padStart(3,"0");
-
-}
-
-function limparFormulario(){
-
-    document.getElementById("nome").value = "";
-
-    document.getElementById("telefone").value = "";
-
-    document.getElementById("cidade").value = "";
-
-    const obs =
-    document.getElementById("observacao");
-
-    if(obs){
-
-        obs.value = "";
-
-    }
-
-}
-
-function limparCartela(){
-
-    numerosSelecionados = [];
-
-    atualizarCartela();
-
-}
-
-/* ==========================================
-   FECHAR MODAL CLICANDO FORA
-========================================== */
-
-window.addEventListener("click",(e)=>{
-
-    const modal =
-    document.getElementById("modal");
-
-    if(modal && e.target === modal){
-
-        fecharModal();
-
-    }
-
-});
-
-/* ==========================================
-   TECLA ENTER
-========================================== */
-
-const campoNumero =
-document.getElementById("numeroEscolhido");
-
-if(campoNumero){
-
-    campoNumero.addEventListener("keypress",(e)=>{
-
-        if(e.key === "Enter"){
-
-            adicionarNumero();
-
-        }
-
-    });
-
-}
-
-console.log("======================================");
-console.log("RIFA GILSIGNS");
-console.log("Script carregado com sucesso.");
-console.log("======================================");
