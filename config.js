@@ -1,13 +1,11 @@
 /* ==========================================
    CONFIGURAÇÃO DA RIFA
-   Rifa GilSigns
+   GilSigns
 ========================================== */
 
 const CONFIG = {
 
-    // ===========================
-    // Dados da Rifa
-    // ===========================
+    /* DADOS DA RIFA */
 
     titulo: "🎟️ Rifa Beneficente",
 
@@ -15,62 +13,45 @@ const CONFIG = {
 
     premio: "Geladeira Midea Frost Free",
 
-    valorNumero: 20.00,
+    valorNumero: 10.00,
 
     moeda: "R$",
 
     dataSorteio: "30/12/2026",
 
-    resultado:
+    resultado: "1ª Premiação da Loteria Federal",
 
-    "1ª Premiação da Loteria Federal",
-
-
-    // ===========================
-    // Contatos
-    // ===========================
+    /* CONTATOS */
 
     whatsapp: "79999145044",
 
     instagram: "@gilart.signs",
 
-    email: "",
+    telefone: "(79) 99914-5044",
 
-
-    // ===========================
-    // PIX
-    // ===========================
+    /* PIX */
 
     pixTipo: "CPF",
 
     pixChave: "58847235553",
 
+    /* NUMERAÇÃO */
 
-    // ===========================
-    // Numeração
-    // ===========================
+    quantidadeNumeros: 1000,
 
-    quantidadeNumeros:1000,
+    numeroInicial: 0,
 
-    numeroInicial:0,
+    numeroFinal: 999,
 
-    numeroFinal:999,
+    /* CARTELAS */
 
+    quantidadeCartelas: 10,
 
-    // ===========================
-    // Cartelas
-    // ===========================
+    numerosPorCartela: 100,
 
-    quantidadeCartelas:10,
+    /* IMAGENS */
 
-    numerosPorCartela:100,
-
-
-    // ===========================
-    // Fotos
-    // ===========================
-
-    fotos:[
+    fotos: [
 
         "img/premio1.jpg",
 
@@ -80,29 +61,27 @@ const CONFIG = {
 
     ],
 
+    logo: "img/logo.png",
 
-    // ===========================
-    // Cores
-    // ===========================
+    /* CORES */
 
-    corPrincipal:"#1976D2",
+    corPrincipal: "#1976D2",
 
-    corSecundaria:"#EC4899",
+    corSecundaria: "#EC4899",
 
-    corSucesso:"#22C55E",
+    corSucesso: "#22C55E",
 
-    corReservado:"#FACC15",
+    corReservado: "#FACC15",
 
-    corPago:"#EF4444",
+    corPago: "#EF4444",
 
-
-    // ===========================
-    // Texto do Rodapé
-    // ===========================
+    /* TEXTO */
 
     rodape:
+    "Obrigado por colaborar com esta ação beneficente.",
 
-    "Obrigado por colaborar com esta ação beneficente."
+    /* FIREBASE */
+
+    caminhoReservas: "reservas"
 
 };
-
