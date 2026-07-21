@@ -20,11 +20,19 @@ const firebaseConfig = {
 
 };
 
+/* ==========================================
+   INICIAR FIREBASE
+========================================== */
+
 firebase.initializeApp(firebaseConfig);
 
 const db = firebase.database();
 
-const reservasRef = db.ref("reservas");
+const reservasRef = db.ref(CONFIG.caminhoReservas);
+
+/* ==========================================
+   LISTA DE NÚMEROS RESERVADOS
+========================================== */
 
 let numerosReservados = [];
 
@@ -32,52 +40,41 @@ let numerosReservados = [];
    CARREGAR RESERVAS
 ========================================== */
 
-reservasRef.on("value", (snapshot) => {
+reservasRef.on("value", (snapshot)=>{
 
     numerosReservados = [];
 
-    snapshot.forEach((item) => {
+    snapshot.forEach((item)=>{
 
         const dados = item.val();
 
-        numerosReservados.push(
-            dados.numero.toString().padStart(3, "0")
-        );
+        if(dados.numero !== undefined){
+
+            numerosReservados.push(
+
+                dados.numero.toString().padStart(3,"0")
+
+            );
+
+        }
 
     });
 
-    atualizarEstatisticas();
+    if(typeof atualizarEstatisticas === "function"){
+
+        atualizarEstatisticas();
+
+    }
 
 });
 
 /* ==========================================
-   ESTATÍSTICAS
+   RESERVAR NÚMERO
 ========================================== */
 
-function atualizarEstatisticas() {
+function salvarReserva(dados){
 
-    const reservados = numerosReservados.length;
-
-    const disponiveis = 1000 - reservados;
-
-    const percentual = ((reservados / 1000) * 100).toFixed(1);
-
-    const totalReservados = document.getElementById("totalReservados");
-    if (totalReservados) totalReservados.innerHTML = reservados;
-
-    const totalDisponiveis = document.getElementById("totalDisponiveis");
-    if (totalDisponiveis) totalDisponiveis.innerHTML = disponiveis;
-
-    const percentualHTML = document.getElementById("percentual");
-    if (percentualHTML) percentualHTML.innerHTML = percentual + "%";
-
-    const texto = document.getElementById("textoProgresso");
-    if (texto)
-        texto.innerHTML = reservados + " de 1000 números reservados";
-
-    const barra = document.getElementById("barraProgresso");
-    if (barra)
-        barra.style.width = percentual + "%";
+    return reservasRef.push(dados);
 
 }
 
@@ -87,7 +84,7 @@ function atualizarEstatisticas() {
 
 function confirmarPagamento(id){
 
-    reservasRef.child(id).update({
+    return reservasRef.child(id).update({
 
         status:"pago"
 
@@ -96,11 +93,27 @@ function confirmarPagamento(id){
 }
 
 /* ==========================================
-   EXCLUIR RESERVA
+   CANCELAR RESERVA
 ========================================== */
 
 function excluirReserva(id){
 
-    reservasRef.child(id).remove();
+    return reservasRef.child(id).remove();
 
 }
+
+/* ==========================================
+   BUSCAR RESERVAS
+========================================== */
+
+function buscarReservas(callback){
+
+    reservasRef.once("value",(snapshot)=>{
+
+        callback(snapshot);
+
+    });
+
+}
+
+console.log("Firebase conectado com sucesso.");
