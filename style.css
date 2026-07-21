@@ -1266,3 +1266,26 @@ MODAL
     }
 
 }
+/* Corrige altura em celulares */
+body{
+    min-height:100dvh;
+}
+html{
+    scroll-behavior:smooth;
+}
+
+body{
+    -webkit-font-smoothing:antialiased;
+    text-rendering:optimizeLegibility;
+}
+img{
+    max-width:100%;
+    height:auto;
+    display:block;
+}
+
+.logo img,
+.slide{
+    user-select:none;
+    -webkit-user-drag:none;
+}
