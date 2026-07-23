@@ -1299,3 +1299,17 @@ img{
     margin-right: 16px;
     flex-shrink: 0;
 }
+
+.foto-container{
+    position: relative;
+    display: inline-block;
+}
+
+.trevo{
+    position: absolute;
+    width: 42px;
+    right: -12px;
+    top: -8px;
+    transform: rotate(20deg);
+    z-index: 10;
+}
