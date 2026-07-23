@@ -1289,3 +1289,13 @@ img{
     user-select:none;
     -webkit-user-drag:none;
 }
+
+.hero-foto {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 4px solid #fff;
+    margin-right: 16px;
+    flex-shrink: 0;
+}
