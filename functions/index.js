@@ -7,6 +7,8 @@ initializeApp();
 
 const db = getDatabase();
 
+const TEMPO_RESERVA = 24 * 60 * 60 * 1000;
+
 
 /* =========================================================
    NORMALIZAR NÚMERO
@@ -123,6 +125,8 @@ exports.criarReserva = onCall(
         );
 
       }
+
+       const TEMPO_RESERVA = 24 * 60 * 60 * 1000;
 
 
       updates[
