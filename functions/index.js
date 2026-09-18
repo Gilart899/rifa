@@ -7,11 +7,17 @@ initializeApp();
 
 const db = getDatabase();
 
+
 /* =========================================================
    CONFIGURAÇÕES
    ========================================================= */
 
-const TEMPO_RESERVA = 24 * 60 * 60 * 1000;
+const REGIAO = 'southamerica-east1';
+
+const TEMPO_RESERVA =
+  24 * 60 * 60 * 1000;
+
+const MAX_NUMEROS_POR_RESERVA = 10;
 
 
 /* =========================================================
@@ -20,13 +26,15 @@ const TEMPO_RESERVA = 24 * 60 * 60 * 1000;
 
 const normalizar = n => {
 
-  const s = String(n ?? '').trim();
+  const s =
+    String(n ?? '').trim();
 
   if (!/^\d{1,3}$/.test(s)) {
     return null;
   }
 
-  const v = s.padStart(3, '0');
+  const v =
+    s.padStart(3, '0');
 
   if (Number(v) > 999) {
     return null;
@@ -61,21 +69,29 @@ const admin = async request => {
 
 exports.criarReserva = onCall(
   {
-    region: 'southamerica-east1'
+    region: REGIAO
   },
   async request => {
 
     const nome =
-      String(request.data?.nome || '').trim();
+      String(
+        request.data?.nome || ''
+      ).trim();
 
     const telefone =
-      String(request.data?.telefone || '').trim();
+      String(
+        request.data?.telefone || ''
+      ).trim();
 
     const nums =
-      Array.isArray(request.data?.numeros)
+      Array.isArray(
+        request.data?.numeros
+      )
         ? request.data.numeros
             .map(normalizar)
-            .filter(n => n !== null)
+            .filter(
+              n => n !== null
+            )
         : [];
 
 
@@ -87,7 +103,7 @@ exports.criarReserva = onCall(
       !nome ||
       !telefone ||
       nums.length < 1 ||
-      nums.length > 10
+      nums.length > MAX_NUMEROS_POR_RESERVA
     ) {
 
       throw new HttpsError(
@@ -99,13 +115,16 @@ exports.criarReserva = onCall(
 
 
     /* =====================================================
-       REMOVER NÚMEROS REPETIDOS
+       VERIFICAR REPETIÇÃO
        ===================================================== */
 
-    const unique = [...new Set(nums)];
+    const unique =
+      [...new Set(nums)];
 
 
-    if (unique.length !== nums.length) {
+    if (
+      unique.length !== nums.length
+    ) {
 
       throw new HttpsError(
         'invalid-argument',
@@ -119,24 +138,35 @@ exports.criarReserva = onCall(
        TEMPO DA RESERVA
        ===================================================== */
 
-    const agora = Date.now();
+    const agora =
+      Date.now();
 
     const expiraEm =
       agora + TEMPO_RESERVA;
 
 
     /* =====================================================
-       VERIFICAR DISPONIBILIDADE
+       PREPARAR ATUALIZAÇÕES
        ===================================================== */
 
     const updates = {};
 
-    for (const numero of unique) {
+
+    /* =====================================================
+       VERIFICAR DISPONIBILIDADE
+       ===================================================== */
+
+    for (
+      const numero of unique
+    ) {
+
+      const numeroRef =
+        db.ref(
+          `rifa/numeros/${numero}`
+        );
 
       const snap =
-        await db
-          .ref(`rifa/numeros/${numero}`)
-          .once('value');
+        await numeroRef.once('value');
 
 
       if (!snap.exists()) {
@@ -150,34 +180,32 @@ exports.criarReserva = onCall(
 
 
       const dados =
-        snap.val();
+        snap.val() || {};
 
 
       /* ===================================================
-         VERIFICAR SE ESTÁ DISPONÍVEL
+         VERIFICAR RESERVA EXPIRADA
          =================================================== */
 
-      if (dados.status !== 'disponivel') {
-
-        /*
-         * Se estiver reservado mas a reserva já expirou,
-         * permitimos uma nova reserva.
-         */
-
-        const reservaExpirada =
-          dados.status === 'reservado' &&
-          dados.expiraEm &&
-          Number(dados.expiraEm) <= agora;
+      const reservaExpirada =
+        dados.status === 'reservado' &&
+        dados.expiraEm &&
+        Number(dados.expiraEm) <= agora;
 
 
-        if (!reservaExpirada) {
+      /* ===================================================
+         VERIFICAR DISPONIBILIDADE
+         =================================================== */
 
-          throw new HttpsError(
-            'failed-precondition',
-            `Número ${numero} não está disponível.`
-          );
+      if (
+        dados.status !== 'disponivel' &&
+        !reservaExpirada
+      ) {
 
-        }
+        throw new HttpsError(
+          'failed-precondition',
+          `Número ${numero} não está disponível.`
+        );
 
       }
 
@@ -192,15 +220,18 @@ exports.criarReserva = onCall(
 
         numero,
 
-        status: 'reservado',
+        status:
+          'reservado',
 
-        reservado: true,
+        reservado:
+          true,
 
         nome,
 
         telefone,
 
-        dataReserva: agora,
+        dataReserva:
+          agora,
 
         expiraEm
 
@@ -210,7 +241,7 @@ exports.criarReserva = onCall(
 
 
     /* =====================================================
-       CRIAR ID ÚNICO DA RESERVA
+       ID DA RESERVA
        ===================================================== */
 
     const reservaId =
@@ -229,11 +260,14 @@ exports.criarReserva = onCall(
 
       telefone,
 
-      numeros: unique,
+      numeros:
+        unique,
 
-      status: 'reservado',
+      status:
+        'reservado',
 
-      criadoEm: agora,
+      criadoEm:
+        agora,
 
       expiraEm
 
@@ -241,7 +275,7 @@ exports.criarReserva = onCall(
 
 
     /* =====================================================
-       GRAVAR TUDO DE UMA VEZ
+       GRAVAR
        ===================================================== */
 
     await db
@@ -255,13 +289,16 @@ exports.criarReserva = onCall(
 
     return {
 
-      ok: true,
+      ok:
+        true,
 
       reservaId,
 
-      numeros: unique,
+      numeros:
+        unique,
 
-      criadoEm: agora,
+      criadoEm:
+        agora,
 
       expiraEm
 
@@ -277,12 +314,12 @@ exports.criarReserva = onCall(
 
 exports.criarJogadaRaspadinha = onCall(
   {
-    region: 'southamerica-east1'
+    region: REGIAO
   },
   async request => {
 
     /* =====================================================
-       VERIFICAR AUTENTICAÇÃO
+       AUTENTICAÇÃO
        ===================================================== */
 
     if (!request.auth) {
@@ -296,11 +333,13 @@ exports.criarJogadaRaspadinha = onCall(
 
 
     /* =====================================================
-       NORMALIZAR NÚMERO
+       NÚMERO
        ===================================================== */
 
     const numero =
-      normalizar(request.data?.numeroRifa);
+      normalizar(
+        request.data?.numeroRifa
+      );
 
 
     if (numero === null) {
@@ -317,13 +356,13 @@ exports.criarJogadaRaspadinha = onCall(
        BUSCAR NÚMERO
        ===================================================== */
 
-    const snap =
+    const numeroSnap =
       await db
         .ref(`rifa/numeros/${numero}`)
         .once('value');
 
 
-    if (!snap.exists()) {
+    if (!numeroSnap.exists()) {
 
       throw new HttpsError(
         'not-found',
@@ -333,15 +372,17 @@ exports.criarJogadaRaspadinha = onCall(
     }
 
 
-    const n =
-      snap.val();
+    const dadosNumero =
+      numeroSnap.val() || {};
 
 
     /* =====================================================
-       SOMENTE NÚMERO PAGO
+       PAGAMENTO CONFIRMADO
        ===================================================== */
 
-    if (n.status !== 'pago') {
+    if (
+      dadosNumero.status !== 'pago'
+    ) {
 
       throw new HttpsError(
         'failed-precondition',
@@ -356,8 +397,9 @@ exports.criarJogadaRaspadinha = onCall(
        ===================================================== */
 
     if (
-      n.participanteId &&
-      n.participanteId !== request.auth.uid
+      dadosNumero.participanteId &&
+      dadosNumero.participanteId !==
+        request.auth.uid
     ) {
 
       throw new HttpsError(
@@ -369,19 +411,138 @@ exports.criarJogadaRaspadinha = onCall(
 
 
     /* =====================================================
-       CRIAR ID DA JOGADA
+       VERIFICAR CONFIGURAÇÃO
        ===================================================== */
 
-    const id =
-      crypto.randomUUID();
+    const configSnap =
+      await db
+        .ref(
+          'rifa/raspadinha/configuracao'
+        )
+        .once('value');
+
+
+    const config =
+      configSnap.val() || {};
+
+
+    if (
+      config.ativa === false
+    ) {
+
+      throw new HttpsError(
+        'failed-precondition',
+        'A raspadinha está temporariamente desativada.'
+      );
+
+    }
+
+
+    /* =====================================================
+       VERIFICAR JOGADA EXISTENTE
+       ===================================================== */
+
+    const jogadasSnap =
+      await db
+        .ref(
+          'rifa/raspadinha/jogadas'
+        )
+        .once('value');
+
+
+    const jogadas =
+      jogadasSnap.val() || {};
+
+
+    for (
+      const [id, jogada] of
+      Object.entries(jogadas)
+    ) {
+
+      if (
+        jogada &&
+        jogada.participanteId ===
+          request.auth.uid &&
+        jogada.numeroRifa ===
+          numero
+      ) {
+
+        return {
+
+          ok:
+            true,
+
+          jogadaId:
+            id,
+
+          novaJogada:
+            false
+
+        };
+
+      }
+
+    }
+
+
+    /* =====================================================
+       LIMITE DE JOGADAS
+       ===================================================== */
+
+    const maxJogadas =
+      Number(
+        config.maxJogadasPorCompra ||
+        1
+      );
+
+
+    let quantidadeJogadas =
+      0;
+
+
+    for (
+      const jogada of
+      Object.values(jogadas)
+    ) {
+
+      if (
+        jogada &&
+        jogada.participanteId ===
+          request.auth.uid
+      ) {
+
+        quantidadeJogadas++;
+
+      }
+
+    }
+
+
+    if (
+      quantidadeJogadas >=
+      maxJogadas
+    ) {
+
+      throw new HttpsError(
+        'resource-exhausted',
+        'O limite de jogadas desta participação foi atingido.'
+      );
+
+    }
 
 
     /* =====================================================
        CRIAR JOGADA
        ===================================================== */
 
+    const jogadaId =
+      crypto.randomUUID();
+
+
     await db
-      .ref(`rifa/raspadinha/jogadas/${id}`)
+      .ref(
+        `rifa/raspadinha/jogadas/${jogadaId}`
+      )
       .set({
 
         participanteId:
@@ -411,334 +572,7 @@ exports.criarJogadaRaspadinha = onCall(
 
     return {
 
-      ok: true,
+      ok:
+        true,
 
-      jogadaId: id
-
-    };
-
-  }
-);
-
-
-/* =========================================================
-   ADMIN — ATUALIZAR NÚMERO
-   ========================================================= */
-
-exports.adminAtualizarNumero = onCall(
-  {
-    region: 'southamerica-east1'
-  },
-  async request => {
-
-    /* =====================================================
-       VERIFICAR ADMIN
-       ===================================================== */
-
-    if (!(await admin(request))) {
-
-      throw new HttpsError(
-        'permission-denied',
-        'Administrador não autorizado.'
-      );
-
-    }
-
-
-    /* =====================================================
-       DADOS
-       ===================================================== */
-
-    const numero =
-      normalizar(request.data?.numero);
-
-    const patch =
-      request.data?.patch;
-
-
-    if (
-      numero === null ||
-      !patch ||
-      typeof patch !== 'object'
-    ) {
-
-      throw new HttpsError(
-        'invalid-argument',
-        'Dados inválidos.'
-      );
-
-    }
-
-
-    /* =====================================================
-       CAMPOS PERMITIDOS
-       ===================================================== */
-
-    const permitidos = [
-
-      'status',
-
-      'pagamento',
-
-      'participanteId',
-
-      'nome',
-
-      'telefone',
-
-      'dataVenda',
-
-      'reservado',
-
-      'dataReserva',
-
-      'expiraEm'
-
-    ];
-
-
-    /* =====================================================
-       LIMPAR PATCH
-       ===================================================== */
-
-    const limpo = {};
-
-
-    for (const k of permitidos) {
-
-      if (
-        Object.prototype.hasOwnProperty.call(
-          patch,
-          k
-        )
-      ) {
-
-        limpo[k] =
-          patch[k];
-
-      }
-
-    }
-
-
-    /* =====================================================
-       ATUALIZAR
-       ===================================================== */
-
-    await db
-      .ref(`rifa/numeros/${numero}`)
-      .update(limpo);
-
-
-    /* =====================================================
-       RETORNO
-       ===================================================== */
-
-    return {
-
-      ok: true
-
-    };
-
-  }
-);
-
-
-/* =========================================================
-   INICIALIZAR BANCO
-   ========================================================= */
-
-exports.inicializarBanco = onCall(
-  {
-    region: 'southamerica-east1'
-  },
-  async request => {
-
-    /* =====================================================
-       VERIFICAR ADMIN
-       ===================================================== */
-
-    if (!(await admin(request))) {
-
-      throw new HttpsError(
-        'permission-denied',
-        'Administrador não autorizado.'
-      );
-
-    }
-
-
-    /* =====================================================
-       VERIFICAR SE JÁ EXISTE
-       ===================================================== */
-
-    const base =
-      await db
-        .ref('rifa')
-        .once('value');
-
-
-    if (base.exists()) {
-
-      return {
-
-        ok: true,
-
-        jaExistia: true
-
-      };
-
-    }
-
-
-    /* =====================================================
-       CRIAR NÚMEROS
-       ===================================================== */
-
-    const numeros = {};
-
-
-    for (let i = 0; i < 1000; i++) {
-
-      const n =
-        String(i).padStart(3, '0');
-
-
-      numeros[n] = {
-
-        numero: n,
-
-        status: 'disponivel'
-
-      };
-
-    }
-
-
-    /* =====================================================
-       CRIAR ESTRUTURA DO BANCO
-       ===================================================== */
-
-    await db
-      .ref('rifa')
-      .set({
-
-        configuracao: {
-
-          nome:
-            'RIFA SOLIDÁRIA',
-
-          beneficiada:
-            'Dona Bené',
-
-          premio:
-            'Geladeira Midea Frost Free',
-
-          valorNumero:
-            10,
-
-          quantidadeNumeros:
-            1000,
-
-          quantidadeCartelas:
-            10,
-
-          numerosPorCartela:
-            100,
-
-          dataSorteio:
-            '2026-12-30T20:00:00-03:00'
-
-        },
-
-
-        numeros,
-
-
-        reservas:
-          {},
-
-
-        raspadinha: {
-
-          configuracao: {
-
-            nome:
-              'Raspadinha da Amizade',
-
-            ativa:
-              true,
-
-            exigePagamentoConfirmado:
-              true,
-
-            maxJogadasPorCompra:
-              1
-
-          },
-
-
-          premios: {
-
-            premio1: {
-
-              nome:
-                'Liquidificador',
-
-              imagem:
-                'img/liquidificador.png',
-
-              quantidade:
-                50,
-
-              ativo:
-                true
-
-            },
-
-
-            premio2: {
-
-              nome:
-                'Ferro elétrico',
-
-              imagem:
-                'img/ferro.png',
-
-              quantidade:
-                50,
-
-              ativo:
-                true
-
-            }
-
-          },
-
-
-          novasChances:
-            {},
-
-
-          jogadas:
-            {}
-
-        }
-
-      });
-
-
-    /* =====================================================
-       RETORNO
-       ===================================================== */
-
-    return {
-
-      ok: true,
-
-      jaExistia: false
-
-    };
-
-  }
-);
+      jogada
