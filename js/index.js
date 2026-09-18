@@ -62,8 +62,8 @@ const VALOR_NUMERO =
 const WHATSAPP =
   '5579999145044';
 
-const TEMPO_RESERVA =
-  40 * 60 * 1000;
+ const TEMPO_RESERVA =
+  24 * 60 * 60 * 1000;
 
 
 /* =========================================================
@@ -996,9 +996,9 @@ if (reservarNumero) {
         }
 
         mostrarStatus(
-          `🔒 NÚMERO ${numero} RESERVADO POR 40 MINUTOS`,
-          'disponivel'
-        );
+  `🔒 NÚMERO ${numero} RESERVADO POR 24 HORAS`,
+  'disponivel'
+);
 
         reservarNumero.textContent =
           '✅ PARTICIPAÇÃO CONFIRMADA';
@@ -1016,11 +1016,10 @@ if (reservarNumero) {
 
         if (msgReserva) {
 
-          msgReserva.textContent =
-            '🔒 Seu número está reservado por 40 minutos. Faça o pagamento via PIX e envie o comprovante pelo WhatsApp.';
-
-        }
-
+          mostrarStatus(
+  `🔒 NÚMERO ${numero} RESERVADO POR 24 HORAS`,
+  'disponivel'
+);
         const cartao =
           document.querySelector(
             '.reserva-inline'
