@@ -1252,7 +1252,7 @@ function montarMensagemWhatsApp() {
 
     `📱 WhatsApp: *${telefone}*\n\n` +
 
-    `🔒 *Número reservado por 40 minutos.*\n\n` +
+    ``🔒 *Número reservado por 24 horas.*\n\n` +
 
     `💚 Pagamento via PIX realizado.\n\n` +
 
