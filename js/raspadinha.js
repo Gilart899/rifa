@@ -1,687 +1,413 @@
+// ============================================================
+// RASPADINHA DA AMIZADE — GILFEST
+// Versão definitiva
+// Capa dourada + brilho + trevos animados
+// Sistema de duas camadas para preservar a raspagem
+// ============================================================
+
 import {
   auth,
   firebaseConfigured
-} from './firebase.js';
-
-import {
-  signInAnonymously
-} from 'https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js';
+} from "./firebase.js";
 
 import {
   getFunctions,
   httpsCallable
-} from 'https://www.gstatic.com/firebasejs/12.1.0/firebase-functions.js';
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-functions.js";
+
+import {
+  signInAnonymously
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 
 
-/* =========================================================
-   ELEMENTOS
-========================================================= */
+// ============================================================
+// CONFIGURAÇÃO
+// ============================================================
 
-const numeroInput =
-  document.getElementById('numeroRifa');
+const REGIAO_FIREBASE = "southamerica-east1";
 
-const liberarBtn =
-  document.getElementById('liberar');
+
+// ============================================================
+// ELEMENTOS
+// ============================================================
+
+const campoNumero =
+  document.getElementById("numeroRifa");
+
+const botaoLiberar =
+  document.getElementById("liberar");
 
 const mensagem =
-  document.getElementById('mensagem');
+  document.getElementById("mensagem");
 
 const areaRaspadinha =
-  document.getElementById('areaRaspadinha');
+  document.getElementById("areaRaspadinha");
 
 const resultado =
-  document.getElementById('resultado');
+  document.getElementById("resultado");
 
-const canvas =
-  document.getElementById('scratchCanvas');
+let canvas =
+  document.getElementById("scratchCanvas");
 
 
-/* =========================================================
-   FIREBASE FUNCTIONS
-========================================================= */
+// ============================================================
+// ESTADO
+// ============================================================
+
+let jogadaIdAtual = null;
+let numeroAtual = null;
+
+let raspando = false;
+let revelada = false;
+
+let canvasCapa = null;
+let canvasRaspagem = null;
+
+let ctxCapa = null;
+let ctxRaspagem = null;
+
+let larguraCanvas = 0;
+let alturaCanvas = 0;
+
+let escalaCanvas = 1;
+
+let animacao = null;
+
+let posicaoBrilho = -300;
+
+let ultimaVerificacao = 0;
+
+let ultimoX = null;
+let ultimoY = null;
+
+
+// ============================================================
+// FIREBASE
+// ============================================================
 
 let functions = null;
-
 let criarJogada = null;
-
 let revelarJogada = null;
 
-
 if (firebaseConfigured) {
-
   functions =
     getFunctions(
       undefined,
-      'southamerica-east1'
+      REGIAO_FIREBASE
     );
-
 
   criarJogada =
     httpsCallable(
       functions,
-      'criarJogadaRaspadinha'
+      "criarJogadaRaspadinha"
     );
-
 
   revelarJogada =
     httpsCallable(
       functions,
-      'revelarJogadaRaspadinha'
+      "revelarJogadaRaspadinha"
     );
-
 }
 
 
-/* =========================================================
-   ESTADO
-========================================================= */
-
-let jogadaAtualId =
-  null;
-
-let resultadoRevelado =
-  false;
-
-let raspadinhaCriada =
-  false;
-
-
-/* =========================================================
-   NORMALIZAR NÚMERO
-========================================================= */
-
-function normalizarNumero(valor) {
-
-  const texto =
-    String(valor || '')
-      .replace(/\D/g, '')
-      .slice(0, 3);
-
-
-  if (!texto) {
-    return null;
-  }
-
-
-  const numero =
-    Number(texto);
-
-
-  if (
-    !Number.isInteger(numero) ||
-    numero < 0 ||
-    numero > 999
-  ) {
-
-    return null;
-
-  }
-
-
-  return String(
-    numero
-  ).padStart(
-    3,
-    '0'
-  );
-
-}
-
-
-/* =========================================================
-   MENSAGEM
-========================================================= */
+// ============================================================
+// MENSAGEM
+// ============================================================
 
 function mostrarMensagem(
   texto,
-  tipo = 'normal'
+  tipo = "normal"
 ) {
+  if (!mensagem) return;
 
-  if (!mensagem) {
-    return;
+  mensagem.textContent = texto;
+
+  mensagem.classList.remove(
+    "erro",
+    "sucesso",
+    "normal"
+  );
+
+  mensagem.classList.add(tipo);
+}
+
+
+// ============================================================
+// NORMALIZAR NÚMERO
+// ============================================================
+
+function normalizarNumero(valor) {
+  const numero =
+    String(valor || "").trim();
+
+  if (!/^\d{1,3}$/.test(numero)) {
+    return null;
   }
 
+  const convertido =
+    Number(numero);
 
-  mensagem.textContent =
-    texto;
-
-
-  mensagem.style.color =
-    tipo === 'erro'
-      ? '#ff7676'
-      : tipo === 'sucesso'
-        ? '#61e294'
-        : 'rgba(255,255,255,.8)';
-
-}
-
-
-/* =========================================================
-   BOTÃO
-========================================================= */
-
-function definirEstadoBotao(
-  disabled,
-  texto
-) {
-
-  if (!liberarBtn) {
-    return;
+  if (
+    !Number.isInteger(convertido) ||
+    convertido < 0 ||
+    convertido > 999
+  ) {
+    return null;
   }
 
-
-  liberarBtn.disabled =
-    disabled;
-
-
-  liberarBtn.textContent =
-    texto;
-
+  return String(convertido)
+    .padStart(3, "0");
 }
 
 
-/* =========================================================
-   INPUT
-========================================================= */
-
-if (numeroInput) {
-
-  numeroInput.addEventListener(
-    'input',
-    () => {
-
-      numeroInput.value =
-        numeroInput.value
-          .replace(/\D/g, '')
-          .slice(0, 3);
-
-    }
-  );
-
-}
-
-
-/* =========================================================
-   ENTER
-========================================================= */
-
-if (numeroInput) {
-
-  numeroInput.addEventListener(
-    'keydown',
-    event => {
-
-      if (
-        event.key ===
-        'Enter'
-      ) {
-
-        event.preventDefault();
-
-
-        if (liberarBtn) {
-          liberarBtn.click();
-        }
-
-      }
-
-    }
-  );
-
-}
-
-
-/* =========================================================
-   BOTÃO LIBERAR
-========================================================= */
-
-if (liberarBtn) {
-
-  liberarBtn.addEventListener(
-    'click',
-    liberarJogada
-  );
-
-}
-
-
-/* =========================================================
-   AUTENTICAÇÃO
-========================================================= */
+// ============================================================
+// AUTENTICAÇÃO
+// ============================================================
 
 async function garantirAutenticacao() {
-
-  if (!auth) {
-
+  if (!firebaseConfigured) {
     throw new Error(
-      'Não foi possível iniciar a autenticação.'
+      "O Firebase ainda não está configurado."
     );
-
   }
 
-
-  if (!auth.currentUser) {
-
-    await signInAnonymously(
-      auth
-    );
-
+  if (auth.currentUser) {
+    return auth.currentUser;
   }
 
+  const resultadoAuth =
+    await signInAnonymously(auth);
 
-  if (!auth.currentUser) {
-
-    throw new Error(
-      'Não foi possível autenticar esta sessão.'
-    );
-
-  }
-
-
-  return auth.currentUser;
-
+  return resultadoAuth.user;
 }
 
 
-/* =========================================================
-   LIBERAR JOGADA
-========================================================= */
+// ============================================================
+// CRIAR SEGUNDA CAMADA
+// ============================================================
 
-async function liberarJogada() {
+function prepararCamadas() {
+  if (!canvas) return;
 
-  const numero =
-    normalizarNumero(
-      numeroInput?.value
+  const antigo =
+    canvas;
+
+  const parent =
+    antigo.parentElement;
+
+  if (!parent) return;
+
+
+  // ----------------------------------------------------------
+  // Remove camadas antigas criadas por esta versão
+  // ----------------------------------------------------------
+
+  const antigas =
+    parent.querySelectorAll(
+      ".gilfest-canvas-capa, .gilfest-canvas-raspagem"
     );
 
-
-  /* =======================================================
-     VALIDAR NÚMERO
-  ======================================================= */
-
-  if (!numero) {
-
-    mostrarMensagem(
-      'Digite um número válido entre 000 e 999.',
-      'erro'
-    );
-
-
-    numeroInput?.focus();
-
-
-    return;
-
-  }
-
-
-  /* =======================================================
-     FIREBASE
-  ======================================================= */
-
-  if (!firebaseConfigured) {
-
-    mostrarMensagem(
-      'O Firebase ainda não está configurado.',
-      'erro'
-    );
-
-
-    return;
-
-  }
-
-
-  if (!criarJogada) {
-
-    mostrarMensagem(
-      'A função da raspadinha não está disponível.',
-      'erro'
-    );
-
-
-    return;
-
-  }
-
-
-  /* =======================================================
-     BOTÃO
-  ======================================================= */
-
-  definirEstadoBotao(
-    true,
-    'VERIFICANDO...'
+  antigas.forEach(
+    elemento => elemento.remove()
   );
 
 
-  try {
+  // ----------------------------------------------------------
+  // Container
+  // ----------------------------------------------------------
 
-    /* =====================================================
-       AUTENTICAR
-       ===================================================== */
+  const container =
+    document.createElement("div");
 
-    await garantirAutenticacao();
-
-
-    /* =====================================================
-       CHAMAR SERVIDOR
-       ===================================================== */
-
-    const resposta =
-      await criarJogada({
-
-        numeroRifa:
-          numero
-
-      });
+  container.className =
+    "gilfest-scratch-container";
 
 
-    const dados =
-      resposta?.data || {};
+  // ----------------------------------------------------------
+  // Canvas da capa
+  // ----------------------------------------------------------
+
+  canvasCapa =
+    document.createElement("canvas");
+
+  canvasCapa.className =
+    "gilfest-canvas-capa";
 
 
-    /* =====================================================
-       VERIFICAR ID
-       ===================================================== */
+  // ----------------------------------------------------------
+  // Canvas transparente de raspagem
+  // ----------------------------------------------------------
 
-    if (!dados.jogadaId) {
+  canvasRaspagem =
+    document.createElement("canvas");
 
-      throw new Error(
-        'O servidor não retornou o ID da jogada.'
-      );
-
-    }
+  canvasRaspagem.className =
+    "gilfest-canvas-raspagem";
 
 
-    jogadaAtualId =
-      String(
-        dados.jogadaId
-      );
+  // ----------------------------------------------------------
+  // Usa o canvas original como referência
+  // ----------------------------------------------------------
+
+  canvas.style.display =
+    "none";
 
 
-    resultadoRevelado =
-      false;
+  container.appendChild(
+    canvasCapa
+  );
+
+  container.appendChild(
+    canvasRaspagem
+  );
 
 
-    raspadinhaCriada =
-      false;
+  parent.appendChild(
+    container
+  );
 
 
-    /* =====================================================
-       MOSTRAR ÁREA
-       ===================================================== */
-
-    if (areaRaspadinha) {
-
-      areaRaspadinha.classList.remove(
-        'hidden'
-      );
-
-    }
-
-
-    /* =====================================================
-       ESCONDER RESULTADO
-       ===================================================== */
-
-    if (resultado) {
-
-      resultado.textContent =
-        'BOA SORTE!';
-
-    }
-
-
-    /* =====================================================
-       CRIAR RASPADINHA
-       ===================================================== */
-
-    criarRaspadinha();
-
-
-    /* =====================================================
-       MENSAGEM
-       ===================================================== */
-
-    if (
-      dados.novaJogada === false
-    ) {
-
-      mostrarMensagem(
-        '✅ Esta jogada já estava liberada para este número.',
-        'sucesso'
-      );
-
-    } else {
-
-      mostrarMensagem(
-        '✅ Número pago confirmado. Sua jogada foi liberada!',
-        'sucesso'
-      );
-
-    }
-
-
-    /* =====================================================
-       ROLAR ATÉ A RASPADINHA
-       ===================================================== */
-
-    areaRaspadinha?.scrollIntoView({
-
-      behavior:
-        'smooth',
-
-      block:
-        'center'
-
-    });
-
-
-  } catch (error) {
-
-    console.error(
-      'Erro ao liberar raspadinha:',
-      error
+  ctxCapa =
+    canvasCapa.getContext(
+      "2d"
     );
 
-
-    let texto =
-      'Não foi possível liberar a jogada.';
-
-
-    const codigo =
-      error?.code || '';
-
-
-    if (
-      codigo ===
-      'functions/failed-precondition'
-    ) {
-
-      texto =
-        error?.message ||
-        '⚠️ O pagamento deste número ainda não foi confirmado.';
-
-    }
-
-
-    else if (
-      codigo ===
-      'functions/unauthenticated'
-    ) {
-
-      texto =
-        'É necessário autenticar para liberar a jogada.';
-
-    }
-
-
-    else if (
-      codigo ===
-      'functions/permission-denied'
-    ) {
-
-      texto =
-        '⛔ Este número pertence a outro participante.';
-
-    }
-
-
-    else if (
-      codigo ===
-      'functions/not-found'
-    ) {
-
-      texto =
-        'Número não encontrado na rifa.';
-
-    }
-
-
-    else if (
-      codigo ===
-      'functions/resource-exhausted'
-    ) {
-
-      texto =
-        '⚠️ Os prêmios disponíveis da raspadinha acabaram.';
-
-    }
-
-
-    else if (
-      error?.message
-    ) {
-
-      texto =
-        error.message;
-
-    }
-
-
-    mostrarMensagem(
-      texto,
-      'erro'
+  ctxRaspagem =
+    canvasRaspagem.getContext(
+      "2d"
     );
-
-
-  } finally {
-
-    definirEstadoBotao(
-      false,
-      'LIBERAR JOGADA'
-    );
-
-  }
-
 }
 
 
-/* =========================================================
-   CRIAR RASPADINHA
-========================================================= */
+// ============================================================
+// AJUSTAR CANVAS
+// ============================================================
 
-function criarRaspadinha() {
-
-  if (!canvas) {
+function ajustarCanvas() {
+  if (
+    !canvasCapa ||
+    !canvasRaspagem
+  ) {
     return;
   }
-
-
-  if (!jogadaAtualId) {
-    return;
-  }
-
-
-  raspadinhaCriada =
-    true;
-
-
-  resultadoRevelado =
-    false;
-
-
-  canvas.style.pointerEvents =
-    'auto';
-
-
-  const card =
-    canvas.parentElement;
-
-
-  if (!card) {
-    return;
-  }
-
 
   const largura =
-    Math.max(
-      1,
-      card.clientWidth
-    );
-
+    canvas.clientWidth ||
+    320;
 
   const altura =
-    Math.max(
-      1,
-      card.clientHeight
+    canvas.clientHeight ||
+    230;
+
+
+  const rect =
+    canvas.getBoundingClientRect();
+
+
+  larguraCanvas =
+    rect.width ||
+    largura;
+
+  alturaCanvas =
+    rect.height ||
+    altura;
+
+
+  escalaCanvas =
+    window.devicePixelRatio ||
+    1;
+
+
+  const larguraReal =
+    Math.round(
+      larguraCanvas *
+      escalaCanvas
+    );
+
+  const alturaReal =
+    Math.round(
+      alturaCanvas *
+      escalaCanvas
     );
 
 
-  const dpr =
-    Math.min(
-      window.devicePixelRatio || 1,
-      2
-    );
+  canvasCapa.width =
+    larguraReal;
+
+  canvasCapa.height =
+    alturaReal;
 
 
-  canvas.width =
-    Math.floor(
-      largura * dpr
-    );
+  canvasRaspagem.width =
+    larguraReal;
+
+  canvasRaspagem.height =
+    alturaReal;
 
 
-  canvas.height =
-    Math.floor(
-      altura * dpr
-    );
+  canvasCapa.style.width =
+    `${larguraCanvas}px`;
+
+  canvasCapa.style.height =
+    `${alturaCanvas}px`;
 
 
-  canvas.style.width =
-    `${largura}px`;
+  canvasRaspagem.style.width =
+    `${larguraCanvas}px`;
+
+  canvasRaspagem.style.height =
+    `${alturaCanvas}px`;
 
 
-  canvas.style.height =
-    `${altura}px`;
-
-
-  const ctx =
-    canvas.getContext(
-      '2d'
-    );
-
-
-  if (!ctx) {
-    return;
-  }
-
-
-  ctx.setTransform(
-    dpr,
+  ctxCapa.setTransform(
+    escalaCanvas,
     0,
     0,
-    dpr,
+    escalaCanvas,
     0,
     0
   );
 
 
-  /* =======================================================
-     COBERTURA
-  ======================================================= */
+  ctxRaspagem.setTransform(
+    escalaCanvas,
+    0,
+    0,
+    escalaCanvas,
+    0,
+    0
+  );
+}
 
-  const gradiente =
+
+// ============================================================
+// FUNDO DOURADO
+// ============================================================
+
+function desenharFundoDourado() {
+  const ctx =
+    ctxCapa;
+
+  const largura =
+    larguraCanvas;
+
+  const altura =
+    alturaCanvas;
+
+
+  ctx.clearRect(
+    0,
+    0,
+    largura,
+    altura
+  );
+
+
+  // ----------------------------------------------------------
+  // Gradiente metálico
+  // ----------------------------------------------------------
+
+  const dourado =
     ctx.createLinearGradient(
       0,
       0,
@@ -690,31 +416,54 @@ function criarRaspadinha() {
     );
 
 
-  gradiente.addColorStop(
+  dourado.addColorStop(
     0,
-    '#d9d9d9'
+    "#704200"
   );
 
-
-  gradiente.addColorStop(
-    0.5,
-    '#a9a9a9'
+  dourado.addColorStop(
+    0.08,
+    "#b87905"
   );
 
+  dourado.addColorStop(
+    0.18,
+    "#f7cf57"
+  );
 
-  gradiente.addColorStop(
+  dourado.addColorStop(
+    0.30,
+    "#fff0a1"
+  );
+
+  dourado.addColorStop(
+    0.42,
+    "#c98a08"
+  );
+
+  dourado.addColorStop(
+    0.55,
+    "#f6cc4b"
+  );
+
+  dourado.addColorStop(
+    0.70,
+    "#9a5f00"
+  );
+
+  dourado.addColorStop(
+    0.84,
+    "#f5ca46"
+  );
+
+  dourado.addColorStop(
     1,
-    '#e7e7e7'
+    "#6e4000"
   );
-
-
-  ctx.globalCompositeOperation =
-    'source-over';
 
 
   ctx.fillStyle =
-    gradiente;
-
+    dourado;
 
   ctx.fillRect(
     0,
@@ -724,700 +473,1646 @@ function criarRaspadinha() {
   );
 
 
-  /* =======================================================
-     TEXTO
-  ======================================================= */
-
-  ctx.fillStyle =
-    '#555';
-
-
-  ctx.textAlign =
-    'center';
-
-
-  ctx.textBaseline =
-    'middle';
-
-
-  ctx.font =
-    '900 22px Arial';
-
-
-  ctx.fillText(
-    'RASPE AQUI',
-    largura / 2,
-    altura / 2 - 10
-  );
-
-
-  ctx.font =
-    '700 12px Arial';
-
-
-  ctx.fillText(
-    '🍀 DESCUBRA SUA SORTE 🍀',
-    largura / 2,
-    altura / 2 + 20
-  );
-
-
-  /* =======================================================
-     MODO APAGAR
-  ======================================================= */
-
-  ctx.globalCompositeOperation =
-    'destination-out';
-
-
-  let raspando =
-    false;
-
-
-  let ultimoX =
-    null;
-
-
-  let ultimoY =
-    null;
-
-
-  let ultimoTeste =
-    0;
-
-
-  let revelando =
-    false;
-
-
-  /* =======================================================
-     OBTER PONTO
-  ======================================================= */
-
-  function ponto(event) {
-
-    const rect =
-      canvas.getBoundingClientRect();
-
-
-    let clientX;
-
-    let clientY;
-
-
-    if (
-      event.touches &&
-      event.touches.length
-    ) {
-
-      clientX =
-        event.touches[0].clientX;
-
-
-      clientY =
-        event.touches[0].clientY;
-
-    }
-
-
-    else if (
-      event.changedTouches &&
-      event.changedTouches.length
-    ) {
-
-      clientX =
-        event.changedTouches[0].clientX;
-
-
-      clientY =
-        event.changedTouches[0].clientY;
-
-    }
-
-
-    else {
-
-      clientX =
-        event.clientX;
-
-
-      clientY =
-        event.clientY;
-
-    }
-
-
-    return {
-
-      x:
-        clientX - rect.left,
-
-      y:
-        clientY - rect.top
-
-    };
-
-  }
-
-
-  /* =======================================================
-     RASPAR
-  ======================================================= */
-
-  function raspar(event) {
-
-    if (
-      !raspando ||
-      resultadoRevelado
-    ) {
-
-      return;
-
-    }
-
-
-    event.preventDefault();
-
-
-    const p =
-      ponto(event);
-
-
-    ctx.lineCap =
-      'round';
-
-
-    ctx.lineJoin =
-      'round';
-
-
-    ctx.lineWidth =
-      48;
-
-
-    ctx.beginPath();
-
-
-    if (
-      ultimoX !== null &&
-      ultimoY !== null
-    ) {
-
-      ctx.moveTo(
-        ultimoX,
-        ultimoY
-      );
-
-    } else {
-
-      ctx.moveTo(
-        p.x,
-        p.y
-      );
-
-    }
-
-
-    ctx.lineTo(
-      p.x,
-      p.y
+  // ----------------------------------------------------------
+  // Brilho radial
+  // ----------------------------------------------------------
+
+  const radial =
+    ctx.createRadialGradient(
+      largura * 0.5,
+      altura * 0.45,
+      10,
+      largura * 0.5,
+      altura * 0.45,
+      Math.max(
+        largura,
+        altura
+      ) * 0.8
     );
 
 
-    ctx.stroke();
+  radial.addColorStop(
+    0,
+    "rgba(255,255,220,0.30)"
+  );
+
+  radial.addColorStop(
+    0.45,
+    "rgba(255,220,100,0.12)"
+  );
+
+  radial.addColorStop(
+    1,
+    "rgba(70,35,0,0.30)"
+  );
 
 
-    ultimoX =
-      p.x;
+  ctx.fillStyle =
+    radial;
+
+  ctx.fillRect(
+    0,
+    0,
+    largura,
+    altura
+  );
 
 
-    ultimoY =
-      p.y;
+  // ----------------------------------------------------------
+  // Textura metálica
+  // ----------------------------------------------------------
+
+  ctx.save();
+
+  ctx.globalAlpha =
+    0.10;
 
 
-    const agora =
-      Date.now();
+  for (
+    let y = 0;
+    y < altura;
+    y += 4
+  ) {
+    ctx.fillStyle =
+      y % 8 === 0
+        ? "#fff3ae"
+        : "#5c3500";
 
 
-    if (
-      agora - ultimoTeste >
-      180
-    ) {
-
-      ultimoTeste =
-        agora;
-
-
-      verificarRevelacao();
-
-    }
-
+    ctx.fillRect(
+      0,
+      y,
+      largura,
+      1
+    );
   }
 
 
-  /* =======================================================
-     COMEÇAR
-  ======================================================= */
+  ctx.restore();
+}
 
-  function iniciar(event) {
 
-    if (resultadoRevelado) {
+// ============================================================
+// TREVO
+// ============================================================
+
+function desenharTrevo(
+  ctx,
+  x,
+  y,
+  tamanho,
+  rotacao,
+  opacidade
+) {
+  ctx.save();
+
+  ctx.translate(
+    x,
+    y
+  );
+
+  ctx.rotate(
+    rotacao
+  );
+
+  ctx.globalAlpha =
+    opacidade;
+
+
+  const escala =
+    tamanho / 40;
+
+  ctx.scale(
+    escala,
+    escala
+  );
+
+
+  ctx.shadowColor =
+    "rgba(255,255,255,0.60)";
+
+  ctx.shadowBlur =
+    5;
+
+
+  const verde =
+    ctx.createRadialGradient(
+      -5,
+      -5,
+      1,
+      0,
+      0,
+      25
+    );
+
+
+  verde.addColorStop(
+    0,
+    "#ecffd0"
+  );
+
+  verde.addColorStop(
+    0.25,
+    "#75cf46"
+  );
+
+  verde.addColorStop(
+    0.60,
+    "#29952f"
+  );
+
+  verde.addColorStop(
+    1,
+    "#0c5317"
+  );
+
+
+  ctx.fillStyle =
+    verde;
+
+
+  const folhas = [
+    [0, -11],
+    [11, 0],
+    [0, 11],
+    [-11, 0]
+  ];
+
+
+  folhas.forEach(
+    ([fx, fy]) => {
+      ctx.beginPath();
+
+      ctx.arc(
+        fx,
+        fy,
+        10,
+        0,
+        Math.PI * 2
+      );
+
+      ctx.fill();
+    }
+  );
+
+
+  // Centro
+  ctx.beginPath();
+
+  ctx.arc(
+    0,
+    0,
+    5,
+    0,
+    Math.PI * 2
+  );
+
+  ctx.fillStyle =
+    "#1b6d1e";
+
+  ctx.fill();
+
+
+  // Cabinho
+  ctx.beginPath();
+
+  ctx.moveTo(
+    2,
+    5
+  );
+
+  ctx.quadraticCurveTo(
+    6,
+    18,
+    2,
+    27
+  );
+
+  ctx.strokeStyle =
+    "#236a1e";
+
+  ctx.lineWidth =
+    3;
+
+  ctx.lineCap =
+    "round";
+
+  ctx.stroke();
+
+
+  ctx.restore();
+}
+
+
+// ============================================================
+// TREVO ANIMADO
+// ============================================================
+
+const trevosAnimados = [
+  {
+    x: 0.12,
+    y: 0.23,
+    tamanho: 25,
+    fase: 0.0,
+    velocidade: 0.0009,
+    opacidade: 0.40
+  },
+
+  {
+    x: 0.84,
+    y: 0.20,
+    tamanho: 31,
+    fase: 1.5,
+    velocidade: 0.0011,
+    opacidade: 0.45
+  },
+
+  {
+    x: 0.16,
+    y: 0.78,
+    tamanho: 32,
+    fase: 2.4,
+    velocidade: 0.0008,
+    opacidade: 0.32
+  },
+
+  {
+    x: 0.83,
+    y: 0.78,
+    tamanho: 27,
+    fase: 3.1,
+    velocidade: 0.0010,
+    opacidade: 0.38
+  }
+];
+
+
+function desenharTrevosAnimados(tempo) {
+  const ctx =
+    ctxCapa;
+
+
+  trevosAnimados.forEach(
+    trevo => {
+      const x =
+        larguraCanvas *
+        trevo.x;
+
+      const yBase =
+        alturaCanvas *
+        trevo.y;
+
+
+      const movimento =
+        Math.sin(
+          tempo *
+          trevo.velocidade +
+          trevo.fase
+        ) * 8;
+
+
+      const rotacao =
+        Math.sin(
+          tempo *
+          trevo.velocidade *
+          0.8 +
+          trevo.fase
+        ) * 0.18;
+
+
+      desenharTrevo(
+        ctx,
+        x,
+        yBase + movimento,
+        trevo.tamanho,
+        rotacao,
+        trevo.opacidade
+      );
+    }
+  );
+}
+
+
+// ============================================================
+// TEXTO
+// ============================================================
+
+function desenharTexto() {
+  const ctx =
+    ctxCapa;
+
+  const largura =
+    larguraCanvas;
+
+  const altura =
+    alturaCanvas;
+
+
+  ctx.save();
+
+  ctx.textAlign =
+    "center";
+
+  ctx.textBaseline =
+    "middle";
+
+
+  ctx.shadowColor =
+    "rgba(70,35,0,0.80)";
+
+  ctx.shadowBlur =
+    5;
+
+  ctx.shadowOffsetX =
+    2;
+
+  ctx.shadowOffsetY =
+    3;
+
+
+  // ----------------------------------------------------------
+  // RASPE AQUI
+  // ----------------------------------------------------------
+
+  ctx.font =
+    "900 30px Arial, sans-serif";
+
+
+  ctx.fillStyle =
+    "#fff4b4";
+
+  ctx.strokeStyle =
+    "#6b3d00";
+
+  ctx.lineWidth =
+    3;
+
+
+  ctx.strokeText(
+    "RASPE AQUI",
+    largura / 2,
+    altura / 2 - 18
+  );
+
+
+  ctx.fillText(
+    "RASPE AQUI",
+    largura / 2,
+    altura / 2 - 18
+  );
+
+
+  // ----------------------------------------------------------
+  // TEXTO SECUNDÁRIO
+  // ----------------------------------------------------------
+
+  ctx.font =
+    "700 14px Arial, sans-serif";
+
+
+  ctx.fillStyle =
+    "#fff8d5";
+
+  ctx.strokeStyle =
+    "#754500";
+
+  ctx.lineWidth =
+    2;
+
+
+  ctx.strokeText(
+    "🍀 DESCUBRA SUA SORTE 🍀",
+    largura / 2,
+    altura / 2 + 21
+  );
+
+
+  ctx.fillText(
+    "🍀 DESCUBRA SUA SORTE 🍀",
+    largura / 2,
+    altura / 2 + 21
+  );
+
+
+  ctx.restore();
+}
+
+
+// ============================================================
+// BORDA
+// ============================================================
+
+function desenharBorda() {
+  const ctx =
+    ctxCapa;
+
+  const largura =
+    larguraCanvas;
+
+  const altura =
+    alturaCanvas;
+
+
+  ctx.save();
+
+
+  ctx.strokeStyle =
+    "rgba(255,246,180,0.95)";
+
+  ctx.lineWidth =
+    3;
+
+
+  ctx.strokeRect(
+    2,
+    2,
+    largura - 4,
+    altura - 4
+  );
+
+
+  ctx.strokeStyle =
+    "rgba(80,45,0,0.80)";
+
+  ctx.lineWidth =
+    1;
+
+
+  ctx.strokeRect(
+    7,
+    7,
+    largura - 14,
+    altura - 14
+  );
+
+
+  ctx.restore();
+}
+
+
+// ============================================================
+// BRILHO
+// ============================================================
+
+function desenharBrilho() {
+  const ctx =
+    ctxCapa;
+
+  const largura =
+    larguraCanvas;
+
+  const altura =
+    alturaCanvas;
+
+
+  const brilho =
+    ctx.createLinearGradient(
+      posicaoBrilho,
+      0,
+      posicaoBrilho + 120,
+      0
+    );
+
+
+  brilho.addColorStop(
+    0,
+    "rgba(255,255,255,0)"
+  );
+
+  brilho.addColorStop(
+    0.45,
+    "rgba(255,255,255,0.15)"
+  );
+
+  brilho.addColorStop(
+    0.50,
+    "rgba(255,255,255,0.55)"
+  );
+
+  brilho.addColorStop(
+    0.55,
+    "rgba(255,255,255,0.15)"
+  );
+
+  brilho.addColorStop(
+    1,
+    "rgba(255,255,255,0)"
+  );
+
+
+  ctx.save();
+
+  ctx.globalCompositeOperation =
+    "source-atop";
+
+  ctx.fillStyle =
+    brilho;
+
+  ctx.fillRect(
+    0,
+    0,
+    largura,
+    altura
+  );
+
+  ctx.restore();
+
+
+  posicaoBrilho +=
+    2.5;
+
+
+  if (
+    posicaoBrilho >
+    largura + 250
+  ) {
+    posicaoBrilho =
+      -250;
+  }
+}
+
+
+// ============================================================
+// DESENHAR CAPA COMPLETA
+// ============================================================
+
+function desenharCapaCompleta(
+  tempo
+) {
+  if (
+    !ctxCapa ||
+    revelada
+  ) {
+    return;
+  }
+
+
+  desenharFundoDourado();
+
+  desenharTrevosAnimados(
+    tempo
+  );
+
+  desenharTexto();
+
+  desenharBorda();
+
+  desenharBrilho();
+}
+
+
+// ============================================================
+// ANIMAÇÃO
+// ============================================================
+
+function iniciarAnimacao() {
+  if (animacao) {
+    cancelAnimationFrame(
+      animacao
+    );
+  }
+
+
+  function quadro(tempo) {
+    if (revelada) {
       return;
     }
 
 
-    raspando =
-      true;
+    desenharCapaCompleta(
+      tempo
+    );
 
 
-    ultimoX =
-      null;
-
-
-    ultimoY =
-      null;
-
-
-    raspar(event);
-
+    animacao =
+      requestAnimationFrame(
+        quadro
+      );
   }
 
 
-  /* =======================================================
-     PARAR
-  ======================================================= */
-
-  function parar() {
-
-    raspando =
-      false;
+  animacao =
+    requestAnimationFrame(
+      quadro
+    );
+}
 
 
-    ultimoX =
-      null;
+// ============================================================
+// PARAR ANIMAÇÃO
+// ============================================================
+
+function pararAnimacao() {
+  if (animacao) {
+    cancelAnimationFrame(
+      animacao
+    );
+
+    animacao = null;
+  }
+}
 
 
-    ultimoY =
-      null;
+// ============================================================
+// LIMPAR CAMADA DE RASPAGEM
+// ============================================================
 
+function limparRaspagem() {
+  if (!ctxRaspagem) return;
+
+  ctxRaspagem.clearRect(
+    0,
+    0,
+    larguraCanvas,
+    alturaCanvas
+  );
+}
+
+
+// ============================================================
+// CONFIGURAR PINCEL
+// ============================================================
+
+function configurarPincel() {
+  if (!ctxRaspagem) return;
+
+  ctxRaspagem.globalCompositeOperation =
+    "destination-out";
+
+  ctxRaspagem.lineWidth =
+    38;
+
+  ctxRaspagem.lineCap =
+    "round";
+
+  ctxRaspagem.lineJoin =
+    "round";
+}
+
+
+// ============================================================
+// POSIÇÃO
+// ============================================================
+
+function obterPosicao(evento) {
+  const alvo =
+    canvasRaspagem;
+
+  const rect =
+    alvo.getBoundingClientRect();
+
+
+  let clienteX = 0;
+  let clienteY = 0;
+
+
+  if (
+    evento.touches &&
+    evento.touches.length
+  ) {
+    clienteX =
+      evento.touches[0].clientX;
+
+    clienteY =
+      evento.touches[0].clientY;
+
+  } else if (
+    evento.changedTouches &&
+    evento.changedTouches.length
+  ) {
+    clienteX =
+      evento.changedTouches[0].clientX;
+
+    clienteY =
+      evento.changedTouches[0].clientY;
+
+  } else {
+    clienteX =
+      evento.clientX;
+
+    clienteY =
+      evento.clientY;
   }
 
 
-  /* =======================================================
-     MOUSE
-  ======================================================= */
+  return {
+    x:
+      clienteX -
+      rect.left,
 
-  canvas.onmousedown =
-    iniciar;
-
-
-  canvas.onmousemove =
-    raspar;
-
-
-  canvas.onmouseup =
-    parar;
+    y:
+      clienteY -
+      rect.top
+  };
+}
 
 
-  canvas.onmouseleave =
-    parar;
+// ============================================================
+// INÍCIO DA RASPAGEM
+// ============================================================
+
+function iniciarRaspagem(
+  evento
+) {
+  if (revelada) {
+    return;
+  }
 
 
-  /* =======================================================
-     TOUCH
-  ======================================================= */
-
-  canvas.ontouchstart =
-    iniciar;
+  raspando = true;
 
 
-  canvas.ontouchmove =
-    raspar;
+  const posicao =
+    obterPosicao(
+      evento
+    );
 
 
-  canvas.ontouchend =
-    parar;
+  ultimoX =
+    posicao.x;
+
+  ultimoY =
+    posicao.y;
 
 
-  canvas.ontouchcancel =
-    parar;
+  raspar(
+    evento
+  );
+}
 
 
-  /* =======================================================
-     VERIFICAR REVELAÇÃO
-  ======================================================= */
+// ============================================================
+// RASPAGEM
+// ============================================================
 
-  function verificarRevelacao() {
-
-    if (
-      revelando ||
-      resultadoRevelado ||
-      !jogadaAtualId
-    ) {
-
-      return;
-
-    }
+function raspar(evento) {
+  if (
+    !raspando ||
+    revelada
+  ) {
+    return;
+  }
 
 
-    const pixels =
-      ctx.getImageData(
-        0,
-        0,
-        canvas.width,
-        canvas.height
-      ).data;
+  evento.preventDefault();
 
 
-    let transparentes =
-      0;
+  const posicao =
+    obterPosicao(
+      evento
+    );
 
 
-    let total =
-      0;
+  configurarPincel();
 
 
-    /*
-     * Amostragem para não pesar
-     * no celular.
-     */
-
-    const passoX =
-      Math.max(
-        1,
-        Math.floor(
-          canvas.width / 120
-        )
-      );
+  ctxRaspagem.beginPath();
 
 
-    const passoY =
-      Math.max(
-        1,
-        Math.floor(
-          canvas.height / 120
-        )
-      );
+  if (
+    ultimoX !== null &&
+    ultimoY !== null
+  ) {
+    ctxRaspagem.moveTo(
+      ultimoX,
+      ultimoY
+    );
+
+  } else {
+    ctxRaspagem.moveTo(
+      posicao.x,
+      posicao.y
+    );
+  }
 
 
+  ctxRaspagem.lineTo(
+    posicao.x,
+    posicao.y
+  );
+
+
+  ctxRaspagem.stroke();
+
+
+  ultimoX =
+    posicao.x;
+
+  ultimoY =
+    posicao.y;
+
+
+  verificarPercentual();
+}
+
+
+// ============================================================
+// FIM DA RASPAGEM
+// ============================================================
+
+function pararRaspagem() {
+  raspando = false;
+
+  ultimoX = null;
+  ultimoY = null;
+}
+
+
+// ============================================================
+// VERIFICAR ÁREA RASPADA
+// ============================================================
+
+function verificarPercentual() {
+  const agora =
+    Date.now();
+
+
+  if (
+    agora -
+      ultimaVerificacao <
+    180
+  ) {
+    return;
+  }
+
+
+  ultimaVerificacao =
+    agora;
+
+
+  if (!ctxRaspagem) {
+    return;
+  }
+
+
+  const largura =
+    canvasRaspagem.width;
+
+  const altura =
+    canvasRaspagem.height;
+
+
+  const imagem =
+    ctxRaspagem.getImageData(
+      0,
+      0,
+      largura,
+      altura
+    );
+
+
+  const dados =
+    imagem.data;
+
+
+  let transparentes =
+    0;
+
+  let total =
+    0;
+
+
+  // Analisa amostras
+  // para não sobrecarregar celulares
+
+  const passo =
+    18;
+
+
+  for (
+    let y = 0;
+    y < altura;
+    y += passo
+  ) {
     for (
-      let y = 0;
-      y < canvas.height;
-      y += passoY
+      let x = 0;
+      x < largura;
+      x += passo
     ) {
+      const indice =
+        (y * largura + x) * 4;
 
-      for (
-        let x = 0;
-        x < canvas.width;
-        x += passoX
+
+      const alpha =
+        dados[
+          indice + 3
+        ];
+
+
+      if (
+        alpha < 80
       ) {
-
-        const indice =
-          (
-            y *
-            canvas.width +
-            x
-          ) *
-          4 +
-          3;
-
-
-        total++;
-
-
-        if (
-          pixels[indice] < 30
-        ) {
-
-          transparentes++;
-
-        }
-
+        transparentes++;
       }
 
+
+      total++;
     }
-
-
-    if (!total) {
-      return;
-    }
-
-
-    const percentual =
-      transparentes /
-      total;
-
-
-    /*
-     * Quando aproximadamente 65%
-     * da cobertura for removida,
-     * consulta o servidor.
-     */
-
-    if (
-      percentual >= 0.65
-    ) {
-
-      revelarResultado();
-
-    }
-
   }
 
 
-  /* =======================================================
-     REVELAR RESULTADO
-  ======================================================= */
+  if (!total) {
+    return;
+  }
 
-  async function revelarResultado() {
+
+  const percentual =
+    transparentes /
+    total;
+
+
+  if (
+    percentual >=
+    0.65
+  ) {
+    revelarResultado();
+  }
+}
+
+
+// ============================================================
+// REVELAR RESULTADO
+// ============================================================
+
+async function revelarResultado() {
+  if (revelada) {
+    return;
+  }
+
+
+  revelada = true;
+
+  raspando = false;
+
+
+  pararAnimacao();
+
+
+  // Remove a camada de raspagem
+  // e deixa o resultado aparecer
+
+  limparRaspagem();
+
+
+  if (!jogadaIdAtual) {
+    mostrarMensagem(
+      "Não foi possível identificar esta jogada.",
+      "erro"
+    );
+
+    return;
+  }
+
+
+  mostrarMensagem(
+    "🍀 Revelando sua sorte...",
+    "normal"
+  );
+
+
+  try {
+    const resposta =
+      await revelarJogada({
+        jogadaId:
+          jogadaIdAtual
+      });
+
+
+    const dados =
+      resposta.data;
+
 
     if (
-      revelando ||
-      resultadoRevelado ||
-      !jogadaAtualId
+      !dados ||
+      !dados.resultado
     ) {
-
-      return;
-
+      throw new Error(
+        "Resultado da raspadinha não encontrado."
+      );
     }
 
 
-    revelando =
+    mostrarResultado(
+      dados.resultado
+    );
+
+
+  } catch (erro) {
+    console.error(
+      "Erro ao revelar raspadinha:",
+      erro
+    );
+
+
+    mostrarMensagem(
+      obterMensagemErro(
+        erro
+      ),
+      "erro"
+    );
+  }
+}
+
+
+// ============================================================
+// MOSTRAR PRÊMIO
+// ============================================================
+
+function mostrarResultado(
+  premio
+) {
+  if (!resultado) {
+    return;
+  }
+
+
+  resultado.innerHTML =
+    "";
+
+
+  const titulo =
+    document.createElement(
+      "div"
+    );
+
+  titulo.className =
+    "raspadinha-titulo-resultado";
+
+  titulo.textContent =
+    "🍀 PARABÉNS! 🍀";
+
+
+  const nome =
+    document.createElement(
+      "div"
+    );
+
+  nome.className =
+    "raspadinha-premio";
+
+  nome.textContent =
+    premio.nome ||
+    "Você ganhou um prêmio!";
+
+
+  resultado.appendChild(
+    titulo
+  );
+
+  resultado.appendChild(
+    nome
+  );
+
+
+  if (premio.imagem) {
+    const imagem =
+      document.createElement(
+        "img"
+      );
+
+
+    imagem.src =
+      premio.imagem;
+
+
+    imagem.alt =
+      premio.nome ||
+      "Prêmio da raspadinha";
+
+
+    imagem.className =
+      "raspadinha-imagem-premio";
+
+
+    resultado.appendChild(
+      imagem
+    );
+  }
+
+
+  resultado.style.display =
+    "block";
+
+
+  mostrarMensagem(
+    "🎉 Sua raspadinha foi revelada!",
+    "sucesso"
+  );
+}
+
+
+// ============================================================
+// LIBERAR JOGADA
+// ============================================================
+
+async function liberarJogada() {
+  if (!firebaseConfigured) {
+    mostrarMensagem(
+      "O Firebase ainda não está configurado.",
+      "erro"
+    );
+
+    return;
+  }
+
+
+  const numero =
+    normalizarNumero(
+      campoNumero?.value
+    );
+
+
+  if (!numero) {
+    mostrarMensagem(
+      "Digite um número válido de 000 a 999.",
+      "erro"
+    );
+
+    campoNumero?.focus();
+
+    return;
+  }
+
+
+  try {
+    botaoLiberar.disabled =
       true;
 
 
     mostrarMensagem(
-      '🔎 Consultando o resultado da sua jogada...',
-      'normal'
+      "🔐 Verificando sua participação...",
+      "normal"
     );
 
 
-    try {
-
-      await garantirAutenticacao();
+    await garantirAutenticacao();
 
 
-      if (!revelarJogada) {
-
-        throw new Error(
-          'A função de revelação não está disponível.'
-        );
-
-      }
+    mostrarMensagem(
+      "🍀 Liberando sua raspadinha...",
+      "normal"
+    );
 
 
-      const resposta =
-        await revelarJogada({
-
-          jogadaId:
-            jogadaAtualId
-
-        });
+    const resposta =
+      await criarJogada({
+        numeroRifa:
+          numero
+      });
 
 
-      const dados =
-        resposta?.data || {};
+    const dados =
+      resposta.data;
 
 
-      if (
-        !dados.ok ||
-        !dados.resultado
-      ) {
-
-        throw new Error(
-          'O servidor não retornou um resultado válido.'
-        );
-
-      }
-
-
-      /* ===================================================
-         RESULTADO REAL
-      =================================================== */
-
-      resultadoRevelado =
-        true;
-
-
-      if (resultado) {
-
-        resultado.textContent =
-          dados.resultado.nome ||
-          'PRÊMIO';
-
-      }
-
-
-      /* ===================================================
-         IMAGEM DO PRÊMIO
-      =================================================== */
-
-      if (
-        dados.resultado.imagem &&
-        resultado
-      ) {
-
-        const imagem =
-          document.createElement(
-            'img'
-          );
-
-
-        imagem.src =
-          dados.resultado.imagem;
-
-
-        imagem.alt =
-          dados.resultado.nome ||
-          'Prêmio';
-
-
-        imagem.style.display =
-          'block';
-
-
-        imagem.style.maxWidth =
-          '140px';
-
-
-        imagem.style.width =
-          '100%';
-
-
-        imagem.style.height =
-          'auto';
-
-
-        imagem.style.margin =
-          '12px auto';
-
-
-        imagem.style.borderRadius =
-          '12px';
-
-
-        resultado.appendChild(
-          imagem
-        );
-
-      }
-
-
-      /* ===================================================
-         LIMPAR COBERTURA
-      =================================================== */
-
-      ctx.clearRect(
-        0,
-        0,
-        largura,
-        altura
+    if (
+      !dados ||
+      !dados.jogadaId
+    ) {
+      throw new Error(
+        "O servidor não retornou a jogada."
       );
-
-
-      canvas.style.pointerEvents =
-        'none';
-
-
-      mostrarMensagem(
-        '🎉 Raspadinha revelada!',
-        'sucesso'
-      );
-
-
-    } catch (error) {
-
-      console.error(
-        'Erro ao revelar raspadinha:',
-        error
-      );
-
-
-      let texto =
-        'Não foi possível revelar o resultado.';
-
-
-      if (
-        error?.code ===
-        'functions/permission-denied'
-      ) {
-
-        texto =
-          '⛔ Esta jogada não pertence a esta sessão.';
-
-      }
-
-
-      else if (
-        error?.code ===
-        'functions/not-found'
-      ) {
-
-        texto =
-          'Jogada não encontrada.';
-
-      }
-
-
-      else if (
-        error?.code ===
-        'functions/failed-precondition'
-      ) {
-
-        texto =
-          error.message ||
-          'Esta jogada ainda não pode ser revelada.';
-
-      }
-
-
-      else if (
-        error?.code ===
-        'functions/resource-exhausted'
-      ) {
-
-        texto =
-          '⚠️ Os prêmios disponíveis da raspadinha acabaram.';
-
-      }
-
-
-      else if (
-        error?.message
-      ) {
-
-        texto =
-          error.message;
-
-      }
-
-
-      mostrarMensagem(
-        texto,
-        'erro'
-      );
-
-    } finally {
-
-      revelando =
-        false;
-
     }
 
-  }
 
+    jogadaIdAtual =
+      dados.jogadaId;
+
+
+    numeroAtual =
+      numero;
+
+
+    revelada = false;
+
+
+    // --------------------------------------------------------
+    // Mostrar área
+    // --------------------------------------------------------
+
+    if (areaRaspadinha) {
+      areaRaspadinha.style.display =
+        "block";
+    }
+
+
+    // --------------------------------------------------------
+    // Limpar resultado
+    // --------------------------------------------------------
+
+    if (resultado) {
+      resultado.innerHTML =
+        "";
+
+      resultado.style.display =
+        "none";
+    }
+
+
+    // --------------------------------------------------------
+    // Preparar duas camadas
+    // --------------------------------------------------------
+
+    prepararCamadas();
+
+    ajustarCanvas();
+
+    limparRaspagem();
+
+
+    // --------------------------------------------------------
+    // Iniciar animação
+    // --------------------------------------------------------
+
+    iniciarAnimacao();
+
+
+    mostrarMensagem(
+      "🍀 BOA SORTE! Raspe a capa dourada para descobrir seu prêmio!",
+      "sucesso"
+    );
+
+
+    // --------------------------------------------------------
+    // Rolar até a raspadinha
+    // --------------------------------------------------------
+
+    setTimeout(
+      () => {
+        areaRaspadinha?.scrollIntoView({
+          behavior: "smooth",
+          block: "center"
+        });
+      },
+      120
+    );
+
+
+  } catch (erro) {
+    console.error(
+      "Erro ao liberar raspadinha:",
+      erro
+    );
+
+
+    mostrarMensagem(
+      obterMensagemErro(
+        erro
+      ),
+      "erro"
+    );
+
+
+  } finally {
+    botaoLiberar.disabled =
+      false;
+  }
 }
 
 
-/* =========================================================
-   AVISO INICIAL
-========================================================= */
+// ============================================================
+// ERROS
+// ============================================================
 
-if (!firebaseConfigured) {
+function obterMensagemErro(
+  erro
+) {
+  const codigo =
+    erro?.code || "";
 
-  mostrarMensagem(
-    'Firebase ainda não configurado.',
-    'erro'
+  const texto =
+    erro?.message || "";
+
+
+  if (
+    codigo.includes(
+      "unauthenticated"
+    )
+  ) {
+    return (
+      "Sua sessão expirou. Tente novamente."
+    );
+  }
+
+
+  if (
+    codigo.includes(
+      "failed-precondition"
+    )
+  ) {
+    return (
+      "Esta raspadinha ainda não está liberada."
+    );
+  }
+
+
+  if (
+    codigo.includes(
+      "not-found"
+    )
+  ) {
+    return (
+      "Jogada não encontrada."
+    );
+  }
+
+
+  if (
+    codigo.includes(
+      "permission-denied"
+    )
+  ) {
+    return (
+      "Você não tem permissão para realizar esta ação."
+    );
+  }
+
+
+  if (texto) {
+    return texto;
+  }
+
+
+  return (
+    "Não foi possível revelar a raspadinha. Tente novamente."
+  );
+}
+
+
+// ============================================================
+// EVENTOS
+// ============================================================
+
+if (botaoLiberar) {
+  botaoLiberar.addEventListener(
+    "click",
+    liberarJogada
+  );
+}
+
+
+if (campoNumero) {
+  campoNumero.addEventListener(
+    "keydown",
+    evento => {
+      if (
+        evento.key === "Enter"
+      ) {
+        evento.preventDefault();
+
+        liberarJogada();
+      }
+    }
+  );
+}
+
+
+// ============================================================
+// CONFIGURAR EVENTOS DA CAMADA DE RASPAGEM
+// ============================================================
+
+function configurarEventosCanvas() {
+  if (!canvasRaspagem) {
+    return;
+  }
+
+
+  canvasRaspagem.addEventListener(
+    "mousedown",
+    iniciarRaspagem
   );
 
+
+  canvasRaspagem.addEventListener(
+    "mousemove",
+    raspar
+  );
+
+
+  canvasRaspagem.addEventListener(
+    "mouseup",
+    pararRaspagem
+  );
+
+
+  canvasRaspagem.addEventListener(
+    "mouseleave",
+    pararRaspagem
+  );
+
+
+  canvasRaspagem.addEventListener(
+    "touchstart",
+    iniciarRaspagem,
+    {
+      passive: false
+    }
+  );
+
+
+  canvasRaspagem.addEventListener(
+    "touchmove",
+    raspar,
+    {
+      passive: false
+    }
+  );
+
+
+  canvasRaspagem.addEventListener(
+    "touchend",
+    pararRaspagem,
+    {
+      passive: true
+    }
+  );
+
+
+  canvasRaspagem.addEventListener(
+    "touchcancel",
+    pararRaspagem,
+    {
+      passive: true
+    }
+  );
+}
+
+
+// ============================================================
+// CSS
+// ============================================================
+
+function adicionarEstilos() {
+  const id =
+    "estilo-raspadinha-gilfest";
+
+  if (
+    document.getElementById(id)
+  ) {
+    return;
+  }
+
+
+  const estilo =
+    document.createElement(
+      "style"
+    );
+
+
+  estilo.id =
+    id;
+
+
+  estilo.textContent = `
+    #areaRaspadinha {
+      width: 100%;
+      max-width: 560px;
+      margin: 25px auto;
+      text-align: center;
+    }
+
+    .gilfest-scratch-container {
+      position: relative;
+      width: 100%;
+      max-width: 520px;
+      height: 260px;
+      margin: 18px auto;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow:
+        0 8px 25px rgba(0,0,0,0.25),
+        0 0 0 3px rgba(180,120,20,0.35);
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .gilfest-canvas-capa,
+    .gilfest-canvas-raspagem {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      border-radius: 18px;
+    }
+
+    .gilfest-canvas-capa {
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .gilfest-canvas-raspagem {
+      z-index: 2;
+      cursor: crosshair;
+      touch-action: none;
+    }
+
+    .raspadinha-titulo-resultado {
+      font-size: 26px;
+      font-weight: 900;
+      margin: 12px 0;
+      letter-spacing: 1px;
+    }
+
+    .raspadinha-premio {
+      font-size: 29px;
+      font-weight: 900;
+      margin: 15px 0;
+    }
+
+    .raspadinha-imagem-premio {
+      display: block;
+      width: auto;
+      max-width: 230px;
+      max-height: 230px;
+      margin: 15px auto;
+      object-fit: contain;
+      border-radius: 15px;
+    }
+
+    #liberar:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+
+    @media (max-width: 600px) {
+      .gilfest-scratch-container {
+        height: 230px;
+        border-radius: 15px;
       }
+
+      .gilfest-canvas-capa,
+      .gilfest-canvas-raspagem {
+        border-radius: 15px;
+      }
+
+      .raspadinha-premio {
+        font-size: 24px;
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .gilfest-canvas-capa {
+        animation: none;
+      }
+    }
+  `;
+
+
+  document.head.appendChild(
+    estilo
+  );
+}
+
+
+// ============================================================
+// RESIZE
+// ============================================================
+
+window.addEventListener(
+  "resize",
+  () => {
+    if (
+      !jogadaIdAtual ||
+      revelada ||
+      !canvasCapa
+    ) {
+      return;
+    }
+
+
+    // Não recria a raspagem durante
+    // um simples redimensionamento.
+    //
+    // Ajustamos apenas as dimensões.
+    ajustarCanvas();
+  }
+);
+
+
+// ============================================================
+// INICIALIZAÇÃO
+// ============================================================
+
+adicionarEstilos();
+
+
+if (areaRaspadinha) {
+  areaRaspadinha.style.display =
+    "none";
+}
+
+
+if (canvas) {
+  prepararCamadas();
+
+  ajustarCanvas();
+
+  configurarEventosCanvas();
+}
+
+
+console.log(
+  "🍀 Raspadinha da Amizade — GILFEST carregada."
+);
