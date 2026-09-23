@@ -1,2543 +1,2046 @@
 import { CONFIG } from './config.js';
 
-import {
-initializeApp
-} from 'https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js';
-
-import {
-getDatabase,
-ref,
-get,
-runTransaction
-} from 'https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js';
-
-/* =========================================================
-🔥 FIREBASE
-========================================================= */
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js';
+import { getDatabase, ref, get, runTransaction } from 'https://www.gstatic.com/firebasejs/12.1.0/firebase-database.js';
 
 let db = null;
 
 try {
-
-if (
-CONFIG &&
-CONFIG.firebaseConfig &&
-CONFIG.firebaseConfig.apiKey
-) {
-
-const app =
-  initializeApp(CONFIG.firebaseConfig);
-
-db =
-  getDatabase(app);
-
-console.log('✅ Firebase conectado.');
-
-} else {
-
-console.warn(
-  '⚠️ Firebase não configurado em config.js.'
-);
-
-}
-
+  if (CONFIG?.firebaseConfig?.apiKey) {
+    const app = initializeApp(CONFIG.firebaseConfig);
+    db = getDatabase(app);
+    console.log('✅ Firebase conectado.');
+  }
 } catch (erro) {
-
-console.error(
-'❌ Erro ao iniciar Firebase:',
-erro
-);
-
+  console.error('❌ Erro ao iniciar Firebase:', erro);
 }
 
-/* =========================================================
-⚙️ CONFIGURAÇÕES
-========================================================= */
+const VALOR_NUMERO = Number(CONFIG?.valorNumero || 10);
+const WHATSAPP = '5579999145044';
+const TEMPO_RESERVA = 24 * 60 * 60 * 1000;
 
-const VALOR_NUMERO =
-Number(CONFIG?.valorNumero || 10);
-
-const WHATSAPP =
-'5579999145044';
-
-const TEMPO_RESERVA =
-24 * 60 * 60 * 1000;
-
-/* =========================================================
-🎯 ELEMENTOS
-========================================================= */
-
-const abrirCartelas =
-document.getElementById('abrirCartelas');
-
-const sugerir =
-document.getElementById('sugerir');
-
-const escolherNumeros =
-document.getElementById('escolherNumeros');
-
-const numeroDireto =
-document.getElementById('numeroDireto');
-
-const verificarNumeroBotao =
-document.getElementById('verificarNumero');
-
-const numeroStatus =
-document.getElementById('numeroStatus');
-
-const reservarNumero =
-document.getElementById('reservarNumero');
-
-const cartaoConfirmacao =
-document.getElementById('confirmarParticipacao');
-
-const mostrarDadosCompra =
-document.getElementById('mostrarDadosCompra');
-
-const dadosCompraOcultos =
-document.getElementById('dadosCompraOcultos');
-
-const reservaNumeros =
-document.getElementById('reservaNumeros');
-
-const reservaTotal =
-document.getElementById('reservaTotal');
-
-const reservaData =
-document.getElementById('reservaData');
-
-const reservaHora =
-document.getElementById('reservaHora');
-
-const limparSelecao =
-document.getElementById('limparSelecao');
-
-const copiarPixReserva =
-document.getElementById('copiarPixReserva');
-
-const pixMsgReserva =
-document.getElementById('pixMsgReserva');
-
-const nomeReserva =
-document.getElementById('nomeReserva');
-
-const telefoneReserva =
-document.getElementById('telefoneReserva');
-
-const enviarComprovante =
-document.getElementById('enviarComprovante');
-
-const comprovanteSelecionado =
-document.getElementById('comprovanteSelecionado');
-
-const nomeComprovante =
-document.getElementById('nomeComprovante');
-
-const msgReserva =
-document.getElementById('msgReserva');
-
-const dataSorteioPublico =
-document.getElementById('dataSorteioPublico');
-
-const scratch =
-document.getElementById('raspadinhaAmizade');
-
-const scratchCanvas =
-document.getElementById('scratchCanvas');
-
-const scratchPremio =
-document.getElementById('scratchPremio');
-
-const scratchSubtexto =
-document.getElementById('scratchSubtexto');
-
-const scratchInstruction =
-document.querySelector('.scratch-instruction');
-
-const revelarNumeroSorte =
-document.getElementById('revelarNumeroSorte');
-
-const numeroSorteResultado =
-document.getElementById('numeroSorteResultado');
-
-/* =========================================================
-🧠 ESTADO DA COMPRA
-========================================================= */
+const abrirCartelas = document.getElementById('abrirCartelas');
+const sugerir = document.getElementById('sugerir');
+const numeroDireto = document.getElementById('numeroDireto');
+const verificarNumeroBotao = document.getElementById('verificarNumero');
+const numeroStatus = document.getElementById('numeroStatus');
+const reservarNumero = document.getElementById('reservarNumero');
+const reservaNumeros = document.getElementById('reservaNumeros');
+const reservaTotal = document.getElementById('reservaTotal');
+const reservaData = document.getElementById('reservaData');
+const reservaHora = document.getElementById('reservaHora');
+const copiarPixReserva = document.getElementById('copiarPixReserva');
+const pixMsgReserva = document.getElementById('pixMsgReserva');
+const nomeReserva = document.getElementById('nomeReserva');
+const telefoneReserva = document.getElementById('telefoneReserva');
+const reservarReserva = document.getElementById('reservarReserva');
+const msgReserva = document.getElementById('msgReserva');
+const mostrarDadosCompra = document.getElementById('mostrarDadosCompra');
+const dadosCompraOcultos = document.getElementById('dadosCompraOcultos');
+const limparSelecao = document.getElementById('limparSelecao');
+const enviarComprovante = document.getElementById('enviarComprovante');
+const comprovanteSelecionado = document.getElementById('comprovanteSelecionado');
+const nomeComprovante = document.getElementById('nomeComprovante');
+const revelarNumeroSorte = document.getElementById('revelarNumeroSorte');
+const numeroSorteResultado = document.getElementById('numeroSorteResultado');
 
 let compraAtual = {
-
-numeros: [],
-
-quantidade: 0,
-
-total: 0,
-
-data: '',
-
-hora: '',
-
-timestamp: '',
-
-status: 'selecionado',
-
-expiraEm: null
-
+  numeros: [],
+  quantidade: 0,
+  total: 0,
+  data: '',
+  hora: '',
+  timestamp: '',
+  status: 'selecionado',
+  expiraEm: null
 };
-
-/* =========================================================
-🔢 FORMATAÇÃO DO NÚMERO
-========================================================= */
 
 function formatarNumero(valor) {
+  const numero = Number(valor);
 
-const texto =
-String(valor ?? '').trim();
+  if (
+    !Number.isInteger(numero) ||
+    numero < 0 ||
+    numero > 999
+  ) {
+    return null;
+  }
 
-if (!/^\d{1,3}$/.test(texto)) {
-return null;
+  return String(numero).padStart(3, '0');
 }
-
-const numero =
-Number(texto);
-
-if (
-!Number.isInteger(numero) ||
-numero < 0 ||
-numero > 999
-) {
-return null;
-}
-
-return String(numero).padStart(3, '0');
-}
-
-/* =========================================================
-🎟️ NORMALIZAR LISTA DE NÚMEROS
-========================================================= */
-
-function normalizarListaNumeros(lista) {
-
-if (!Array.isArray(lista)) {
-return [];
-}
-
-const resultado = [];
-
-lista.forEach(valor => {
-
-const numero =
-  formatarNumero(valor);
-
-if (
-  numero &&
-  !resultado.includes(numero)
-) {
-  resultado.push(numero);
-}
-
-});
-
-return resultado.slice(0, 10);
-}
-
-/* =========================================================
-💰 FORMATAÇÃO DO VALOR
-========================================================= */
 
 function formatarValor(valor) {
-
-return Number(valor || 0).toLocaleString(
-'pt-BR',
-{
-style: 'currency',
-currency: 'BRL'
-}
-);
-
-}
-
-/* =========================================================
-📅 DATA E HORA ATUAIS
-========================================================= */
-
-function obterDataHora() {
-
-const agora =
-new Date();
-
-return {
-
-data:
-  agora.toLocaleDateString('pt-BR'),
-
-hora:
-  agora.toLocaleTimeString(
+  return Number(valor || 0).toLocaleString(
     'pt-BR',
     {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
+      style: 'currency',
+      currency: 'BRL'
     }
-  ),
-
-timestamp:
-  agora.toISOString()
-
-};
-
+  );
 }
 
-/* =========================================================
-🟢 STATUS DO NÚMERO
-========================================================= */
+function obterDataHora() {
+  const agora = new Date();
 
-function mostrarStatus(
-mensagem,
-tipo = 'verificando'
-) {
+  return {
+    data: agora.toLocaleDateString('pt-BR'),
 
-if (!numeroStatus) {
-return;
+    hora: agora.toLocaleTimeString(
+      'pt-BR',
+      {
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit'
+      }
+    ),
+
+    timestamp: agora.toISOString()
+  };
 }
-
-numeroStatus.style.display =
-'flex';
-
-numeroStatus.textContent =
-mensagem;
-
-numeroStatus.classList.remove(
-'disponivel',
-'indisponivel',
-'verificando',
-'erro'
-);
-
-numeroStatus.classList.add(tipo);
-
-}
-
-/* =========================================================
-⚠️ ERRO
-========================================================= */
-
-function mostrarErro(mensagem) {
-
-mostrarStatus(
-"⚠️ ${mensagem}",
-'erro'
-);
-
-}
-
-/* =========================================================
-🧹 LIMPAR STATUS
-========================================================= */
-
-function limparNumeroStatus() {
-
-if (numeroStatus) {
-
-numeroStatus.textContent =
-  '';
-
-numeroStatus.style.display =
-  'none';
-
-numeroStatus.classList.remove(
-  'disponivel',
-  'indisponivel',
-  'verificando',
-  'erro'
-);
-
-}
-
-if (reservarNumero) {
-
-reservarNumero.hidden =
-  true;
-
-reservarNumero.style.display =
-  'none';
-
-reservarNumero.disabled =
-  false;
-
-reservarNumero.textContent =
-  '🛒 COMPRAR NÚMERO';
-
-delete reservarNumero.dataset.numero;
-
-}
-
-}
-
-/* =========================================================
-⏱️ RESERVA EXPIRADA
-========================================================= */
-
-function reservaExpirou(dados) {
-
-if (!dados) {
-return false;
-}
-
-const expiraEm =
-Number(dados.expiraEm || 0);
-
-if (!expiraEm) {
-return false;
-}
-
-return Date.now() >= expiraEm;
-
-}
-
-/* =========================================================
-🔒 NÚMERO OCUPADO
-========================================================= */
-
-function numeroEstaOcupado(dados) {
-
-if (!dados) {
-return false;
-}
-
-if (
-String(dados.status || '').toLowerCase() ===
-'reservado' &&
-reservaExpirou(dados)
-) {
-
-return false;
-
-}
-
-const status =
-String(
-dados.status ||
-dados.situacao ||
-''
-).toLowerCase();
-
-return (
-
-status === 'reservado' ||
-status === 'vendido' ||
-status === 'pago' ||
-status === 'ocupado' ||
-status === 'indisponivel' ||
-
-dados.reservado === true ||
-dados.vendido === true ||
-dados.pago === true ||
-dados.ocupado === true
-
-);
-
-}
-
-/* =========================================================
-💾 SALVAR COMPRA
-========================================================= */
 
 function salvarCompra() {
-
-try {
-
-localStorage.setItem(
-  'rifaCompraAtual',
-  JSON.stringify(compraAtual)
-);
-
-} catch (erro) {
-
-console.warn(
-  '⚠️ Não foi possível salvar a compra.',
-  erro
-);
-
-}
-
-}
-
-/* =========================================================
-💾 SALVAR SELEÇÃO
-========================================================= */
-
-function salvarSelecionados(numeros) {
-
-try {
-
-localStorage.setItem(
-  'rifaSelecionados',
-  JSON.stringify(numeros)
-);
-
-} catch (erro) {
-
-console.warn(
-  '⚠️ Não foi possível salvar a seleção.',
-  erro
-);
-
-}
-
-}
-
-/* =========================================================
-📋 LER SELEÇÃO DA CARTELA
-========================================================= */
-
-function lerSelecionados() {
-
-try {
-
-const salvo =
-  localStorage.getItem(
-    'rifaSelecionados'
-  );
-
-if (!salvo) {
-  return [];
-}
-
-const lista =
-  JSON.parse(salvo);
-
-return normalizarListaNumeros(lista);
-
-} catch (erro) {
-
-console.warn(
-  '⚠️ Erro ao ler números selecionados.',
-  erro
-);
-
-return [];
-
-}
-
-}
-
-/* =========================================================
-🧾 PREENCHER CARTÃO DE CONFIRMAÇÃO
-========================================================= */
-
-function preencherCompra(
-numeros,
-dataHora = obterDataHora()
-) {
-
-const lista =
-normalizarListaNumeros(numeros);
-
-if (!lista.length) {
-return false;
-}
-
-const quantidade =
-lista.length;
-
-const total =
-quantidade * VALOR_NUMERO;
-
-compraAtual = {
-
-numeros: lista,
-
-quantidade,
-
-total,
-
-data: dataHora.data,
-
-hora: dataHora.hora,
-
-timestamp: dataHora.timestamp,
-
-status: 'selecionado',
-
-expiraEm: null
-
-};
-
-salvarCompra();
-
-if (reservaNumeros) {
-
-reservaNumeros.textContent =
-  lista.join(', ');
-
-}
-
-if (reservaTotal) {
-
-reservaTotal.textContent =
-  `🎟️ ${quantidade} número(s) • Total: ${formatarValor(total)}`;
-
-}
-
-if (reservaData) {
-
-reservaData.textContent =
-  dataHora.data;
-
-}
-
-if (reservaHora) {
-
-reservaHora.textContent =
-  dataHora.hora;
-
-}
-
-return true;
-
-}
-
-/* =========================================================
-🧾 ABRIR CARTÃO DE CONFIRMAÇÃO
-========================================================= */
-
-function abrirCartaoConfirmacao() {
-
-if (!cartaoConfirmacao) {
-return;
-}
-
-cartaoConfirmacao.hidden =
-false;
-
-cartaoConfirmacao.style.display =
-'block';
-
-if (mostrarDadosCompra) {
-
-mostrarDadosCompra.hidden =
-  false;
-
-mostrarDadosCompra.style.display =
-  '';
-
-}
-
-if (dadosCompraOcultos) {
-
-dadosCompraOcultos.hidden =
-  true;
-
-dadosCompraOcultos.style.display =
-  'none';
-
-}
-
-setTimeout(() => {
-
-cartaoConfirmacao.scrollIntoView({
-  behavior: 'smooth',
-  block: 'center'
-});
-
-}, 120);
-
-}
-
-/* =========================================================
-🧾 MOSTRAR DADOS DA COMPRA
-========================================================= */
-
-function mostrarDetalhesCompra() {
-
-if (!dadosCompraOcultos) {
-return;
-}
-
-dadosCompraOcultos.hidden =
-false;
-
-dadosCompraOcultos.style.display =
-'';
-
-if (mostrarDadosCompra) {
-
-mostrarDadosCompra.hidden =
-  true;
-
-mostrarDadosCompra.style.display =
-  'none';
-
-}
-
-}
-
-/* =========================================================
-🛒 MOSTRAR BOTÃO COMPRAR
-========================================================= */
-
-function mostrarBotaoComprar(numero) {
-
-if (!reservarNumero) {
-return;
-}
-
-reservarNumero.hidden =
-false;
-
-reservarNumero.style.display =
-'flex';
-
-reservarNumero.disabled =
-false;
-
-reservarNumero.dataset.numero =
-numero;
-
-reservarNumero.textContent =
-"🛒 COMPRAR ${numero}";
-
-}
-
-/* =========================================================
-🔎 MOSTRAR NÚMERO DISPONÍVEL
-========================================================= */
-
-function mostrarDisponivel(numero) {
-
-mostrarStatus(
-"🟢 NÚMERO ${numero} DISPONÍVEL",
-'disponivel'
-);
-
-mostrarBotaoComprar(numero);
-
-}
-
-/* =========================================================
-🔴 MOSTRAR NÚMERO INDISPONÍVEL
-========================================================= */
-
-function mostrarIndisponivel(numero) {
-
-mostrarStatus(
-"🔴 NÚMERO ${numero} NÃO DISPONÍVEL",
-'indisponivel'
-);
-
-if (reservarNumero) {
-
-reservarNumero.hidden =
-  true;
-
-reservarNumero.style.display =
-  'none';
-
-delete reservarNumero.dataset.numero;
-
-}
-
-}
-
-/* =========================================================
-🔎 VERIFICAR NÚMERO
-========================================================= */
-
-async function verificarNumero() {
-
-if (!numeroDireto) {
-return;
-}
-
-const numero =
-formatarNumero(
-numeroDireto.value
-);
-
-if (!numero) {
-
-mostrarErro(
-  'Digite um número entre 000 e 999.'
-);
-
-return;
-
-}
-
-numeroDireto.value =
-numero;
-
-mostrarStatus(
-'🔎 Verificando disponibilidade...',
-'verificando'
-);
-
-if (!db) {
-
-mostrarErro(
-  'Firebase não está conectado. Verifique o config.js.'
-);
-
-return;
-
-}
-
-try {
-
-const numeroRef =
-  ref(
-    db,
-    `rifa/numeros/${numero}`
-  );
-
-const snapshot =
-  await get(numeroRef);
-
-if (!snapshot.exists()) {
-
-  preencherCompra([numero]);
-
-  abrirCartaoConfirmacao();
-
-  mostrarDisponivel(numero);
-
-  return;
-
-}
-
-const dados =
-  snapshot.val();
-
-if (
-  String(dados.status || '').toLowerCase() ===
-  'reservado' &&
-  reservaExpirou(dados)
-) {
-
-  preencherCompra([numero]);
-
-  abrirCartaoConfirmacao();
-
-  mostrarDisponivel(numero);
-
-  return;
-
-}
-
-if (numeroEstaOcupado(dados)) {
-
-  mostrarIndisponivel(numero);
-
-  return;
-
-}
-
-preencherCompra([numero]);
-
-abrirCartaoConfirmacao();
-
-mostrarDisponivel(numero);
-
-} catch (erro) {
-
-console.error(
-  '❌ Erro ao verificar número:',
-  erro
-);
-
-mostrarErro(
-  'Não foi possível verificar o número.'
-);
-
-}
-
-}
-
-/* =========================================================
-🔒 RESERVAR UM NÚMERO
-========================================================= */
-
-async function reservarNumeroFirebase(numero) {
-
-if (!db) {
-
-throw new Error(
-  'Firebase não está conectado.'
-);
-
-}
-
-const numeroRef =
-ref(
-db,
-"rifa/numeros/${numero}"
-);
-
-const agora =
-obterDataHora();
-
-const expiraEm =
-Date.now() +
-TEMPO_RESERVA;
-
-const resultado =
-await runTransaction(
-numeroRef,
-atual => {
-
-    if (atual === null) {
-
-      return {
-
-        numero,
-
-        status: 'reservado',
-
-        reservado: true,
-
-        dataReserva:
-          agora.timestamp,
-
-        expiraEm
-
-      };
-
-    }
-
-    if (
-      String(atual.status || '').toLowerCase() ===
-      'reservado' &&
-      reservaExpirou(atual)
-    ) {
-
-      return {
-
-        ...atual,
-
-        numero,
-
-        status: 'reservado',
-
-        reservado: true,
-
-        dataReserva:
-          agora.timestamp,
-
-        expiraEm
-
-      };
-
-    }
-
-    if (numeroEstaOcupado(atual)) {
-
-      return;
-
-    }
-
-    return {
-
-      ...atual,
-
-      numero,
-
-      status: 'reservado',
-
-      reservado: true,
-
-      dataReserva:
-        agora.timestamp,
-
-      expiraEm
-
-    };
-
+  try {
+    localStorage.setItem(
+      'rifaCompraAtual',
+      JSON.stringify(compraAtual)
+    );
+  } catch (erro) {
+    console.warn(erro);
   }
-);
-
-if (!resultado.committed) {
-
-throw new Error(
-  `O número ${numero} acabou de ser reservado por outra pessoa.`
-);
-
 }
 
-return {
-...agora,
-expiraEm
-};
+function prepararCompra(
+  numeros,
+  dataHora = obterDataHora()
+) {
+  const lista = (
+    Array.isArray(numeros)
+      ? numeros
+      : [numeros]
+  )
+    .map(formatarNumero)
+    .filter(Boolean);
 
+  if (!lista.length) {
+    return false;
+  }
+
+  const numerosUnicos = [
+    ...new Set(lista)
+  ];
+
+  compraAtual = {
+    numeros: numerosUnicos,
+    quantidade: numerosUnicos.length,
+    total:
+      numerosUnicos.length *
+      VALOR_NUMERO,
+    data: dataHora.data,
+    hora: dataHora.hora,
+    timestamp: dataHora.timestamp,
+    status: 'selecionado',
+    expiraEm: null
+  };
+
+  if (reservaNumeros) {
+    reservaNumeros.textContent =
+      compraAtual.numeros.join(', ');
+  }
+
+  if (reservaTotal) {
+    reservaTotal.textContent =
+      `🎟️ ${compraAtual.quantidade} número(s) • Total: ${formatarValor(compraAtual.total)}`;
+  }
+
+  if (reservaData) {
+    reservaData.textContent =
+      compraAtual.data;
+  }
+
+  if (reservaHora) {
+    reservaHora.textContent =
+      compraAtual.hora;
+  }
+
+  salvarCompra();
+
+  return true;
 }
 
-/* =========================================================
-🛒 CONFIRMAR PARTICIPAÇÃO / RESERVAR SELEÇÃO
-========================================================= */
-
-async function confirmarParticipacao() {
-
-const numeros =
-normalizarListaNumeros(
-compraAtual.numeros
-);
-
-if (!numeros.length) {
-
-const selecionados =
-  lerSelecionados();
-
-if (selecionados.length) {
-
-  preencherCompra(
-    selecionados
-  );
-
-}
-
-}
-
-const listaFinal =
-normalizarListaNumeros(
-compraAtual.numeros
-);
-
-if (!listaFinal.length) {
-
-mostrarErro(
-  'Escolha pelo menos um número antes de confirmar.'
-);
-
-return;
-
-}
-
-if (listaFinal.length > 10) {
-
-mostrarErro(
-  'Você pode selecionar no máximo 10 números.'
-);
-
-return;
-
-}
-
-if (!db) {
-
-mostrarErro(
-  'Firebase não está conectado.'
-);
-
-return;
-
-}
-
-if (mostrarDadosCompra) {
-
-mostrarDadosCompra.disabled =
-  true;
-
-mostrarDadosCompra.textContent =
-  '⏳ CONFIRMANDO PARTICIPAÇÃO...';
-
-}
-
-try {
-
-const reservasRealizadas = [];
-
-for (const numero of listaFinal) {
-
-  const resultado =
-    await reservarNumeroFirebase(
-      numero
+function mostrarCartaoConfirmacao() {
+  const cartao =
+    document.querySelector(
+      '.reserva-inline'
     );
 
-  reservasRealizadas.push({
-    numero,
-    ...resultado
-  });
+  if (!cartao) {
+    return;
+  }
 
+  cartao.hidden = false;
+  cartao.style.display = 'block';
+
+  if (mostrarDadosCompra) {
+    mostrarDadosCompra.hidden = false;
+    mostrarDadosCompra.style.display =
+      'block';
+  }
+
+  if (dadosCompraOcultos) {
+    dadosCompraOcultos.hidden = true;
+    dadosCompraOcultos.style.display =
+      'none';
+  }
+
+  setTimeout(() => {
+    cartao.scrollIntoView({
+      behavior: 'smooth',
+      block: 'center'
+    });
+  }, 100);
 }
 
-const primeiro =
-  reservasRealizadas[0];
+/*
+  IMPORTANTE:
+  Este botão NÃO reserva o número.
+  Ele somente abre os dados da compra.
+*/
+function mostrarDetalhesCompra() {
+  if (!compraAtual.numeros.length) {
+    if (msgReserva) {
+      msgReserva.textContent =
+        '⚠️ Primeiro escolha um número.';
+    }
 
-compraAtual.status =
-  'reservado';
+    return;
+  }
 
-compraAtual.expiraEm =
-  Math.min(
-    ...reservasRealizadas.map(
-      item => item.expiraEm
-    )
+  const cartao =
+    document.querySelector(
+      '.reserva-inline'
+    );
+
+  if (cartao) {
+    cartao.hidden = false;
+    cartao.style.display = 'block';
+  }
+
+  if (mostrarDadosCompra) {
+    mostrarDadosCompra.hidden = true;
+    mostrarDadosCompra.style.display =
+      'none';
+  }
+
+  if (dadosCompraOcultos) {
+    dadosCompraOcultos.hidden = false;
+    dadosCompraOcultos.style.display =
+      'block';
+  }
+
+  if (msgReserva) {
+    msgReserva.textContent = '';
+  }
+}
+
+function mostrarStatus(
+  mensagem,
+  tipo
+) {
+  if (!numeroStatus) {
+    return;
+  }
+
+  /*
+    O status fica somente como texto.
+    Não cria outro cartão/quadro.
+  */
+  numeroStatus.style.display = 'block';
+  numeroStatus.style.background =
+    'transparent';
+  numeroStatus.style.border = '0';
+  numeroStatus.style.boxShadow = 'none';
+  numeroStatus.style.padding = '8px 0';
+  numeroStatus.style.margin = '8px 0 0';
+  numeroStatus.style.fontWeight = '800';
+  numeroStatus.style.textAlign = 'center';
+
+  numeroStatus.textContent =
+    mensagem;
+
+  numeroStatus.classList.remove(
+    'disponivel',
+    'indisponivel',
+    'verificando',
+    'erro'
   );
 
-compraAtual.timestamp =
-  primeiro.timestamp;
+  numeroStatus.classList.add(tipo);
 
-salvarCompra();
-
-salvarSelecionados(
-  listaFinal
-);
-
-mostrarDetalhesCompra();
-
-if (msgReserva) {
-
-  msgReserva.textContent =
-    `🔒 ${listaFinal.length} número(s) reservado(s) por 24 horas. Faça o pagamento via PIX e envie o comprovante.`;
-
+  numeroStatus.style.color =
+    tipo === 'disponivel'
+      ? '#16803a'
+      : tipo === 'indisponivel' ||
+        tipo === 'erro'
+        ? '#b42318'
+        : '#6b5a00';
 }
 
-if (numeroStatus) {
+function limparNumeroStatus() {
+  if (numeroStatus) {
+    numeroStatus.style.display =
+      'none';
+
+    numeroStatus.textContent = '';
+
+    numeroStatus.classList.remove(
+      'disponivel',
+      'indisponivel',
+      'verificando',
+      'erro'
+    );
+  }
+
+  if (reservarNumero) {
+    reservarNumero.style.display =
+      'none';
+
+    reservarNumero.hidden = true;
+
+    reservarNumero.disabled = false;
+
+    reservarNumero.textContent =
+      '🔴 CONFIRMAR PARTICIPAÇÃO';
+
+    reservarNumero.classList.remove(
+      'confirmar-participacao',
+      'reservado'
+    );
+
+    delete reservarNumero.dataset.numero;
+  }
+}
+
+function reservaExpirou(dados) {
+  const expiraEm =
+    Number(dados?.expiraEm || 0);
+
+  return (
+    !!expiraEm &&
+    Date.now() >= expiraEm
+  );
+}
+
+function numeroEstaOcupado(dados) {
+  if (!dados) {
+    return false;
+  }
+
+  if (
+    String(
+      dados.status || ''
+    ).toLowerCase() === 'reservado' &&
+    reservaExpirou(dados)
+  ) {
+    return false;
+  }
+
+  const status =
+    String(
+      dados.status ||
+      dados.situacao ||
+      ''
+    ).toLowerCase();
+
+  return (
+    status === 'reservado' ||
+    status === 'vendido' ||
+    status === 'pago' ||
+    status === 'ocupado' ||
+    status === 'indisponivel' ||
+
+    dados.reservado === true ||
+    dados.vendido === true ||
+    dados.pago === true ||
+    dados.ocupado === true
+  );
+}
+
+function mostrarDisponivel(numero) {
+  prepararCompra([numero]);
 
   mostrarStatus(
-    `🔒 ${listaFinal.length} número(s) reservado(s) por 24 horas.`,
+    `🟢 NÚMERO ${numero} DISPONÍVEL`,
     'disponivel'
   );
 
-}
+  if (reservarNumero) {
+    reservarNumero.style.display =
+      'flex';
 
-if (reservarNumero) {
+    reservarNumero.hidden = false;
 
-  reservarNumero.disabled =
-    true;
+    reservarNumero.disabled = false;
 
-  reservarNumero.textContent =
-    listaFinal.length === 1
-      ? `✅ ${listaFinal[0]} RESERVADO`
-      : `✅ ${listaFinal.length} NÚMEROS RESERVADOS`;
+    reservarNumero.textContent =
+      '🔴 CONFIRMAR PARTICIPAÇÃO';
 
-}
+    reservarNumero.dataset.numero =
+      numero;
 
-} catch (erro) {
-
-console.error(
-  '❌ Erro ao confirmar participação:',
-  erro
-);
-
-if (msgReserva) {
-
-  msgReserva.textContent =
-    `⚠️ ${erro.message || 'Não foi possível confirmar a participação.'}`;
-
-}
-
-mostrarErro(
-  erro.message ||
-  'Não foi possível reservar os números.'
-);
-
-} finally {
-
-if (
-  mostrarDadosCompra &&
-  compraAtual.status !== 'reservado'
-) {
-
-  mostrarDadosCompra.disabled =
-    false;
-
-  mostrarDadosCompra.textContent =
-    '🍀 🎟️ CONFIRMAR PARTICIPAÇÃO';
-
-}
-
-}
-
-}
-
-/* =========================================================
-🛒 BOTÃO COMPRAR NÚMERO
-========================================================= */
-
-if (reservarNumero) {
-
-reservarNumero.addEventListener(
-'click',
-() => {
-
-  const numero =
-    formatarNumero(
-      reservarNumero.dataset.numero
+    reservarNumero.classList.add(
+      'confirmar-participacao'
     );
 
-  if (!numero) {
+    reservarNumero.classList.remove(
+      'reservado'
+    );
+  }
+}
+
+function mostrarIndisponivel(numero) {
+  mostrarStatus(
+    `🔴 NÚMERO ${numero} NÃO DISPONÍVEL`,
+    'indisponivel'
+  );
+
+  if (reservarNumero) {
+    reservarNumero.style.display =
+      'none';
+
+    reservarNumero.hidden = true;
+
+    delete reservarNumero.dataset.numero;
+  }
+}
+
+function mostrarErro(mensagem) {
+  mostrarStatus(
+    `⚠️ ${mensagem}`,
+    'erro'
+  );
+}
+
+async function verificarNumero() {
+  if (!numeroDireto) {
     return;
   }
 
-  preencherCompra([numero]);
+  const valor =
+    numeroDireto.value.trim();
 
-  abrirCartaoConfirmacao();
+  const numero =
+    formatarNumero(valor);
 
-}
+  if (!numero) {
+    mostrarErro(
+      'Digite um número entre 000 e 999.'
+    );
 
-);
-
-}
-
-/* =========================================================
-🧾 BOTÃO CONFIRMAR PARTICIPAÇÃO
-========================================================= */
-
-if (mostrarDadosCompra) {
-
-mostrarDadosCompra.addEventListener(
-'click',
-confirmarParticipacao
-);
-
-}
-
-/* =========================================================
-🎟️ ABRIR CARTELAS
-========================================================= */
-
-if (abrirCartelas) {
-
-abrirCartelas.addEventListener(
-'click',
-() => {
-
-  window.location.href =
-    'cartela.html';
-
-}
-
-);
-
-}
-
-/* =========================================================
-🍀 SUGERIR NÚMERO
-========================================================= */
-
-if (sugerir) {
-
-sugerir.addEventListener(
-'click',
-() => {
-
-  window.location.href =
-    'cartela.html?sugerir=1';
-
-}
-
-);
-
-}
-
-/* =========================================================
-🔎 BOTÃO VERIFICAR
-========================================================= */
-
-if (verificarNumeroBotao) {
-
-verificarNumeroBotao.addEventListener(
-'click',
-verificarNumero
-);
-
-}
-
-/* =========================================================
-⌨️ DIGITAÇÃO
-========================================================= */
-
-if (numeroDireto) {
-
-numeroDireto.addEventListener(
-'input',
-() => {
-
-  numeroDireto.value =
-    numeroDireto.value
-      .replace(/\D/g, '')
-      .slice(0, 3);
-
-  limparNumeroStatus();
-
-}
-
-);
-
-numeroDireto.addEventListener(
-'keydown',
-evento => {
-
-  if (evento.key === 'Enter') {
-
-    evento.preventDefault();
-
-    verificarNumero();
-
+    return;
   }
 
+  numeroDireto.value =
+    numero;
+
+  mostrarStatus(
+    '🔎 Verificando disponibilidade...',
+    'verificando'
+  );
+
+  if (!db) {
+    mostrarErro(
+      'Firebase não está conectado. Verifique o config.js.'
+    );
+
+    return;
+  }
+
+  try {
+    const snapshot =
+      await get(
+        ref(
+          db,
+          `rifa/numeros/${numero}`
+        )
+      );
+
+    if (!snapshot.exists()) {
+      mostrarDisponivel(numero);
+      return;
+    }
+
+    const dados =
+      snapshot.val();
+
+    if (
+      dados.status === 'reservado' &&
+      reservaExpirou(dados)
+    ) {
+      mostrarDisponivel(numero);
+      return;
+    }
+
+    if (
+      numeroEstaOcupado(dados)
+    ) {
+      mostrarIndisponivel(numero);
+      return;
+    }
+
+    mostrarDisponivel(numero);
+
+  } catch (erro) {
+    console.error(
+      '❌ Erro ao verificar número:',
+      erro
+    );
+
+    mostrarErro(
+      'Não foi possível verificar o número.'
+    );
+  }
 }
 
-);
+async function reservarNumeroFirebase(numero) {
+  if (!db) {
+    throw new Error(
+      'Firebase não está conectado.'
+    );
+  }
 
+  const numeroRef =
+    ref(
+      db,
+      `rifa/numeros/${numero}`
+    );
+
+  const dataHora =
+    obterDataHora();
+
+  const expiraEm =
+    Date.now() +
+    TEMPO_RESERVA;
+
+  const resultado =
+    await runTransaction(
+      numeroRef,
+      atual => {
+
+        if (atual === null) {
+          return {
+            numero,
+
+            status:
+              'reservado',
+
+            reservado:
+              true,
+
+            dataReserva:
+              dataHora.timestamp,
+
+            expiraEm
+          };
+        }
+
+        if (
+          atual.status === 'reservado' &&
+          reservaExpirou(atual)
+        ) {
+          return {
+            numero,
+
+            status:
+              'reservado',
+
+            reservado:
+              true,
+
+            dataReserva:
+              dataHora.timestamp,
+
+            expiraEm
+          };
+        }
+
+        if (
+          numeroEstaOcupado(atual)
+        ) {
+          return;
+        }
+
+        return {
+          ...atual,
+
+          numero,
+
+          status:
+            'reservado',
+
+          reservado:
+            true,
+
+          dataReserva:
+            dataHora.timestamp,
+
+          expiraEm
+        };
+      }
+    );
+
+  if (!resultado.committed) {
+    throw new Error(
+      `O número ${numero} acabou de ser reservado por outra pessoa.`
+    );
+  }
+
+  return {
+    ...dataHora,
+    expiraEm
+  };
 }
 
-/* =========================================================
-📋 COPIAR PIX
-========================================================= */
+async function confirmarReservaAntesDoEnvio() {
+  if (!compraAtual.numeros.length) {
+    throw new Error(
+      'Escolha um número primeiro.'
+    );
+  }
 
-if (copiarPixReserva) {
+  if (
+    compraAtual.status ===
+    'reservado'
+  ) {
+    return true;
+  }
 
-copiarPixReserva.addEventListener(
-'click',
-async () => {
+  if (!db) {
+    return false;
+  }
 
-  const pix =
-    String(
-      CONFIG?.pixChave ||
-      CONFIG?.pix ||
-      CONFIG?.pixKey ||
-      ''
-    ).trim();
+  const resultados = [];
 
-  if (!pix) {
+  for (
+    const numero of compraAtual.numeros
+  ) {
+    resultados.push(
+      await reservarNumeroFirebase(
+        numero
+      )
+    );
+  }
 
-    if (pixMsgReserva) {
+  compraAtual.status =
+    'reservado';
 
-      pixMsgReserva.textContent =
-        '⚠️ A chave PIX ainda não foi cadastrada.';
+  compraAtual.expiraEm =
+    Math.min(
+      ...resultados.map(
+        resultado =>
+          resultado.expiraEm
+      )
+    );
 
+  salvarCompra();
+
+  return true;
+}
+
+function montarMensagemWhatsApp() {
+  const numeros =
+    compraAtual.numeros.join(', ');
+
+  const nome =
+    nomeReserva?.value.trim() ||
+    'Não informado';
+
+  const telefone =
+    telefoneReserva?.value.trim() ||
+    'Não informado';
+
+  return `🍀 *RIFA SOLIDÁRIA — GILFEST*
+
+🧾 *CONFIRMAÇÃO DE PARTICIPAÇÃO*
+
+🎟️ Número(s): *${numeros}*
+🔢 Quantidade: *${compraAtual.quantidade}*
+💰 Valor total: *${formatarValor(compraAtual.total)}*
+📅 Data da compra: *${compraAtual.data}*
+🕐 Hora da compra: *${compraAtual.hora}*
+
+👤 Nome: *${nome}*
+📱 WhatsApp: *${telefone}*
+
+🔒 *Número reservado por 24 horas.*
+
+💚 Pagamento via PIX realizado.
+
+📎 *COMPROVANTE DE PAGAMENTO*
+Anexe o comprovante nesta conversa.
+
+🍀 Obrigado por participar da Rifa Solidária — GILFEST!`;
+}
+
+async function enviarParaWhatsApp() {
+  if (!compraAtual.numeros.length) {
+    if (msgReserva) {
+      msgReserva.textContent =
+        '⚠️ Escolha um número primeiro.';
     }
 
     return;
+  }
 
+  const nome =
+    nomeReserva?.value.trim();
+
+  const telefone =
+    telefoneReserva?.value.trim();
+
+  if (!nome) {
+    if (msgReserva) {
+      msgReserva.textContent =
+        '⚠️ Informe seu nome antes de enviar.';
+    }
+
+    nomeReserva?.focus();
+
+    return;
+  }
+
+  if (!telefone) {
+    if (msgReserva) {
+      msgReserva.textContent =
+        '⚠️ Informe seu WhatsApp antes de enviar.';
+    }
+
+    telefoneReserva?.focus();
+
+    return;
+  }
+
+  try {
+    await confirmarReservaAntesDoEnvio();
+
+    if (msgReserva) {
+      msgReserva.textContent =
+        '📲 Abrindo seu WhatsApp...';
+    }
+
+    window.open(
+      `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(
+        montarMensagemWhatsApp()
+      )}`,
+      '_blank'
+    );
+
+  } catch (erro) {
+    console.error(erro);
+
+    if (msgReserva) {
+      msgReserva.textContent =
+        `⚠️ ${
+          erro.message ||
+          'Não foi possível reservar o número.'
+        }`;
+    }
+  }
+}
+
+if (abrirCartelas) {
+  abrirCartelas.addEventListener(
+    'click',
+    () => {
+      window.location.href =
+        'cartela.html';
+    }
+  );
+}
+
+if (sugerir) {
+  sugerir.addEventListener(
+    'click',
+    () => {
+      window.location.href =
+        'cartela.html?sugerir=1';
+    }
+  );
+}
+
+if (verificarNumeroBotao) {
+  verificarNumeroBotao.addEventListener(
+    'click',
+    verificarNumero
+  );
+}
+
+if (numeroDireto) {
+
+  numeroDireto.addEventListener(
+    'input',
+    () => {
+
+      numeroDireto.value =
+        numeroDireto.value
+          .replace(/\D/g, '')
+          .slice(0, 3);
+
+      limparNumeroStatus();
+    }
+  );
+
+  numeroDireto.addEventListener(
+    'keydown',
+    evento => {
+
+      if (
+        evento.key === 'Enter'
+      ) {
+        evento.preventDefault();
+        verificarNumero();
+      }
+
+    }
+  );
+}
+
+/*
+  AQUI ESTÁ A CORREÇÃO PRINCIPAL:
+
+  O botão vermelho "CONFIRMAR PARTICIPAÇÃO"
+  NÃO tenta gravar no Firebase.
+
+  Ele apenas abre:
+  - número
+  - valor
+  - data
+  - hora
+  - nome
+  - WhatsApp
+  - PIX
+  - comprovante
+*/
+
+if (reservarNumero) {
+  reservarNumero.addEventListener(
+    'click',
+    mostrarDetalhesCompra
+  );
+}
+
+if (mostrarDadosCompra) {
+  mostrarDadosCompra.addEventListener(
+    'click',
+    mostrarDetalhesCompra
+  );
+}
+
+if (reservarReserva) {
+  reservarReserva.addEventListener(
+    'click',
+    enviarParaWhatsApp
+  );
+}
+
+async function copiarChavePix(botao) {
+  const chave =
+    String(
+      CONFIG?.pixChave || ''
+    ).trim();
+
+  if (!chave) {
+    if (pixMsgReserva) {
+      pixMsgReserva.textContent =
+        '⚠️ Chave PIX não configurada.';
+    }
+
+    return;
   }
 
   try {
 
     await navigator.clipboard.writeText(
-      pix
+      chave
     );
 
-    if (pixMsgReserva) {
-
-      pixMsgReserva.textContent =
-        '✅ Chave PIX copiada!';
-
+    if (botao) {
+      botao.textContent =
+        '✅ PIX COPIADO!';
     }
-
-  } catch (erro) {
 
     if (pixMsgReserva) {
-
       pixMsgReserva.textContent =
-        `📋 Chave PIX: ${pix}`;
-
+        '✅ Chave PIX copiada.';
     }
 
-  }
+    setTimeout(
+      () => {
+        if (botao) {
+          botao.textContent =
+            '📋 COPIAR PIX';
+        }
+      },
+      1800
+    );
 
-}
-
-);
-
-}
-
-/* =========================================================
-📎 COMPROVANTE
-========================================================= */
-
-if (enviarComprovante) {
-
-enviarComprovante.addEventListener(
-'click',
-() => {
-
-  if (
-    compraAtual.status !== 'reservado'
-  ) {
-
-    if (msgReserva) {
-
-      msgReserva.textContent =
-        '⚠️ Primeiro confirme sua participação para reservar o número.';
-
+  } catch {
+    if (pixMsgReserva) {
+      pixMsgReserva.textContent =
+        `📋 Copie manualmente: ${chave}`;
     }
-
-    return;
-
   }
+}
 
-  const input =
-    document.createElement('input');
+if (copiarPixReserva) {
+  copiarPixReserva.addEventListener(
+    'click',
+    () =>
+      copiarChavePix(
+        copiarPixReserva
+      )
+  );
+}
 
-  input.type =
-    'file';
-
-  input.accept =
-    'image/*,.pdf';
-
-  input.style.display =
-    'none';
-
-  document.body.appendChild(input);
-
-  input.addEventListener(
-    'change',
+if (limparSelecao) {
+  limparSelecao.addEventListener(
+    'click',
     () => {
 
-      const arquivo =
-        input.files?.[0];
+      compraAtual = {
+        numeros: [],
+        quantidade: 0,
+        total: 0,
+        data: '',
+        hora: '',
+        timestamp: '',
+        status: 'selecionado',
+        expiraEm: null
+      };
 
-      if (!arquivo) {
+      try {
+        localStorage.removeItem(
+          'rifaCompraAtual'
+        );
 
-        input.remove();
+        localStorage.removeItem(
+          'rifaSelecionados'
+        );
+      } catch {}
 
-        return;
+      if (reservaNumeros) {
+        reservaNumeros.textContent =
+          'Nenhum número selecionado';
+      }
 
+      if (reservaTotal) {
+        reservaTotal.textContent =
+          'Total: R$ 0,00';
+      }
+
+      if (reservaData) {
+        reservaData.textContent =
+          '—';
+      }
+
+      if (reservaHora) {
+        reservaHora.textContent =
+          '—';
+      }
+
+      if (dadosCompraOcultos) {
+        dadosCompraOcultos.hidden =
+          true;
+
+        dadosCompraOcultos.style.display =
+          'none';
+      }
+
+      if (mostrarDadosCompra) {
+        mostrarDadosCompra.hidden =
+          false;
+
+        mostrarDadosCompra.style.display =
+          'block';
+      }
+
+      if (numeroDireto) {
+        numeroDireto.value = '';
+      }
+
+      limparNumeroStatus();
+
+      if (msgReserva) {
+        msgReserva.textContent = '';
       }
 
       if (comprovanteSelecionado) {
-
         comprovanteSelecionado.hidden =
-          false;
-
+          true;
       }
 
       if (nomeComprovante) {
-
         nomeComprovante.textContent =
-          arquivo.name;
-
+          '—';
       }
 
-      if (msgReserva) {
-
-        msgReserva.textContent =
-          '✅ Comprovante selecionado. Agora envie pelo WhatsApp para concluir o atendimento.';
-
-      }
-
-      const numeros =
-        compraAtual.numeros.join(', ');
-
-      const mensagem =
-        [
-          '🍀 RIFA SOLIDÁRIA — GILFEST',
-          '',
-          '📎 Envio de comprovante de pagamento',
-          `🎟️ Número(s): ${numeros}`,
-          `💰 Valor: ${formatarValor(compraAtual.total)}`,
-          `👤 Nome: ${nomeReserva?.value || 'Não informado'}`,
-          `📱 WhatsApp: ${telefoneReserva?.value || 'Não informado'}`,
-          '',
-          'Estou enviando o comprovante de pagamento.'
-        ].join('\n');
-
-      const url =
-        `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(mensagem)}`;
-
-      window.open(
-        url,
-        '_blank',
-        'noopener,noreferrer'
-      );
-
-      input.remove();
-
+      /*
+        NÃO apagamos nomeReserva
+        nem telefoneReserva.
+      */
     }
   );
-
-  input.click();
-
 }
 
-);
+if (enviarComprovante) {
+  enviarComprovante.addEventListener(
+    'click',
+    () => {
 
+      const input =
+        document.createElement(
+          'input'
+        );
+
+      input.type = 'file';
+
+      input.accept =
+        'image/*,.pdf';
+
+      input.addEventListener(
+        'change',
+        () => {
+
+          const arquivo =
+            input.files?.[0];
+
+          if (!arquivo) {
+            return;
+          }
+
+          if (nomeComprovante) {
+            nomeComprovante.textContent =
+              arquivo.name;
+          }
+
+          if (comprovanteSelecionado) {
+            comprovanteSelecionado.hidden =
+              false;
+          }
+
+          if (msgReserva) {
+            msgReserva.textContent =
+              '📎 Comprovante selecionado. Agora envie pelo WhatsApp.';
+          }
+
+          window.open(
+            `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(
+              montarMensagemWhatsApp()
+            )}`,
+            '_blank'
+          );
+        }
+      );
+
+      input.click();
+    }
+  );
 }
 
-/* =========================================================
-🧹 LIMPAR SELEÇÃO
-========================================================= */
-
-if (limparSelecao) {
-
-limparSelecao.addEventListener(
-'click',
-() => {
-
-  compraAtual = {
-
-    numeros: [],
-
-    quantidade: 0,
-
-    total: 0,
-
-    data: '',
-
-    hora: '',
-
-    timestamp: '',
-
-    status: 'selecionado',
-
-    expiraEm: null
-
-  };
-
+function recuperarCompraSalva() {
   try {
 
-    localStorage.removeItem(
-      'rifaCompraAtual'
+    const salva =
+      localStorage.getItem(
+        'rifaCompraAtual'
+      );
+
+    if (!salva) {
+      return false;
+    }
+
+    const dados =
+      JSON.parse(salva);
+
+    if (
+      !dados?.numeros?.length
+    ) {
+      return false;
+    }
+
+    compraAtual = dados;
+
+    prepararCompra(
+      dados.numeros,
+      {
+        data:
+          dados.data ||
+          obterDataHora().data,
+
+        hora:
+          dados.hora ||
+          obterDataHora().hora,
+
+        timestamp:
+          dados.timestamp ||
+          obterDataHora().timestamp
+      }
     );
 
-    localStorage.removeItem(
-      'rifaSelecionados'
-    );
+    compraAtual = {
+      ...dados
+    };
+
+    return true;
 
   } catch (erro) {
-
     console.warn(
-      '⚠️ Erro ao limpar armazenamento.',
+      '⚠️ Erro ao recuperar compra:',
       erro
     );
 
+    return false;
   }
-
-  if (reservaNumeros) {
-
-    reservaNumeros.textContent =
-      'Nenhum número selecionado';
-
-  }
-
-  if (reservaTotal) {
-
-    reservaTotal.textContent =
-      'Total: R$ 0,00';
-
-  }
-
-  if (reservaData) {
-
-    reservaData.textContent =
-      '—';
-
-  }
-
-  if (reservaHora) {
-
-    reservaHora.textContent =
-      '—';
-
-  }
-
-  if (nomeComprovante) {
-
-    nomeComprovante.textContent =
-      '—';
-
-  }
-
-  if (comprovanteSelecionado) {
-
-    comprovanteSelecionado.hidden =
-      true;
-
-  }
-
-  if (msgReserva) {
-
-    msgReserva.textContent =
-      '';
-
-  }
-
-  if (pixMsgReserva) {
-
-    pixMsgReserva.textContent =
-      '';
-
-  }
-
-  if (nomeReserva) {
-
-    nomeReserva.value =
-      '';
-
-  }
-
-  if (telefoneReserva) {
-
-    telefoneReserva.value =
-      '';
-
-  }
-
-  if (numeroDireto) {
-
-    numeroDireto.value =
-      '';
-
-  }
-
-  limparNumeroStatus();
-
-  if (dadosCompraOcultos) {
-
-    dadosCompraOcultos.hidden =
-      true;
-
-    dadosCompraOcultos.style.display =
-      'none';
-
-  }
-
-  if (mostrarDadosCompra) {
-
-    mostrarDadosCompra.hidden =
-      false;
-
-    mostrarDadosCompra.style.display =
-      '';
-
-    mostrarDadosCompra.disabled =
-      false;
-
-    mostrarDadosCompra.textContent =
-      '🍀 🎟️ CONFIRMAR PARTICIPAÇÃO';
-
-  }
-
-  if (cartaoConfirmacao) {
-
-    cartaoConfirmacao.hidden =
-      true;
-
-    cartaoConfirmacao.style.display =
-      'none';
-
-  }
-
-  if (escolherNumeros) {
-
-    escolherNumeros.scrollIntoView({
-      behavior: 'smooth',
-      block: 'start'
-    });
-
-  }
-
-}
-
-);
-
-}
-
-/* =========================================================
-📦 RECUPERAR COMPRA SALVA
-========================================================= */
-
-function recuperarCompraSalva() {
-
-let compraSalva = null;
-
-try {
-
-const salvo =
-  localStorage.getItem(
-    'rifaCompraAtual'
-  );
-
-if (salvo) {
-
-  compraSalva =
-    JSON.parse(salvo);
-
-}
-
-} catch (erro) {
-
-console.warn(
-  '⚠️ Não foi possível recuperar compra.',
-  erro
-);
-
-}
-
-if (
-compraSalva &&
-Array.isArray(compraSalva.numeros) &&
-compraSalva.numeros.length
-) {
-
-compraAtual = {
-
-  ...compraAtual,
-
-  ...compraSalva,
-
-  numeros:
-    normalizarListaNumeros(
-      compraSalva.numeros
-    )
-
-};
-
-const dataHora = {
-
-  data:
-    compraAtual.data ||
-    obterDataHora().data,
-
-  hora:
-    compraAtual.hora ||
-    obterDataHora().hora,
-
-  timestamp:
-    compraAtual.timestamp ||
-    obterDataHora().timestamp
-
-};
-
-preencherCompra(
-  compraAtual.numeros,
-  dataHora
-);
-
-compraAtual.status =
-  compraSalva.status ||
-  'selecionado';
-
-compraAtual.expiraEm =
-  compraSalva.expiraEm ||
-  null;
-
-salvarCompra();
-
-abrirCartaoConfirmacao();
-
-return true;
-
-}
-
-return false;
-
-}
-
-/* =========================================================
-🎟️ RECUPERAR SELEÇÃO DA CARTELA
-========================================================= */
-
-function recuperarSelecaoDaCartela() {
-
-const lista =
-lerSelecionados();
-
-if (!lista.length) {
-return false;
-}
-
-const dataHora =
-obterDataHora();
-
-preencherCompra(
-lista,
-dataHora
-);
-
-abrirCartaoConfirmacao();
-
-return true;
-
-}
-
-/* =========================================================
-🔗 LER NÚMERO DA URL
-========================================================= */
+                                           }
 
 function lerNumerosDaURL() {
+  const params = new URLSearchParams(window.location.search);
+  const numero = params.get('numero');
+  const numerosParam = params.get('numeros');
 
-try {
+  let numeros = [];
 
-const params =
-  new URLSearchParams(
-    window.location.search
-  );
-
-const numero =
-  params.get('numero');
-
-const numeros =
-  params.get('numeros');
-
-if (numeros) {
-
-  const lista =
-    normalizarListaNumeros(
-      numeros.split(',')
-    );
-
-  if (lista.length) {
-
-    preencherCompra(lista);
-
-    abrirCartaoConfirmacao();
-
-    return true;
-
+  if (numerosParam) {
+    numeros = numerosParam
+      .split(',')
+      .map(formatarNumero)
+      .filter(Boolean);
+  } else if (numero) {
+    const n = formatarNumero(numero);
+    if (n) numeros = [n];
   }
 
+  if (!numeros.length) return false;
+
+  prepararCompra(numeros);
+  mostrarCartaoConfirmacao();
+
+  return true;
 }
 
-if (numero) {
+function recuperarSelecaoCartela() {
+  try {
+    const salva = localStorage.getItem('rifaSelecionados');
 
-  const formatado =
-    formatarNumero(numero);
+    if (!salva) return false;
 
-  if (formatado) {
+    const numeros = JSON.parse(salva);
 
-    preencherCompra([formatado]);
-
-    abrirCartaoConfirmacao();
-
-    return true;
-
-  }
-
-}
-
-} catch (erro) {
-
-console.warn(
-  '⚠️ Erro ao ler números da URL.',
-  erro
-);
-
-}
-
-return false;
-
-}
-
-/* =========================================================
-📅 DATA DO SORTEIO
-========================================================= */
-
-async function carregarDataSorteio() {
-
-if (!dataSorteioPublico || !db) {
-return;
-}
-
-try {
-
-const caminhos = [
-  'rifa/config/dataSorteio',
-  'rifa/configuracao/dataSorteio'
-];
-
-for (const caminho of caminhos) {
-
-  const snapshot =
-    await get(
-      ref(db, caminho)
-    );
-
-  if (!snapshot.exists()) {
-    continue;
-  }
-
-  const valor =
-    snapshot.val();
-
-  if (typeof valor === 'string') {
-
-    dataSorteioPublico.textContent =
-      valor;
-
-    return;
-
-  }
-
-  if (
-    valor &&
-    typeof valor === 'object'
-  ) {
-
-    const data =
-      valor.data ||
-      valor.dataSorteio ||
-      '';
-
-    const hora =
-      valor.hora ||
-      valor.horaSorteio ||
-      '';
-
-    if (data || hora) {
-
-      dataSorteioPublico.textContent =
-        [data, hora]
-          .filter(Boolean)
-          .join(' às ');
-
-      return;
-
+    if (!Array.isArray(numeros) || !numeros.length) {
+      return false;
     }
 
+    prepararCompra(numeros);
+    mostrarCartaoConfirmacao();
+
+    localStorage.removeItem('rifaSelecionados');
+
+    return true;
+
+  } catch (erro) {
+    console.warn(
+      '⚠️ Erro ao recuperar seleção:',
+      erro
+    );
+
+    return false;
   }
-
 }
 
-} catch (erro) {
-
-console.warn(
-  '⚠️ Não foi possível carregar a data do sorteio.',
-  erro
-);
-
-}
-
-}
 
 /* =========================================================
-🍀 NÚMERO DA SORTE
-========================================================= */
-
-function mostrarNumeroDaSorte() {
-
-if (!numeroSorteResultado) {
-return;
-}
-
-const numeros =
-normalizarListaNumeros(
-compraAtual.numeros
-);
-
-if (!numeros.length) {
-
-numeroSorteResultado.textContent =
-  '🎟️ Primeiro escolha um número da rifa.';
-
-return;
-
-}
-
-/*
-
-* Não criamos um número aleatório.
-* 
-* O número da sorte é um dos números
-* efetivamente escolhidos pelo participante.
-* 
-* A definição definitiva poderá ser vinculada
-* ao registro da compra posteriormente.
-  */
-
-const numero =
-numeros[0];
-
-numeroSorteResultado.textContent =
-"🍀 Seu número da sorte é ${numero}";
-
-}
-
-/* =========================================================
-🍀 BOTÃO NÚMERO DA SORTE
-========================================================= */
-
-if (revelarNumeroSorte) {
-
-revelarNumeroSorte.addEventListener(
-'click',
-mostrarNumeroDaSorte
-);
-
-}
-
-/* =========================================================
-🪙 RASPADINHA — VISUAL
+   🍀 RASPADINHA DA AMIZADE — CARTÃO DOURADO
 ========================================================= */
 
 function iniciarRaspadinha() {
+  const scratchCard =
+    document.querySelector('.scratch');
 
-if (
-!scratch ||
-!scratchCanvas
-) {
-return;
-}
+  const canvas =
+    document.getElementById('scratchCanvas');
 
-const area =
-scratchCanvas.parentElement;
+  const resultado =
+    document.getElementById('scratchPremio');
 
-if (!area) {
-return;
-}
+  const subtexto =
+    document.getElementById('scratchSubtexto');
 
-const largura =
-Math.max(
-280,
-area.clientWidth || 320
-);
-
-const altura =
-Math.max(
-180,
-Math.round(largura * 0.58)
-);
-
-const escala =
-window.devicePixelRatio || 1;
-
-scratchCanvas.width =
-Math.round(largura * escala);
-
-scratchCanvas.height =
-Math.round(altura * escala);
-
-scratchCanvas.style.width =
-"${largura}px";
-
-scratchCanvas.style.height =
-"${altura}px";
-
-const ctx =
-scratchCanvas.getContext('2d');
-
-if (!ctx) {
-return;
-}
-
-ctx.setTransform(
-escala,
-0,
-0,
-escala,
-0,
-0
-);
-
-/* -------------------------------------------------------
-COBERTURA PRATEADA
-------------------------------------------------------- */
-
-const gradiente =
-ctx.createLinearGradient(
-0,
-0,
-largura,
-altura
-);
-
-gradiente.addColorStop(
-0,
-'#8b8b8b'
-);
-
-gradiente.addColorStop(
-0.22,
-'#eeeeee'
-);
-
-gradiente.addColorStop(
-0.45,
-'#a8a8a8'
-);
-
-gradiente.addColorStop(
-0.65,
-'#f7f7f7'
-);
-
-gradiente.addColorStop(
-0.82,
-'#9a9a9a'
-);
-
-gradiente.addColorStop(
-1,
-'#dcdcdc'
-);
-
-ctx.globalCompositeOperation =
-'source-over';
-
-ctx.fillStyle =
-gradiente;
-
-ctx.fillRect(
-0,
-0,
-largura,
-altura
-);
-
-/* -------------------------------------------------------
-TEXTURA
-------------------------------------------------------- */
-
-for (
-let i = 0;
-i < 900;
-i++
-) {
-
-const x =
-  Math.random() * largura;
-
-const y =
-  Math.random() * altura;
-
-const tamanho =
-  Math.random() * 2 + 0.4;
-
-ctx.fillStyle =
-  Math.random() > 0.5
-    ? 'rgba(255,255,255,.25)'
-    : 'rgba(0,0,0,.12)';
-
-ctx.fillRect(
-  x,
-  y,
-  tamanho,
-  tamanho
-);
-
-}
-
-/* -------------------------------------------------------
-TEXTO RASPE AQUI
-------------------------------------------------------- */
-
-ctx.fillStyle =
-'rgba(50,50,50,.78)';
-
-ctx.textAlign =
-'center';
-
-ctx.textBaseline =
-'middle';
-
-ctx.font =
-'900 25px Arial';
-
-ctx.fillText(
-'🍀 RASPE AQUI 🍀',
-largura / 2,
-altura / 2 - 10
-);
-
-ctx.font =
-'600 13px Arial';
-
-ctx.fillStyle =
-'rgba(40,40,40,.7)';
-
-ctx.fillText(
-'Descubra sua sorte!',
-largura / 2,
-altura / 2 + 22
-);
-
-/* -------------------------------------------------------
-RESULTADO INICIAL
-------------------------------------------------------- */
-
-if (scratchPremio) {
-
-scratchPremio.textContent =
-  '';
-
-}
-
-if (scratchSubtexto) {
-
-scratchSubtexto.textContent =
-  '';
-
-}
-
-/* -------------------------------------------------------
-ESTADO
-------------------------------------------------------- */
-
-let raspando =
-false;
-
-let revelou =
-false;
-
-let ultimaPosicao =
-null;
-
-let areaRaspada =
-0;
-
-/* -------------------------------------------------------
-RASPAGEM
-------------------------------------------------------- */
-
-function raspar(x, y) {
-
-if (revelou) {
-  return;
-}
-
-ctx.save();
-
-ctx.globalCompositeOperation =
-  'destination-out';
-
-ctx.beginPath();
-
-ctx.arc(
-  x,
-  y,
-  24,
-  0,
-  Math.PI * 2
-);
-
-ctx.fill();
-
-ctx.restore();
-
-areaRaspada +=
-  24 * 24 * Math.PI;
-
-const areaTotal =
-  largura * altura;
-
-/*
- * Aproximadamente 45% raspado.
- */
-
-if (
-  areaRaspada >=
-  areaTotal * 0.45
-) {
-
-  revelarRaspadinha();
-
-}
-
-}
-
-/* -------------------------------------------------------
-REVELAR
-------------------------------------------------------- */
-
-function revelarRaspadinha() {
-
-if (revelou) {
-  return;
-}
-
-revelou =
-  true;
-
-ctx.clearRect(
-  0,
-  0,
-  largura,
-  altura
-);
-
-/*
- * Não escolhemos prêmio aqui.
- *
- * O resultado verdadeiro deverá vir
- * do Firebase após confirmação do pagamento.
- */
-
-if (scratchPremio) {
-
-  scratchPremio.textContent =
-    '🔒';
-
-}
-
-if (scratchSubtexto) {
-
-  scratchSubtexto.textContent =
-    'A raspadinha será liberada após a confirmação do pagamento.';
-
-}
-
-if (scratchInstruction) {
-
-  scratchInstruction.textContent =
-    '🍀 Pagamento aguardando confirmação.';
-
-}
-
-}
-
-/* -------------------------------------------------------
-MOUSE
-------------------------------------------------------- */
-
-scratchCanvas.addEventListener(
-'pointerdown',
-evento => {
-
-  if (revelou) {
-    return;
-  }
-
-  raspando =
-    true;
-
-  scratchCanvas.setPointerCapture?.(
-    evento.pointerId
-  );
-
-  const rect =
-    scratchCanvas.getBoundingClientRect();
-
-  ultimaPosicao = {
-
-    x:
-      evento.clientX -
-      rect.left,
-
-    y:
-      evento.clientY -
-      rect.top
-
-  };
-
-  raspar(
-    ultimaPosicao.x,
-    ultimaPosicao.y
-  );
-
-}
-
-);
-
-scratchCanvas.addEventListener(
-'pointermove',
-evento => {
+  const scratchArea =
+    document.querySelector('.scratch-area');
 
   if (
-    !raspando ||
-    revelou
+    !scratchCard ||
+    !canvas ||
+    !resultado ||
+    !scratchArea
   ) {
     return;
   }
 
-  const rect =
-    scratchCanvas.getBoundingClientRect();
+  const largura =
+    Math.max(1, scratchArea.clientWidth);
 
-  const x =
-    evento.clientX -
-    rect.left;
+  const altura =
+    Math.max(1, scratchArea.clientHeight);
 
-  const y =
-    evento.clientY -
-    rect.top;
+  const dpr =
+    Math.max(
+      1,
+      window.devicePixelRatio || 1
+    );
 
-  if (ultimaPosicao) {
+  canvas.width = largura * dpr;
+  canvas.height = altura * dpr;
+
+  canvas.style.width =
+    `${largura}px`;
+
+  canvas.style.height =
+    `${altura}px`;
+
+  const ctx =
+    canvas.getContext(
+      '2d',
+      {
+        willReadFrequently: true
+      }
+    );
+
+  ctx.setTransform(
+    dpr,
+    0,
+    0,
+    dpr,
+    0,
+    0
+  );
+
+
+  /* =====================================================
+     FUNDO DOURADO
+  ===================================================== */
+
+  const gradiente =
+    ctx.createLinearGradient(
+      0,
+      0,
+      largura,
+      altura
+    );
+
+  gradiente.addColorStop(
+    0,
+    '#8a5a00'
+  );
+
+  gradiente.addColorStop(
+    0.14,
+    '#f7d774'
+  );
+
+  gradiente.addColorStop(
+    0.28,
+    '#c58a13'
+  );
+
+  gradiente.addColorStop(
+    0.46,
+    '#ffe9a3'
+  );
+
+  gradiente.addColorStop(
+    0.62,
+    '#d19a22'
+  );
+
+  gradiente.addColorStop(
+    0.82,
+    '#fff0ad'
+  );
+
+  gradiente.addColorStop(
+    1,
+    '#9b6505'
+  );
+
+  ctx.fillStyle = gradiente;
+
+  ctx.fillRect(
+    0,
+    0,
+    largura,
+    altura
+  );
+
+
+  /* =====================================================
+     BRILHOS DO CARTÃO
+  ===================================================== */
+
+  for (
+    let i = 0;
+    i < 700;
+    i++
+  ) {
+    const x =
+      Math.random() * largura;
+
+    const y =
+      Math.random() * altura;
+
+    const tamanho =
+      Math.random() * 2 + 0.5;
+
+    ctx.fillStyle =
+      Math.random() > 0.5
+        ? 'rgba(255,255,255,.30)'
+        : 'rgba(91,55,0,.16)';
+
+    ctx.fillRect(
+      x,
+      y,
+      tamanho,
+      tamanho
+    );
+  }
+
+
+  /* =====================================================
+     TEXTO DO CARTÃO
+  ===================================================== */
+
+  ctx.save();
+
+  ctx.fillStyle =
+    'rgba(30,30,30,.72)';
+
+  ctx.textAlign =
+    'center';
+
+  ctx.textBaseline =
+    'middle';
+
+  ctx.font =
+    '900 25px Arial';
+
+  ctx.fillText(
+    '🍀 RASPE AQUI 🍀',
+    largura / 2,
+    altura / 2 - 15
+  );
+
+  ctx.font =
+    '700 13px Arial';
+
+  ctx.fillText(
+    'Descubra sua sorte!',
+    largura / 2,
+    altura / 2 + 20
+  );
+
+  ctx.restore();
+
+
+  /* =====================================================
+     🚂 TREM ANIMADO
+  ===================================================== */
+
+  let trem =
+    scratchArea.querySelector(
+      '.scratch-trem-animado'
+    );
+
+  if (!trem) {
+
+    trem =
+      document.createElement(
+        'div'
+      );
+
+    trem.className =
+      'scratch-trem-animado';
+
+    trem.textContent =
+      '🚂';
+
+    trem.setAttribute(
+      'aria-hidden',
+      'true'
+    );
+
+    Object.assign(
+      trem.style,
+      {
+        position: 'absolute',
+        left: '4%',
+        top: '8%',
+        zIndex: '3',
+        pointerEvents: 'none',
+        fontSize: '28px',
+        lineHeight: '1',
+        filter:
+          'drop-shadow(0 2px 2px rgba(80,50,0,.45))',
+        animation:
+          'scratchTremZigueZague 5s ease-in-out infinite'
+      }
+    );
+
+    scratchArea.appendChild(
+      trem
+    );
+  }
+
+
+  if (
+    !document.getElementById(
+      'scratchTremStyle'
+    )
+  ) {
+
+    const estilo =
+      document.createElement(
+        'style'
+      );
+
+    estilo.id =
+      'scratchTremStyle';
+
+    estilo.textContent = `
+      @keyframes scratchTremZigueZague {
+        0% {
+          transform:
+            translate(0,0)
+            rotate(-3deg);
+        }
+
+        20% {
+          transform:
+            translate(18%,14px)
+            rotate(4deg);
+        }
+
+        40% {
+          transform:
+            translate(38%,-8px)
+            rotate(-4deg);
+        }
+
+        60% {
+          transform:
+            translate(58%,16px)
+            rotate(4deg);
+        }
+
+        80% {
+          transform:
+            translate(78%,-6px)
+            rotate(-3deg);
+        }
+
+        100% {
+          transform:
+            translate(100%,12px)
+            rotate(3deg);
+        }
+      }
+
+      @media(prefers-reduced-motion:reduce) {
+        .scratch-trem-animado {
+          animation:none!important;
+        }
+      }
+    `;
+
+    document.head.appendChild(
+      estilo
+    );
+  }
+
+
+  /*
+   * Importante:
+   * limpa o texto que poderia ficar
+   * aparecendo por baixo da raspadinha.
+   */
+
+  resultado.textContent = '';
+
+  if (subtexto) {
+    subtexto.textContent = '';
+  }
+
+
+  let raspando = false;
+  let finalizado = false;
+  let raspagemIniciada = false;
+
+  let ultimaX = 0;
+  let ultimaY = 0;
+
+  let ultimaVerificacao = 0;
+
+
+  /* =====================================================
+     VERIFICAR PAGAMENTO
+  ===================================================== */
+
+  function pagoConfirmado() {
+
+    if (
+      compraAtual.status === 'pago' ||
+      compraAtual.status === 'confirmado' ||
+      compraAtual.pagamento === 'confirmado'
+    ) {
+      return true;
+    }
+
+    return false;
+  }
+
+
+  /* =====================================================
+     BLOQUEIO
+  ===================================================== */
+
+  function mostrarBloqueio() {
+
+    resultado.textContent =
+      '🔒';
+
+    if (subtexto) {
+
+      subtexto.textContent =
+        'A raspadinha será liberada após o pagamento ser confirmado.';
+    }
+  }
+
+
+  /* =====================================================
+     VERIFICAR QUANTO FOI RASPADO
+  ===================================================== */
+
+  function verificarPercentual() {
+
+    const agora =
+      Date.now();
+
+    if (
+      agora - ultimaVerificacao <
+      120
+    ) {
+      return;
+    }
+
+    ultimaVerificacao =
+      agora;
+
+    const dados =
+      ctx.getImageData(
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
+
+    let transparentes = 0;
+    let analisados = 0;
+
+    const passo = 16;
+
+    for (
+      let i = 3;
+      i < dados.data.length;
+      i += 4 * passo
+    ) {
+
+      analisados++;
+
+      if (
+        dados.data[i] < 80
+      ) {
+        transparentes++;
+      }
+    }
+
+    if (!analisados) {
+      return;
+    }
+
+    if (
+      (transparentes / analisados) * 100 >= 55
+    ) {
+
+      revelarRaspadinha();
+    }
+  }
+
+
+  /* =====================================================
+     RASPAR
+  ===================================================== */
+
+  function raspar(x, y) {
+
+    if (finalizado) {
+      return;
+    }
+
+    ctx.save();
+
+    ctx.globalCompositeOperation =
+      'destination-out';
+
+    ctx.beginPath();
+
+    ctx.arc(
+      x,
+      y,
+      24,
+      0,
+      Math.PI * 2
+    );
+
+    ctx.fill();
+
+    ctx.restore();
+
+    raspagemIniciada =
+      true;
+
+    verificarPercentual();
+  }
+
+
+  /* =====================================================
+     RASPAR LINHA
+  ===================================================== */
+
+  function rasparLinha(
+    x1,
+    y1,
+    x2,
+    y2
+  ) {
 
     const distancia =
       Math.hypot(
-        x - ultimaPosicao.x,
-        y - ultimaPosicao.y
+        x2 - x1,
+        y2 - y1
       );
 
     const passos =
       Math.max(
         1,
         Math.ceil(
-          distancia / 10
+          distancia / 8
         )
       );
 
     for (
-      let i = 1;
+      let i = 0;
       i <= passos;
       i++
     ) {
 
-      const px =
-        ultimaPosicao.x +
-        (x - ultimaPosicao.x) *
-        (i / passos);
+      const t =
+        i / passos;
 
-      const py =
-        ultimaPosicao.y +
-        (y - ultimaPosicao.y) *
-        (i / passos);
-
-      raspar(px, py);
-
+      raspar(
+        x1 + (x2 - x1) * t,
+        y1 + (y2 - y1) * t
+      );
     }
-
-  } else {
-
-    raspar(x, y);
-
   }
 
-  ultimaPosicao = {
-    x,
-    y
-  };
 
-}
+  /* =====================================================
+     REVELAR RASPADINHA
+  ===================================================== */
 
-);
+  function revelarRaspadinha() {
 
-scratchCanvas.addEventListener(
-'pointerup',
-() => {
+    if (finalizado) {
+      return;
+    }
 
-  raspando =
-    false;
+    finalizado =
+      true;
 
-  ultimaPosicao =
-    null;
+    if (trem) {
+      trem.style.display =
+        'none';
+    }
 
-}
 
-);
+    if (!pagoConfirmado()) {
 
-scratchCanvas.addEventListener(
-'pointercancel',
-() => {
+      mostrarBloqueio();
 
-  raspando =
-    false;
+    } else {
 
-  ultimaPosicao =
-    null;
+      resultado.textContent =
+        '🎉 RASPADINHA LIBERADA!';
 
-}
+      if (subtexto) {
 
-);
+        subtexto.textContent =
+          'O resultado será definido pelo sistema após a confirmação do pagamento.';
+      }
+    }
 
-}
 
-/* =========================================================
-📱 AJUSTAR RASPADINHA AO REDIMENSIONAR
-========================================================= */
+    canvas.style.transition =
+      'opacity .45s ease';
 
-let redimensionamentoRaspadinha;
+    canvas.style.opacity =
+      '0';
 
-window.addEventListener(
-'resize',
-() => {
 
-clearTimeout(
-  redimensionamentoRaspadinha
-);
+    const instrucao =
+      scratchCard.querySelector(
+        '.scratch-instruction'
+      );
 
-redimensionamentoRaspadinha =
-  setTimeout(
-    () => {
+    if (instrucao) {
 
-      iniciarRaspadinha();
+      instrucao.textContent =
+        pagoConfirmado()
+          ? '🎉 Raspadinha liberada.'
+          : '🔒 Aguarde a confirmação do pagamento.';
+    }
+  }
 
-    },
-    250
+
+  /* =====================================================
+     MOUSE
+  ===================================================== */
+
+  canvas.addEventListener(
+    'mousedown',
+    evento => {
+
+      if (finalizado) {
+        return;
+      }
+
+      raspando = true;
+
+      const rect =
+        canvas.getBoundingClientRect();
+
+      ultimaX =
+        evento.clientX -
+        rect.left;
+
+      ultimaY =
+        evento.clientY -
+        rect.top;
+
+      raspar(
+        ultimaX,
+        ultimaY
+      );
+    }
   );
 
+
+  canvas.addEventListener(
+    'mousemove',
+    evento => {
+
+      if (!raspando) {
+        return;
+      }
+
+      const rect =
+        canvas.getBoundingClientRect();
+
+      const x =
+        evento.clientX -
+        rect.left;
+
+      const y =
+        evento.clientY -
+        rect.top;
+
+      rasparLinha(
+        ultimaX,
+        ultimaY,
+        x,
+        y
+      );
+
+      ultimaX = x;
+      ultimaY = y;
+    }
+  );
+
+
+  window.addEventListener(
+    'mouseup',
+    () => {
+      raspando = false;
+    }
+  );
+
+
+  /* =====================================================
+     TOUCH — CELULAR
+  ===================================================== */
+
+  canvas.addEventListener(
+    'touchstart',
+    evento => {
+
+      if (finalizado) {
+        return;
+      }
+
+      evento.preventDefault();
+
+      raspando = true;
+
+      const toque =
+        evento.touches[0];
+
+      const rect =
+        canvas.getBoundingClientRect();
+
+      ultimaX =
+        toque.clientX -
+        rect.left;
+
+      ultimaY =
+        toque.clientY -
+        rect.top;
+
+      raspar(
+        ultimaX,
+        ultimaY
+      );
+    },
+    {
+      passive: false
+    }
+  );
+
+
+  canvas.addEventListener(
+    'touchmove',
+    evento => {
+
+      if (!raspando) {
+        return;
+      }
+
+      evento.preventDefault();
+
+      const toque =
+        evento.touches[0];
+
+      const rect =
+        canvas.getBoundingClientRect();
+
+      const x =
+        toque.clientX -
+        rect.left;
+
+      const y =
+        toque.clientY -
+        rect.top;
+
+      rasparLinha(
+        ultimaX,
+        ultimaY,
+        x,
+        y
+      );
+
+      ultimaX = x;
+      ultimaY = y;
+    },
+    {
+      passive: false
+    }
+  );
+
+
+  canvas.addEventListener(
+    'touchend',
+    () => {
+      raspando = false;
+    }
+  );
+
+
+  canvas.addEventListener(
+    'contextmenu',
+    evento => {
+      evento.preventDefault();
+    }
+  );
+
+
+  window.addEventListener(
+    'resize',
+    () => {
+
+      if (!raspagemIniciada) {
+        iniciarRaspadinha();
+      }
+    }
+  );
 }
-);
+
 
 /* =========================================================
-🚀 INICIALIZAÇÃO
+   🍀 NÚMERO DA SORTE
 ========================================================= */
 
-document.addEventListener(
-'DOMContentLoaded',
-async () => {
+function revelarNumeroDaSorte() {
 
-/*
- * O cartão começa escondido.
- */
-
-if (cartaoConfirmacao) {
-
-  cartaoConfirmacao.hidden =
-    true;
-
-  cartaoConfirmacao.style.display =
-    'none';
-
-}
-
-if (dadosCompraOcultos) {
-
-  dadosCompraOcultos.hidden =
-    true;
-
-  dadosCompraOcultos.style.display =
-    'none';
-
-}
-
-/*
- * Tenta recuperar compra já confirmada.
- */
-
-const recuperouCompra =
-  recuperarCompraSalva();
-
-/*
- * Se não houver compra salva,
- * tenta recuperar os números vindos da cartela.
- */
-
-if (!recuperouCompra) {
-
-  const recuperouCartela =
-    recuperarSelecaoDaCartela();
-
-  if (recuperouCartela) {
-
-    try {
-
-      localStorage.removeItem(
-        'rifaSelecionados'
-      );
-
-    } catch (erro) {
-
-      console.warn(
-        '⚠️ Não foi possível limpar seleção temporária.',
-        erro
-      );
-
-    }
-
-  } else {
-
-    lerNumerosDaURL();
-
+  if (!numeroSorteResultado) {
+    return;
   }
 
+  const numeros =
+    compraAtual.numeros.length
+      ? compraAtual.numeros
+      : [];
+
+  if (!numeros.length) {
+
+    numeroSorteResultado.textContent =
+      '🎟️ Escolha primeiro um número para revelar seu número da sorte.';
+
+    return;
+  }
+
+  const indice =
+    Math.floor(
+      Math.random() *
+      numeros.length
+    );
+
+  numeroSorteResultado.textContent =
+    `🍀 Seu número da sorte é: ${numeros[indice]}`;
 }
 
-/*
- * Data do sorteio.
- */
 
-await carregarDataSorteio();
+if (revelarNumeroSorte) {
 
-/*
- * Raspadinha visual.
- */
-
-iniciarRaspadinha();
-
-console.log(
-  '🍀 Rifa Solidária inicializada.'
-);
-
+  revelarNumeroSorte.addEventListener(
+    'click',
+    revelarNumeroDaSorte
+  );
 }
-);
+
+
+/* =========================================================
+   🚀 INICIALIZAÇÃO
+========================================================= */
+
+function inicializar() {
+
+  const veioDaCartela =
+    lerNumerosDaURL();
+
+  if (!veioDaCartela) {
+    recuperarSelecaoCartela();
+  }
+
+  if (
+    !veioDaCartela &&
+    !compraAtual.numeros.length
+  ) {
+    recuperarCompraSalva();
+  }
+
+  iniciarRaspadinha();
+}
+
+
+if (
+  document.readyState ===
+  'loading'
+) {
+
+  document.addEventListener(
+    'DOMContentLoaded',
+    inicializar,
+    {
+      once: true
+    }
+  );
+
+} else {
+
+  inicializar();
+}
+
+
+/* =========================================================
+   AJUSTES VISUAIS FINAIS
+========================================================= */
+
+const scratchCardVisivel =
+  document.querySelector(
+    '.scratch'
+  );
+
+if (scratchCardVisivel) {
+
+  scratchCardVisivel.style.display =
+    'block';
+
+  scratchCardVisivel.style.width =
+    '100%';
+}
+
+
+const stepsGrid =
+  document.querySelector(
+    '.steps-grid'
+  );
+
+if (stepsGrid) {
+
+  stepsGrid.style.display =
+    'flex';
+
+  stepsGrid.style.flexDirection =
+    'column';
+
+  stepsGrid.style.width =
+    '100%';
+}
+
+
+const scratchAreaGlobal =
+  document.querySelector(
+    '.scratch-area'
+  );
+
+if (scratchAreaGlobal) {
+
+  scratchAreaGlobal.style.width =
+    'min(100%, 700px)';
+
+  scratchAreaGlobal.style.margin =
+    '18px auto';
+
+  scratchAreaGlobal.style.position =
+    'relative';
+
+  scratchAreaGlobal.style.overflow =
+    'hidden';
+      }
