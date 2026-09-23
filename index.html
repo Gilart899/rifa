@@ -156,7 +156,10 @@ content="Rifa Solidária — em prol da saúde de Dona Bené."
      ESCOLHA DOS NÚMEROS
 ====================================================== -->
 
-<section class="card choose">
+<section
+  class="card choose"
+  id="escolherNumeros"
+>
 
   <h2>
     🎟️ Escolha seus números
@@ -247,9 +250,9 @@ content="Rifa Solidária — em prol da saúde de Dona Bené."
 <!-- =====================================================
      ÁREA DE CONFIRMAÇÃO
      
-     A área inteira começa escondida.
-     O primeiro botão fica visível quando o JS abrir
-     esta seção. Os dados ficam escondidos até o clique.
+     Começa totalmente escondida.
+     Quando um número é selecionado, o JS poderá
+     mostrar somente o botão inicial.
 ====================================================== -->
 
 <section class="steps-grid">
@@ -281,7 +284,7 @@ content="Rifa Solidária — em prol da saúde de Dona Bené."
     <!-- =================================================
          DADOS DA COMPRA
          
-         Permanecem escondidos até o clique acima.
+         Aparecem somente após o clique no botão acima.
     ================================================== -->
 
     <div
@@ -325,8 +328,6 @@ content="Rifa Solidária — em prol da saúde de Dona Bené."
 
         </div>
 
-
-        <!-- DATA E HORA JUNTAS -->
 
         <div class="reserva-info-group">
 
@@ -499,7 +500,10 @@ content="Rifa Solidária — em prol da saúde de Dona Bené."
        RASPADINHA DA AMIZADE
   ==================================================== -->
 
-  <article class="card scratch">
+  <article
+    class="card scratch"
+    id="raspadinhaAmizade"
+  >
 
     <div class="trevo-mini">
       🍀
@@ -526,13 +530,6 @@ content="Rifa Solidária — em prol da saúde de Dona Bené."
         <span class="icone">
           🎁
         </span>
-
-        <!--
-          IMPORTANTE:
-          Não colocamos "RASPE AQUI" aqui.
-          O canvas/JS controla a cobertura e o resultado.
-          Isso evita o texto duplicado depois de raspar.
-        -->
 
         <strong id="scratchPremio"></strong>
 
@@ -597,7 +594,10 @@ content="Rifa Solidária — em prol da saúde de Dona Bené."
      NÚMERO DA SORTE
 ====================================================== -->
 
-<section class="luck card">
+<section
+  class="luck card"
+  id="numeroDaSorte"
+>
 
   <span>
     🍀
@@ -612,6 +612,19 @@ content="Rifa Solidária — em prol da saúde de Dona Bené."
     <p>
       Não é sorte, é fé, é esperança, é solidariedade!
     </p>
+
+    <button
+      id="revelarNumeroSorte"
+      class="primary"
+      type="button"
+    >
+      🍀 REVELAR MEU NÚMERO DA SORTE
+    </button>
+
+    <div
+      id="numeroSorteResultado"
+      aria-live="polite"
+    ></div>
 
   </div>
 
@@ -655,4 +668,4 @@ content="Rifa Solidária — em prol da saúde de Dona Bené."
     type="module"
     src="js/index.js"
   ></script></body>
-      </html>
+  </html>
