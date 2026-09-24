@@ -58,11 +58,7 @@ let compraAtual = {
 function formatarNumero(valor) {
   const numero = Number(valor);
 
-  if (
-    !Number.isInteger(numero) ||
-    numero < 0 ||
-    numero > 999
-  ) {
+  if (!Number.isInteger(numero) || numero < 0 || numero > 999) {
     return null;
   }
 
@@ -70,13 +66,10 @@ function formatarNumero(valor) {
 }
 
 function formatarValor(valor) {
-  return Number(valor || 0).toLocaleString(
-    'pt-BR',
-    {
-      style: 'currency',
-      currency: 'BRL'
-    }
-  );
+  return Number(valor || 0).toLocaleString('pt-BR', {
+    style: 'currency',
+    currency: 'BRL'
+  });
 }
 
 function obterDataHora() {
@@ -84,16 +77,11 @@ function obterDataHora() {
 
   return {
     data: agora.toLocaleDateString('pt-BR'),
-
-    hora: agora.toLocaleTimeString(
-      'pt-BR',
-      {
-        hour: '2-digit',
-        minute: '2-digit',
-        second: '2-digit'
-      }
-    ),
-
+    hora: agora.toLocaleTimeString('pt-BR', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    }),
     timestamp: agora.toISOString()
   };
 }
@@ -109,15 +97,8 @@ function salvarCompra() {
   }
 }
 
-function prepararCompra(
-  numeros,
-  dataHora = obterDataHora()
-) {
-  const lista = (
-    Array.isArray(numeros)
-      ? numeros
-      : [numeros]
-  )
+function prepararCompra(numeros, dataHora = obterDataHora()) {
+  const lista = (Array.isArray(numeros) ? numeros : [numeros])
     .map(formatarNumero)
     .filter(Boolean);
 
@@ -125,16 +106,12 @@ function prepararCompra(
     return false;
   }
 
-  const numerosUnicos = [
-    ...new Set(lista)
-  ];
+  const numerosUnicos = [...new Set(lista)];
 
   compraAtual = {
     numeros: numerosUnicos,
     quantidade: numerosUnicos.length,
-    total:
-      numerosUnicos.length *
-      VALOR_NUMERO,
+    total: numerosUnicos.length * VALOR_NUMERO,
     data: dataHora.data,
     hora: dataHora.hora,
     timestamp: dataHora.timestamp,
@@ -143,8 +120,7 @@ function prepararCompra(
   };
 
   if (reservaNumeros) {
-    reservaNumeros.textContent =
-      compraAtual.numeros.join(', ');
+    reservaNumeros.textContent = compraAtual.numeros.join(', ');
   }
 
   if (reservaTotal) {
@@ -153,13 +129,11 @@ function prepararCompra(
   }
 
   if (reservaData) {
-    reservaData.textContent =
-      compraAtual.data;
+    reservaData.textContent = compraAtual.data;
   }
 
   if (reservaHora) {
-    reservaHora.textContent =
-      compraAtual.hora;
+    reservaHora.textContent = compraAtual.hora;
   }
 
   salvarCompra();
@@ -168,10 +142,7 @@ function prepararCompra(
 }
 
 function mostrarCartaoConfirmacao() {
-  const cartao =
-    document.querySelector(
-      '.reserva-inline'
-    );
+  const cartao = document.querySelector('.reserva-inline');
 
   if (!cartao) {
     return;
@@ -182,14 +153,12 @@ function mostrarCartaoConfirmacao() {
 
   if (mostrarDadosCompra) {
     mostrarDadosCompra.hidden = false;
-    mostrarDadosCompra.style.display =
-      'block';
+    mostrarDadosCompra.style.display = 'block';
   }
 
   if (dadosCompraOcultos) {
     dadosCompraOcultos.hidden = true;
-    dadosCompraOcultos.style.display =
-      'none';
+    dadosCompraOcultos.style.display = 'none';
   }
 
   setTimeout(() => {
@@ -200,11 +169,6 @@ function mostrarCartaoConfirmacao() {
   }, 100);
 }
 
-/*
-  IMPORTANTE:
-  Este botão NÃO reserva o número.
-  Ele somente abre os dados da compra.
-*/
 function mostrarDetalhesCompra() {
   if (!compraAtual.numeros.length) {
     if (msgReserva) {
@@ -215,10 +179,7 @@ function mostrarDetalhesCompra() {
     return;
   }
 
-  const cartao =
-    document.querySelector(
-      '.reserva-inline'
-    );
+  const cartao = document.querySelector('.reserva-inline');
 
   if (cartao) {
     cartao.hidden = false;
@@ -227,14 +188,12 @@ function mostrarDetalhesCompra() {
 
   if (mostrarDadosCompra) {
     mostrarDadosCompra.hidden = true;
-    mostrarDadosCompra.style.display =
-      'none';
+    mostrarDadosCompra.style.display = 'none';
   }
 
   if (dadosCompraOcultos) {
     dadosCompraOcultos.hidden = false;
-    dadosCompraOcultos.style.display =
-      'block';
+    dadosCompraOcultos.style.display = 'block';
   }
 
   if (msgReserva) {
@@ -242,21 +201,13 @@ function mostrarDetalhesCompra() {
   }
 }
 
-function mostrarStatus(
-  mensagem,
-  tipo
-) {
+function mostrarStatus(mensagem, tipo) {
   if (!numeroStatus) {
     return;
   }
 
-  /*
-    O status fica somente como texto.
-    Não cria outro cartão/quadro.
-  */
   numeroStatus.style.display = 'block';
-  numeroStatus.style.background =
-    'transparent';
+  numeroStatus.style.background = 'transparent';
   numeroStatus.style.border = '0';
   numeroStatus.style.boxShadow = 'none';
   numeroStatus.style.padding = '8px 0';
@@ -264,8 +215,7 @@ function mostrarStatus(
   numeroStatus.style.fontWeight = '800';
   numeroStatus.style.textAlign = 'center';
 
-  numeroStatus.textContent =
-    mensagem;
+  numeroStatus.textContent = mensagem;
 
   numeroStatus.classList.remove(
     'disponivel',
@@ -279,17 +229,14 @@ function mostrarStatus(
   numeroStatus.style.color =
     tipo === 'disponivel'
       ? '#16803a'
-      : tipo === 'indisponivel' ||
-        tipo === 'erro'
+      : tipo === 'indisponivel' || tipo === 'erro'
         ? '#b42318'
         : '#6b5a00';
 }
 
 function limparNumeroStatus() {
   if (numeroStatus) {
-    numeroStatus.style.display =
-      'none';
-
+    numeroStatus.style.display = 'none';
     numeroStatus.textContent = '';
 
     numeroStatus.classList.remove(
@@ -301,15 +248,10 @@ function limparNumeroStatus() {
   }
 
   if (reservarNumero) {
-    reservarNumero.style.display =
-      'none';
-
+    reservarNumero.style.display = 'none';
     reservarNumero.hidden = true;
-
     reservarNumero.disabled = false;
-
-    reservarNumero.textContent =
-      '🔴 CONFIRMAR PARTICIPAÇÃO';
+    reservarNumero.textContent = '🔴 CONFIRMAR PARTICIPAÇÃO';
 
     reservarNumero.classList.remove(
       'confirmar-participacao',
@@ -321,13 +263,9 @@ function limparNumeroStatus() {
 }
 
 function reservaExpirou(dados) {
-  const expiraEm =
-    Number(dados?.expiraEm || 0);
+  const expiraEm = Number(dados?.expiraEm || 0);
 
-  return (
-    !!expiraEm &&
-    Date.now() >= expiraEm
-  );
+  return !!expiraEm && Date.now() >= expiraEm;
 }
 
 function numeroEstaOcupado(dados) {
@@ -336,20 +274,15 @@ function numeroEstaOcupado(dados) {
   }
 
   if (
-    String(
-      dados.status || ''
-    ).toLowerCase() === 'reservado' &&
+    String(dados.status || '').toLowerCase() === 'reservado' &&
     reservaExpirou(dados)
   ) {
     return false;
   }
 
-  const status =
-    String(
-      dados.status ||
-      dados.situacao ||
-      ''
-    ).toLowerCase();
+  const status = String(
+    dados.status || dados.situacao || ''
+  ).toLowerCase();
 
   return (
     status === 'reservado' ||
@@ -357,7 +290,6 @@ function numeroEstaOcupado(dados) {
     status === 'pago' ||
     status === 'ocupado' ||
     status === 'indisponivel' ||
-
     dados.reservado === true ||
     dados.vendido === true ||
     dados.pago === true ||
@@ -374,27 +306,23 @@ function mostrarDisponivel(numero) {
   );
 
   if (reservarNumero) {
-    reservarNumero.style.display =
-      'flex';
-
+    reservarNumero.style.display = 'flex';
     reservarNumero.hidden = false;
-
     reservarNumero.disabled = false;
 
     reservarNumero.textContent =
       '🔴 CONFIRMAR PARTICIPAÇÃO';
 
-    reservarNumero.dataset.numero =
-      numero;
+    reservarNumero.dataset.numero = numero;
 
     reservarNumero.classList.add(
       'confirmar-participacao'
     );
 
-    reservarNumero.classList.remove(
-      'reservado'
-    );
+    reservarNumero.classList.remove('reservado');
   }
+
+  mostrarCartaoConfirmacao();
 }
 
 function mostrarIndisponivel(numero) {
@@ -404,9 +332,7 @@ function mostrarIndisponivel(numero) {
   );
 
   if (reservarNumero) {
-    reservarNumero.style.display =
-      'none';
-
+    reservarNumero.style.display = 'none';
     reservarNumero.hidden = true;
 
     delete reservarNumero.dataset.numero;
@@ -425,11 +351,8 @@ async function verificarNumero() {
     return;
   }
 
-  const valor =
-    numeroDireto.value.trim();
-
-  const numero =
-    formatarNumero(valor);
+  const valor = numeroDireto.value.trim();
+  const numero = formatarNumero(valor);
 
   if (!numero) {
     mostrarErro(
@@ -439,8 +362,7 @@ async function verificarNumero() {
     return;
   }
 
-  numeroDireto.value =
-    numero;
+  numeroDireto.value = numero;
 
   mostrarStatus(
     '🔎 Verificando disponibilidade...',
@@ -456,21 +378,16 @@ async function verificarNumero() {
   }
 
   try {
-    const snapshot =
-      await get(
-        ref(
-          db,
-          `rifa/numeros/${numero}`
-        )
-      );
+    const snapshot = await get(
+      ref(db, `rifa/numeros/${numero}`)
+    );
 
     if (!snapshot.exists()) {
       mostrarDisponivel(numero);
       return;
     }
 
-    const dados =
-      snapshot.val();
+    const dados = snapshot.val();
 
     if (
       dados.status === 'reservado' &&
@@ -480,9 +397,7 @@ async function verificarNumero() {
       return;
     }
 
-    if (
-      numeroEstaOcupado(dados)
-    ) {
+    if (numeroEstaOcupado(dados)) {
       mostrarIndisponivel(numero);
       return;
     }
@@ -508,85 +423,57 @@ async function reservarNumeroFirebase(numero) {
     );
   }
 
-  const numeroRef =
-    ref(
-      db,
-      `rifa/numeros/${numero}`
-    );
+  const numeroRef = ref(
+    db,
+    `rifa/numeros/${numero}`
+  );
 
-  const dataHora =
-    obterDataHora();
+  const dataHora = obterDataHora();
 
   const expiraEm =
-    Date.now() +
-    TEMPO_RESERVA;
+    Date.now() + TEMPO_RESERVA;
 
-  const resultado =
-    await runTransaction(
-      numeroRef,
-      atual => {
+  const resultado = await runTransaction(
+    numeroRef,
+    atual => {
 
-        if (atual === null) {
-          return {
-            numero,
-
-            status:
-              'reservado',
-
-            reservado:
-              true,
-
-            dataReserva:
-              dataHora.timestamp,
-
-            expiraEm
-          };
-        }
-
-        if (
-          atual.status === 'reservado' &&
-          reservaExpirou(atual)
-        ) {
-          return {
-            numero,
-
-            status:
-              'reservado',
-
-            reservado:
-              true,
-
-            dataReserva:
-              dataHora.timestamp,
-
-            expiraEm
-          };
-        }
-
-        if (
-          numeroEstaOcupado(atual)
-        ) {
-          return;
-        }
-
+      if (atual === null) {
         return {
-          ...atual,
-
           numero,
-
-          status:
-            'reservado',
-
-          reservado:
-            true,
-
-          dataReserva:
-            dataHora.timestamp,
-
+          status: 'reservado',
+          reservado: true,
+          dataReserva: dataHora.timestamp,
           expiraEm
         };
       }
-    );
+
+      if (
+        atual.status === 'reservado' &&
+        reservaExpirou(atual)
+      ) {
+        return {
+          numero,
+          status: 'reservado',
+          reservado: true,
+          dataReserva: dataHora.timestamp,
+          expiraEm
+        };
+      }
+
+      if (numeroEstaOcupado(atual)) {
+        return;
+      }
+
+      return {
+        ...atual,
+        numero,
+        status: 'reservado',
+        reservado: true,
+        dataReserva: dataHora.timestamp,
+        expiraEm
+      };
+    }
+  );
 
   if (!resultado.committed) {
     throw new Error(
@@ -607,10 +494,7 @@ async function confirmarReservaAntesDoEnvio() {
     );
   }
 
-  if (
-    compraAtual.status ===
-    'reservado'
-  ) {
+  if (compraAtual.status === 'reservado') {
     return true;
   }
 
@@ -624,22 +508,17 @@ async function confirmarReservaAntesDoEnvio() {
     const numero of compraAtual.numeros
   ) {
     resultados.push(
-      await reservarNumeroFirebase(
-        numero
-      )
+      await reservarNumeroFirebase(numero)
     );
   }
 
-  compraAtual.status =
-    'reservado';
+  compraAtual.status = 'reservado';
 
-  compraAtual.expiraEm =
-    Math.min(
-      ...resultados.map(
-        resultado =>
-          resultado.expiraEm
-      )
-    );
+  compraAtual.expiraEm = Math.min(
+    ...resultados.map(
+      resultado => resultado.expiraEm
+    )
+  );
 
   salvarCompra();
 
@@ -779,7 +658,6 @@ if (numeroDireto) {
   numeroDireto.addEventListener(
     'input',
     () => {
-
       numeroDireto.value =
         numeroDireto.value
           .replace(/\D/g, '')
@@ -793,9 +671,7 @@ if (numeroDireto) {
     'keydown',
     evento => {
 
-      if (
-        evento.key === 'Enter'
-      ) {
+      if (evento.key === 'Enter') {
         evento.preventDefault();
         verificarNumero();
       }
@@ -803,23 +679,6 @@ if (numeroDireto) {
     }
   );
 }
-
-/*
-  AQUI ESTÁ A CORREÇÃO PRINCIPAL:
-
-  O botão vermelho "CONFIRMAR PARTICIPAÇÃO"
-  NÃO tenta gravar no Firebase.
-
-  Ele apenas abre:
-  - número
-  - valor
-  - data
-  - hora
-  - nome
-  - WhatsApp
-  - PIX
-  - comprovante
-*/
 
 if (reservarNumero) {
   reservarNumero.addEventListener(
@@ -843,12 +702,12 @@ if (reservarReserva) {
 }
 
 async function copiarChavePix(botao) {
+
   const chave =
-    String(
-      CONFIG?.pixChave || ''
-    ).trim();
+    String(CONFIG?.pixChave || '').trim();
 
   if (!chave) {
+
     if (pixMsgReserva) {
       pixMsgReserva.textContent =
         '⚠️ Chave PIX não configurada.';
@@ -884,6 +743,7 @@ async function copiarChavePix(botao) {
     );
 
   } catch {
+
     if (pixMsgReserva) {
       pixMsgReserva.textContent =
         `📋 Copie manualmente: ${chave}`;
@@ -902,6 +762,7 @@ if (copiarPixReserva) {
 }
 
 if (limparSelecao) {
+
   limparSelecao.addEventListener(
     'click',
     () => {
@@ -938,27 +799,21 @@ if (limparSelecao) {
       }
 
       if (reservaData) {
-        reservaData.textContent =
-          '—';
+        reservaData.textContent = '—';
       }
 
       if (reservaHora) {
-        reservaHora.textContent =
-          '—';
+        reservaHora.textContent = '—';
       }
 
       if (dadosCompraOcultos) {
-        dadosCompraOcultos.hidden =
-          true;
-
+        dadosCompraOcultos.hidden = true;
         dadosCompraOcultos.style.display =
           'none';
       }
 
       if (mostrarDadosCompra) {
-        mostrarDadosCompra.hidden =
-          false;
-
+        mostrarDadosCompra.hidden = false;
         mostrarDadosCompra.style.display =
           'block';
       }
@@ -974,35 +829,26 @@ if (limparSelecao) {
       }
 
       if (comprovanteSelecionado) {
-        comprovanteSelecionado.hidden =
-          true;
+        comprovanteSelecionado.hidden = true;
       }
 
       if (nomeComprovante) {
-        nomeComprovante.textContent =
-          '—';
+        nomeComprovante.textContent = '—';
       }
-
-      /*
-        NÃO apagamos nomeReserva
-        nem telefoneReserva.
-      */
     }
   );
 }
 
 if (enviarComprovante) {
+
   enviarComprovante.addEventListener(
     'click',
     () => {
 
       const input =
-        document.createElement(
-          'input'
-        );
+        document.createElement('input');
 
       input.type = 'file';
-
       input.accept =
         'image/*,.pdf';
 
@@ -1047,6 +893,7 @@ if (enviarComprovante) {
 }
 
 function recuperarCompraSalva() {
+
   try {
 
     const salva =
@@ -1090,9 +937,12 @@ function recuperarCompraSalva() {
       ...dados
     };
 
+    mostrarCartaoConfirmacao();
+
     return true;
 
   } catch (erro) {
+
     console.warn(
       '⚠️ Erro ao recuperar compra:',
       erro
@@ -1100,53 +950,87 @@ function recuperarCompraSalva() {
 
     return false;
   }
-                                           }
+}
 
 function lerNumerosDaURL() {
-  const params = new URLSearchParams(window.location.search);
-  const numero = params.get('numero');
-  const numerosParam = params.get('numeros');
+
+  const params =
+    new URLSearchParams(
+      window.location.search
+    );
+
+  const numero =
+    params.get('numero');
+
+  const numerosParam =
+    params.get('numeros');
 
   let numeros = [];
 
   if (numerosParam) {
-    numeros = numerosParam
-      .split(',')
-      .map(formatarNumero)
-      .filter(Boolean);
+
+    numeros =
+      numerosParam
+        .split(',')
+        .map(formatarNumero)
+        .filter(Boolean);
+
   } else if (numero) {
-    const n = formatarNumero(numero);
-    if (n) numeros = [n];
+
+    const n =
+      formatarNumero(numero);
+
+    if (n) {
+      numeros = [n];
+    }
   }
 
-  if (!numeros.length) return false;
+  if (!numeros.length) {
+    return false;
+  }
 
   prepararCompra(numeros);
+
   mostrarCartaoConfirmacao();
 
   return true;
 }
 
 function recuperarSelecaoCartela() {
+
   try {
-    const salva = localStorage.getItem('rifaSelecionados');
 
-    if (!salva) return false;
+    const salva =
+      localStorage.getItem(
+        'rifaSelecionados'
+      );
 
-    const numeros = JSON.parse(salva);
+    if (!salva) {
+      return false;
+    }
 
-    if (!Array.isArray(numeros) || !numeros.length) {
+    const numeros =
+      JSON.parse(salva);
+
+    if (
+      !Array.isArray(numeros) ||
+      !numeros.length
+    ) {
       return false;
     }
 
     prepararCompra(numeros);
+
     mostrarCartaoConfirmacao();
 
-    localStorage.removeItem('rifaSelecionados');
+    localStorage.removeItem(
+      'rifaSelecionados'
+    );
 
     return true;
 
   } catch (erro) {
+
     console.warn(
       '⚠️ Erro ao recuperar seleção:',
       erro
@@ -1156,26 +1040,34 @@ function recuperarSelecaoCartela() {
   }
 }
 
-
 /* =========================================================
-   🍀 RASPADINHA DA AMIZADE — CARTÃO DOURADO
+   🎲 RASPADINHA DA AMIZADE — CARTÃO DOURADO
 ========================================================= */
 
 function iniciarRaspadinha() {
+
   const scratchCard =
     document.querySelector('.scratch');
 
   const canvas =
-    document.getElementById('scratchCanvas');
+    document.getElementById(
+      'scratchCanvas'
+    );
 
   const resultado =
-    document.getElementById('scratchPremio');
+    document.getElementById(
+      'scratchPremio'
+    );
 
   const subtexto =
-    document.getElementById('scratchSubtexto');
+    document.getElementById(
+      'scratchSubtexto'
+    );
 
   const scratchArea =
-    document.querySelector('.scratch-area');
+    document.querySelector(
+      '.scratch-area'
+    );
 
   if (
     !scratchCard ||
@@ -1187,10 +1079,16 @@ function iniciarRaspadinha() {
   }
 
   const largura =
-    Math.max(1, scratchArea.clientWidth);
+    Math.max(
+      1,
+      scratchArea.clientWidth
+    );
 
   const altura =
-    Math.max(1, scratchArea.clientHeight);
+    Math.max(
+      1,
+      scratchArea.clientHeight
+    );
 
   const dpr =
     Math.max(
@@ -1198,8 +1096,11 @@ function iniciarRaspadinha() {
       window.devicePixelRatio || 1
     );
 
-  canvas.width = largura * dpr;
-  canvas.height = altura * dpr;
+  canvas.width =
+    largura * dpr;
+
+  canvas.height =
+    altura * dpr;
 
   canvas.style.width =
     `${largura}px`;
@@ -1223,11 +1124,6 @@ function iniciarRaspadinha() {
     0,
     0
   );
-
-
-  /* =====================================================
-     FUNDO DOURADO
-  ===================================================== */
 
   const gradiente =
     ctx.createLinearGradient(
@@ -1272,7 +1168,8 @@ function iniciarRaspadinha() {
     '#9b6505'
   );
 
-  ctx.fillStyle = gradiente;
+  ctx.fillStyle =
+    gradiente;
 
   ctx.fillRect(
     0,
@@ -1281,24 +1178,23 @@ function iniciarRaspadinha() {
     altura
   );
 
-
-  /* =====================================================
-     BRILHOS DO CARTÃO
-  ===================================================== */
-
   for (
     let i = 0;
     i < 700;
     i++
   ) {
+
     const x =
-      Math.random() * largura;
+      Math.random() *
+      largura;
 
     const y =
-      Math.random() * altura;
+      Math.random() *
+      altura;
 
     const tamanho =
-      Math.random() * 2 + 0.5;
+      Math.random() * 2 +
+      0.5;
 
     ctx.fillStyle =
       Math.random() > 0.5
@@ -1312,11 +1208,6 @@ function iniciarRaspadinha() {
       tamanho
     );
   }
-
-
-  /* =====================================================
-     TEXTO DO CARTÃO
-  ===================================================== */
 
   ctx.save();
 
@@ -1349,60 +1240,59 @@ function iniciarRaspadinha() {
 
   ctx.restore();
 
+  /*
+    🎲 DADO ANIMADO
+    Substitui o antigo trenzinho.
+  */
 
-  /* =====================================================
-     🚂 TREM ANIMADO
-  ===================================================== */
-
-  let trem =
+  let dado =
     scratchArea.querySelector(
-      '.scratch-trem-animado'
+      '.scratch-dado-animado'
     );
 
-  if (!trem) {
+  if (!dado) {
 
-    trem =
+    dado =
       document.createElement(
         'div'
       );
 
-    trem.className =
-      'scratch-trem-animado';
+    dado.className =
+      'scratch-dado-animado';
 
-    trem.textContent =
-      '🚂';
+    dado.textContent =
+      '🎲';
 
-    trem.setAttribute(
+    dado.setAttribute(
       'aria-hidden',
       'true'
     );
 
     Object.assign(
-      trem.style,
+      dado.style,
       {
         position: 'absolute',
         left: '4%',
         top: '8%',
         zIndex: '3',
         pointerEvents: 'none',
-        fontSize: '28px',
+        fontSize: '32px',
         lineHeight: '1',
         filter:
           'drop-shadow(0 2px 2px rgba(80,50,0,.45))',
         animation:
-          'scratchTremZigueZague 5s ease-in-out infinite'
+          'scratchDadoZigueZague 5s ease-in-out infinite'
       }
     );
 
     scratchArea.appendChild(
-      trem
+      dado
     );
   }
 
-
   if (
     !document.getElementById(
-      'scratchTremStyle'
+      'scratchDadoStyle'
     )
   ) {
 
@@ -1412,50 +1302,50 @@ function iniciarRaspadinha() {
       );
 
     estilo.id =
-      'scratchTremStyle';
+      'scratchDadoStyle';
 
     estilo.textContent = `
-      @keyframes scratchTremZigueZague {
+      @keyframes scratchDadoZigueZague {
         0% {
           transform:
             translate(0,0)
-            rotate(-3deg);
+            rotate(-8deg);
         }
 
         20% {
           transform:
             translate(18%,14px)
-            rotate(4deg);
+            rotate(12deg);
         }
 
         40% {
           transform:
             translate(38%,-8px)
-            rotate(-4deg);
+            rotate(-10deg);
         }
 
         60% {
           transform:
             translate(58%,16px)
-            rotate(4deg);
+            rotate(12deg);
         }
 
         80% {
           transform:
             translate(78%,-6px)
-            rotate(-3deg);
+            rotate(-8deg);
         }
 
         100% {
           transform:
             translate(100%,12px)
-            rotate(3deg);
+            rotate(10deg);
         }
       }
 
-      @media(prefers-reduced-motion:reduce) {
-        .scratch-trem-animado {
-          animation:none!important;
+      @media (prefers-reduced-motion: reduce) {
+        .scratch-dado-animado {
+          animation: none !important;
         }
       }
     `;
@@ -1465,19 +1355,16 @@ function iniciarRaspadinha() {
     );
   }
 
-
   /*
-   * Importante:
-   * limpa o texto que poderia ficar
-   * aparecendo por baixo da raspadinha.
-   */
+    Não colocar "RASPE AQUI" no resultado.
+    O texto "RASPE AQUI" fica somente no canvas.
+  */
 
   resultado.textContent = '';
 
   if (subtexto) {
     subtexto.textContent = '';
   }
-
 
   let raspando = false;
   let finalizado = false;
@@ -1487,11 +1374,6 @@ function iniciarRaspadinha() {
   let ultimaY = 0;
 
   let ultimaVerificacao = 0;
-
-
-  /* =====================================================
-     VERIFICAR PAGAMENTO
-  ===================================================== */
 
   function pagoConfirmado() {
 
@@ -1506,11 +1388,6 @@ function iniciarRaspadinha() {
     return false;
   }
 
-
-  /* =====================================================
-     BLOQUEIO
-  ===================================================== */
-
   function mostrarBloqueio() {
 
     resultado.textContent =
@@ -1522,11 +1399,6 @@ function iniciarRaspadinha() {
         'A raspadinha será liberada após o pagamento ser confirmado.';
     }
   }
-
-
-  /* =====================================================
-     VERIFICAR QUANTO FOI RASPADO
-  ===================================================== */
 
   function verificarPercentual() {
 
@@ -1575,18 +1447,16 @@ function iniciarRaspadinha() {
       return;
     }
 
-    if (
-      (transparentes / analisados) * 100 >= 55
-    ) {
+    const percentual =
+      (transparentes / analisados) *
+      100;
 
+    if (
+      percentual >= 55
+    ) {
       revelarRaspadinha();
     }
   }
-
-
-  /* =====================================================
-     RASPAR
-  ===================================================== */
 
   function raspar(x, y) {
 
@@ -1618,11 +1488,6 @@ function iniciarRaspadinha() {
 
     verificarPercentual();
   }
-
-
-  /* =====================================================
-     RASPAR LINHA
-  ===================================================== */
 
   function rasparLinha(
     x1,
@@ -1661,11 +1526,6 @@ function iniciarRaspadinha() {
     }
   }
 
-
-  /* =====================================================
-     REVELAR RASPADINHA
-  ===================================================== */
-
   function revelarRaspadinha() {
 
     if (finalizado) {
@@ -1675,11 +1535,10 @@ function iniciarRaspadinha() {
     finalizado =
       true;
 
-    if (trem) {
-      trem.style.display =
+    if (dado) {
+      dado.style.display =
         'none';
     }
-
 
     if (!pagoConfirmado()) {
 
@@ -1697,13 +1556,11 @@ function iniciarRaspadinha() {
       }
     }
 
-
     canvas.style.transition =
       'opacity .45s ease';
 
     canvas.style.opacity =
       '0';
-
 
     const instrucao =
       scratchCard.querySelector(
@@ -1718,11 +1575,6 @@ function iniciarRaspadinha() {
           : '🔒 Aguarde a confirmação do pagamento.';
     }
   }
-
-
-  /* =====================================================
-     MOUSE
-  ===================================================== */
 
   canvas.addEventListener(
     'mousedown',
@@ -1751,7 +1603,6 @@ function iniciarRaspadinha() {
       );
     }
   );
-
 
   canvas.addEventListener(
     'mousemove',
@@ -1784,18 +1635,12 @@ function iniciarRaspadinha() {
     }
   );
 
-
   window.addEventListener(
     'mouseup',
     () => {
       raspando = false;
     }
   );
-
-
-  /* =====================================================
-     TOUCH — CELULAR
-  ===================================================== */
 
   canvas.addEventListener(
     'touchstart',
@@ -1832,7 +1677,6 @@ function iniciarRaspadinha() {
       passive: false
     }
   );
-
 
   canvas.addEventListener(
     'touchmove',
@@ -1873,7 +1717,6 @@ function iniciarRaspadinha() {
     }
   );
 
-
   canvas.addEventListener(
     'touchend',
     () => {
@@ -1881,14 +1724,12 @@ function iniciarRaspadinha() {
     }
   );
 
-
   canvas.addEventListener(
     'contextmenu',
     evento => {
       evento.preventDefault();
     }
   );
-
 
   window.addEventListener(
     'resize',
@@ -1901,23 +1742,22 @@ function iniciarRaspadinha() {
   );
 }
 
-
 /* =========================================================
    🍀 NÚMERO DA SORTE
 ========================================================= */
 
-function revelarNumeroDaSorte() {
+async function revelarNumeroDaSorte() {
 
   if (!numeroSorteResultado) {
     return;
   }
 
-  const numeros =
-    compraAtual.numeros.length
-      ? compraAtual.numeros
-      : [];
+  /*
+    O número da sorte NÃO será mais escolhido
+    entre os números comprados.
+  */
 
-  if (!numeros.length) {
+  if (!compraAtual.numeros.length) {
 
     numeroSorteResultado.textContent =
       '🎟️ Escolha primeiro um número para revelar seu número da sorte.';
@@ -1925,16 +1765,193 @@ function revelarNumeroDaSorte() {
     return;
   }
 
+  /*
+    Primeiro bloqueamos os números que o participante
+    já comprou.
+  */
+
+  const numerosProibidos =
+    new Set(
+      compraAtual.numeros
+        .map(formatarNumero)
+        .filter(Boolean)
+    );
+
+  /*
+    Tentamos também ler do Firebase os números
+    que eventualmente já estejam cadastrados como
+    premiados ou "Raspe de novo".
+
+    Isso deixa o código preparado para a estrutura
+    definitiva dos prêmios.
+  */
+
+  if (db) {
+
+    try {
+
+      const snapshot =
+        await get(
+          ref(
+            db,
+            'rifa/raspadinha/premios'
+          )
+        );
+
+      if (snapshot.exists()) {
+
+        const premios =
+          snapshot.val();
+
+        Object.values(premios || {})
+          .forEach(premio => {
+
+            if (!premio) {
+              return;
+            }
+
+            /*
+              Estruturas possíveis:
+              numeros: ["001","002"]
+              numerosPremiados: [...]
+              numero: "001"
+            */
+
+            const listas = [
+              premio.numeros,
+              premio.numerosPremiados,
+              premio.numerosPremio,
+              premio.numerosPremiados
+            ];
+
+            listas.forEach(lista => {
+
+              if (Array.isArray(lista)) {
+
+                lista.forEach(numero => {
+
+                  const formatado =
+                    formatarNumero(numero);
+
+                  if (formatado) {
+                    numerosProibidos.add(
+                      formatado
+                    );
+                  }
+                });
+              }
+
+              if (
+                lista &&
+                typeof lista === 'object' &&
+                !Array.isArray(lista)
+              ) {
+
+                Object.keys(lista).forEach(
+                  numero => {
+
+                    const formatado =
+                      formatarNumero(numero);
+
+                    if (formatado) {
+                      numerosProibidos.add(
+                        formatado
+                      );
+                    }
+                  }
+                );
+              }
+            });
+
+            if (premio.numero !== undefined) {
+
+              const numero =
+                formatarNumero(
+                  premio.numero
+                );
+
+              if (numero) {
+                numerosProibidos.add(
+                  numero
+                );
+              }
+            }
+
+            if (
+              Array.isArray(
+                premio.raspeDeNovo
+              )
+            ) {
+
+              premio.raspeDeNovo.forEach(
+                numero => {
+
+                  const formatado =
+                    formatarNumero(numero);
+
+                  if (formatado) {
+                    numerosProibidos.add(
+                      formatado
+                    );
+                  }
+                }
+              );
+            }
+          });
+      }
+
+    } catch (erro) {
+
+      console.warn(
+        '⚠️ Não foi possível consultar os números premiados:',
+        erro
+      );
+    }
+  }
+
+  /*
+    Procura um número aleatório entre 000 e 999
+    que não esteja proibido.
+  */
+
+  const disponiveis = [];
+
+  for (
+    let i = 0;
+    i <= 999;
+    i++
+  ) {
+
+    const numero =
+      String(i).padStart(3, '0');
+
+    if (
+      !numerosProibidos.has(numero)
+    ) {
+      disponiveis.push(numero);
+    }
+  }
+
+  if (!disponiveis.length) {
+
+    numeroSorteResultado.textContent =
+      '⚠️ Não há números disponíveis para gerar o número da sorte.';
+
+    return;
+  }
+
   const indice =
     Math.floor(
       Math.random() *
-      numeros.length
+      disponiveis.length
     );
 
-  numeroSorteResultado.textContent =
-    `🍀 Seu número da sorte é: ${numeros[indice]}`;
-}
+  const numeroSorte =
+    disponiveis[indice];
 
+  numeroSorteResultado.textContent =
+    `🍀 Seu número da sorte é: ${numeroSorte}`;
+}
 
 if (revelarNumeroSorte) {
 
@@ -1943,7 +1960,6 @@ if (revelarNumeroSorte) {
     revelarNumeroDaSorte
   );
 }
-
 
 /* =========================================================
    🚀 INICIALIZAÇÃO
@@ -1968,7 +1984,6 @@ function inicializar() {
   iniciarRaspadinha();
 }
 
-
 if (
   document.readyState ===
   'loading'
@@ -1987,9 +2002,8 @@ if (
   inicializar();
 }
 
-
 /* =========================================================
-   AJUSTES VISUAIS FINAIS
+   🎨 AJUSTES VISUAIS
 ========================================================= */
 
 const scratchCardVisivel =
@@ -2005,7 +2019,6 @@ if (scratchCardVisivel) {
   scratchCardVisivel.style.width =
     '100%';
 }
-
 
 const stepsGrid =
   document.querySelector(
@@ -2023,7 +2036,6 @@ if (stepsGrid) {
   stepsGrid.style.width =
     '100%';
 }
-
 
 const scratchAreaGlobal =
   document.querySelector(
@@ -2043,4 +2055,4 @@ if (scratchAreaGlobal) {
 
   scratchAreaGlobal.style.overflow =
     'hidden';
-      }
+  }
